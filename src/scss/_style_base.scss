@@ -1,0 +1,282 @@
+body {
+    position: relative;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 0% 90%;
+    margin: 0;
+    padding: 0;
+}
+
+.logo-aviasales {
+    height: 24px;
+    position: absolute;
+    margin: 30px 0 0 60px;
+}
+
+.blackout {
+    position: absolute;
+    z-index: 0;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.blackout:before {
+    content: "";
+    width: 100%;
+    height: 200px;
+    position: absolute;
+    bottom: 100%;
+    background: -webkit-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+}
+
+.block {
+    z-index: 1;
+    position: absolute;
+    bottom: 0;
+    margin: 60px;
+}
+
+.block--left {
+    left: 0;
+}
+
+.block--right {
+    right: 0;
+}
+
+.btn-container {
+    height: 70px;
+}
+
+.btn-price {
+    position: relative;
+    z-index: 1;
+    line-height: 1em;
+    font-size: 30px;
+    color: white;
+    border: 2px solid;
+    padding: 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    float: left;
+}
+
+.btn-price-value {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.destination {
+    font-size: 28px;
+    line-height: 1em;
+    color: white;
+    margin-top: 13px;
+}
+
+.origin-container {
+    margin-top: 13px;
+}
+
+.origin {
+    font-size: 16px;
+    line-height: 1em;
+    color: white;
+}
+
+.tags-container {
+    margin-top: 16px;
+}
+
+.tags {
+    font-size: 0;
+}
+
+.tag {
+    background: rgba(150, 150, 150, 0.8);
+    font-size: 12px;
+    color: black;
+    padding: 5px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.review {
+    position: relative;
+    width: 450px;
+    color: white;
+    font-size: 13px;
+    box-sizing: border-box;
+    background: rgba(0,0,0,0.3);
+    padding: 35px 20px 17px 50px;
+}
+
+.quote {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    opacity: .65;
+}
+
+.review-title {
+    font-size: 16px;
+    opacity: 0.85;
+}
+
+.review-text {
+    margin: 10px 30px 0 0;
+    line-height: 18px;
+    opacity: 0.85;
+}
+
+.review-author {
+    text-align: right;
+    margin: 3px 0 0 0;
+}
+
+.review-date {
+    font-size: 11px;
+    text-align: right;
+    margin: 2px 0 0 0;
+    opacity: 0.8;
+}
+
+.hidden {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.show-animate {
+    transition: opacity 1s;
+}
+
+.prices-calendar-container {
+    position: absolute;
+    z-index: 0;
+    transform: translate(0%, -100%);
+    padding: 0px 0 18px 0;
+    width: 284px;
+    opacity: 1;
+    height: 382px;
+    transition: transform .2s ease , opacity .3s ease, height .0s;
+}
+
+.prices-calendar-container.prices-calendar-container--hidden {
+    transform: translate(0%, -85%);
+    opacity: 0;
+    height: 0px;
+    transition: transform .4s ease, opacity .2s ease, height .0s ease .4s;
+}
+
+.prices-calendar {
+    height: 382px;
+    overflow: hidden;
+    transition: height .0s;
+}
+
+.prices-calendar-container.prices-calendar-container--hidden .prices-calendar {
+    height: 0;
+    transition: height .0s ease .4s
+}
+
+.prices-calendar-month {
+    text-decoration: none;
+    display: block;
+    height: 60px;
+    width: 140px;
+    background: rgba(0,0,0,0.4);
+    float: left;
+    margin: 0 4px 4px 0;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.prices-calendar-month:nth-child(even) {
+    margin-right: 0;
+}
+
+.prices-calendar-month .price {
+    font-size: 14px;
+    height: 24px;
+}
+
+.prices-calendar-month .price .price_value {
+    font-size: 18px;
+}
+
+.prices-calendar-month:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+.date_container {
+    position: relative;
+    margin-top: 3px;
+    font-size: 14px;
+    width: 200%;
+    left: 0%;
+    transition: left .3s;
+}
+
+.prices-calendar-month.has-price:hover .date_container {
+    left: -100%;
+}
+
+.preloader {
+    display: inline-block;
+    position: relative;
+    -webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    width: 40px;
+    height: 24px;
+    position: relative;
+}
+
+.item {
+    top: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.6;
+    position: absolute;
+    animation: bounce 1.5s infinite ease-in-out;
+    margin: 7px 0;
+}
+
+.item-1 {
+    left: 0;
+}
+
+.item-2 {
+    left: 15;
+    animation-delay: .2s;
+}
+
+.item-3 {
+    left: 30;
+    animation-delay: .4s;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1);
+    }
+}
+
+.prices-calendar-preloader {
+    margin-top: 8px;
+}
+
+.slider-elem {
+    float: left;
+    width: 50%;
+}
