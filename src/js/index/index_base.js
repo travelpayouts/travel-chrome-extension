@@ -189,13 +189,13 @@ var hide = function (el) {
 }
 
 var update_bg = function(deal, callback) {
-    var body = document.body,
+    var place_container = document.getElementById('place_container'),
         img = new Image();
         img.onload = function() {
             console.log("IMG loaded");
             callback();
         }
-        body.setAttribute("style", "background-image:url(" + deal.image_url + ")");
+        place_container.setAttribute("style", "background-image:url(" + deal.image_url + ")");
         img.src = deal.image_url;
 }
 

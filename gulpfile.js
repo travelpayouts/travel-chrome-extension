@@ -28,12 +28,12 @@ gulp.task('html', function() {
 gulp.task('js', function() {
   gulp.src('src/js/background/*.js')
 	.pipe(concat('background.js'))
-    .pipe(uglify())
+    // .pipe(uglify())
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('build/'));
   gulp.src('src/js/index/*.js')
 	.pipe(concat('index.js'))
-    .pipe(uglify())
+    // .pipe(uglify())
     .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
     .pipe(gulp.dest('build/'));
 });
