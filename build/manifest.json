@@ -12,5 +12,5 @@
    "manifest_version": 2,
    "name": "InspirationTab --test",
    "permissions": [ "https://api.flickr.com/", "tabs", "alarms", "storage" ],
-   "version": "0.1.1"
+   "version": "0.2.0"
 }

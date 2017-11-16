@@ -34,8 +34,15 @@ body {
 .block {
     z-index: 1;
     position: absolute;
-    bottom: 0;
     margin: 24px;
+}
+
+.block--top {
+    top: 0;
+}
+
+.block--bottom {
+    bottom: 0;    
 }
 
 .block--left {

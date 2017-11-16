@@ -30,8 +30,13 @@ body {
 .block {
   z-index: 1;
   position: absolute;
-  bottom: 0;
   margin: 24px; }
+
+.block--top {
+  top: 0; }
+
+.block--bottom {
+  bottom: 0; }
 
 .block--left {
   left: 0; }
@@ -252,3 +257,15 @@ body {
   font-weight: 100;
   color: white;
   opacity: 0.25; }
+
+.options {
+  margin-top: 48px; }
+
+.button-container:first-child {
+  margin-bottom: 24px; }
+
+.button {
+  background: none;
+  padding: 0;
+  border: none;
+  cursor: pointer; }

@@ -15,3 +15,20 @@
     color: white;
     opacity: 0.25;
 }
+
+.options {
+    margin-top: 48px;
+}
+
+.button-container {
+    &:first-child {
+        margin-bottom: 24px;
+    }
+}
+
+.button {
+    background: none;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+}
