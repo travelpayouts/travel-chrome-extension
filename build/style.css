@@ -28,7 +28,7 @@ body {
   z-index: 1;
   position: absolute;
   bottom: 0;
-  margin: 60px; }
+  margin: 24px; }
 
 .block--left {
   left: 0; }
@@ -235,7 +235,17 @@ body {
   width: 50%; }
 
 .place-container {
+  position: relative;
   height: 100%;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 0% 90%; }
+
+.image-copyright {
+  margin: 0;
+  transform: rotate(-90deg) translateX(calc(100% + 24px));
+  transform-origin: 100% 100%;
+  font-size: 15px;
+  font-weight: 100;
+  color: white;
+  opacity: 0.25; }

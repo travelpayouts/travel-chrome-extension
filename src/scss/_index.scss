@@ -1,6 +1,17 @@
 .place-container {
+    position: relative;
     height: 100%;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: 0% 90%;
+}
+
+.image-copyright {
+    margin: 0;
+    transform: rotate(-90deg) translateX(calc(100% + 24px));
+    transform-origin: 100% 100%;
+    font-size: 15px;
+    font-weight: 100;
+    color: white;
+    opacity: 0.25;
 }
