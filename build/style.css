@@ -269,3 +269,14 @@ body {
   padding: 0;
   border: none;
   cursor: pointer; }
+  .button svg {
+    transform: scale(1);
+    transition: transform 0.2s ease-in; }
+  .button:hover svg {
+    transform: scale(1.1);
+    transition-duration: 0.3;
+    transition-timing-function: ease-out; }
+    .button:hover svg path:first-child {
+      transform: rotate(-360deg);
+      transform-origin: 50% 50%;
+      transition: transform 0.7s ease-out; }
