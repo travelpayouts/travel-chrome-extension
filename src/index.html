@@ -1,6 +1,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>New Tab</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&amp;subset=cyrillic" rel="stylesheet">    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,13 +12,85 @@
     <div class="block block--top block--right">
         <div class="button-container">
             <button type="button" class="button next-destination">
-                @@include("../build/img/icons/next-destination.svg")
+                @@include("svg/next-destination.svg")
             </button>
         </div>
         <div class="button-container">
-            <button type="button" class="button">
-                @@include("../build/img/icons/settings.svg")
+            <button type="button" class="button menu-opened">
+                @@include("svg/settings.svg")
             </button>
+            <div class="button-menu block--top block--right">
+                <div class="button-menu__close block--top block--right">
+                    <button class="button button-close">
+                        <img src="img/icons/close.png" alt="close">
+                    </button>
+                </div>
+                <h3 class="button-menu__title">Настройки</h3>
+                <div>
+                    <label for="" class="input-label">Валюта</label>
+                    <div id="choose_currency" class="wrapper-select-dropdown">
+                        <span class="wrapper-select-dropdown__label">
+                            <span class="currency-sign">&#8381;</span>Рубль
+                        </span>
+                        <ul class="dropdown">
+                            <li class="checked">
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8381;</span>Рубль
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&euro;</span>Евро
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&dollar;</span>Доллар
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&yen;</span>Юань
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8372;</span>Гривна
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8376;</span>Тенге
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8380;</span>Манат
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <label for="" class="input-label">Город вылета</label>
+                    <div id="" class="wrapper-input">
+                        <input type="text" class="input-text">
+                        <ul class="dropdown">
+                            <li class="checked">
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8381;</span>Рубль
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&euro;</span>Евро
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&dollar;</span>Доллар
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&yen;</span>Юань
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8372;</span>Гривна
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8376;</span>Тенге
+                            </li>
+                            <li>
+                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8380;</span>Манат
+                            </li>
+                        </ul>
+                    </div>
+                           
+                </div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </div>
     </div>
     
@@ -62,6 +135,6 @@
     </div>
 
     <div class="bottombar"></div>
-
+    <script src="jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>
