@@ -1,14 +1,3 @@
-$(function() {
-    
-    var dd = new DropDown( $('#choose_currency') );
-
-    $(document).click(function() {
-        // all dropdowns
-        $('.wrapper-select-dropdown').removeClass('active');
-    });
-    
-});
-
 function DropDown(el) {
     this.dd = el;
     this.placeholder = this.dd.children('span');

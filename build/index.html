@@ -11,7 +11,7 @@
 
     <div class="block block--top block--right">
         <div class="button-container">
-            <button type="button" class="button next-destination">
+            <button class="button next-destination" id="btn_change_destination" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
     <g fill="#FFF" fill-rule="evenodd">
         <path fill-rule="nonzero" d="M19.177 21.619l-.13.714a1 1 0 0 0 1.967.36l.69-3.784a1.062 1.062 0 0 0-1.242-1.241l-3.782.69a1 1 0 0 0 .358 1.967l.688-.125a10.004 10.004 0 0 1-9.79.931 9.995 9.995 0 0 1-5.592-11.72 1 1 0 0 0-1.932-.517c-1.715 6.402 2.084 12.982 8.485 14.697a11.962 11.962 0 0 0 10.28-1.972zM4.826 2.384l.13-.714a1 1 0 0 0-1.967-.36l-.69 3.784a1.062 1.062 0 0 0 1.242 1.241l3.782-.69a1 1 0 0 0-.358-1.967l-.688.125a10.004 10.004 0 0 1 9.79-.931 9.995 9.995 0 0 1 5.592 11.72 1 1 0 1 0 1.932.517C25.306 8.707 21.507 2.127 15.106.412a11.962 11.962 0 0 0-10.28 1.972z"/>
@@ -22,7 +22,7 @@
             </button>
         </div>
         <div class="button-container">
-            <button type="button" class="button menu-opened">
+            <button class="button" id="btn_settings" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
     <path fill="#FFF" fill-rule="nonzero" d="M10.612 2.859L10.2 5.737A2 2 0 0 1 7.476 7.31L4.777 6.227a1 1 0 0 0-1.238.428l-.398.69a1 1 0 0 0 .248 1.286l2.288 1.796a2 2 0 0 1 0 3.146L3.389 15.37a1 1 0 0 0-.248 1.286l.398.69a1 1 0 0 0 1.238.428l2.699-1.083a2 2 0 0 1 2.725 1.573l.41 2.878a1 1 0 0 0 .99.859h.797a1 1 0 0 0 .99-.859l.411-2.878a2 2 0 0 1 2.725-1.573l2.699 1.083a1 1 0 0 0 1.238-.428l.398-.69a1 1 0 0 0-.248-1.286l-2.288-1.796a2 2 0 0 1 0-3.146l2.288-1.796a1 1 0 0 0 .248-1.286l-.398-.69a1 1 0 0 0-1.238-.428L16.524 7.31A2 2 0 0 1 13.8 5.737l-.41-2.878a1 1 0 0 0-.99-.859h-.797a1 1 0 0 0-.99.859zM8.22 5.454l.534-3.737A2 2 0 0 1 10.735 0h2.53a2 2 0 0 1 1.98 1.717l.534 3.737 3.504-1.406a2 2 0 0 1 2.477.856l1.265 2.192a2 2 0 0 1-.497 2.573L19.558 12l2.97 2.33a2 2 0 0 1 .497 2.574l-1.265 2.192a2 2 0 0 1-2.477.856l-3.504-1.406-.534 3.737A2 2 0 0 1 13.265 24h-2.53a2 2 0 0 1-1.98-1.717l-.534-3.737-3.504 1.406a2 2 0 0 1-2.477-.856L.975 16.904a2 2 0 0 1 .497-2.573L4.442 12l-2.97-2.33a2 2 0 0 1-.497-2.574L2.24 4.904a2 2 0 0 1 2.477-.856l3.504 1.406zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-2a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
 </svg>
@@ -30,14 +30,16 @@
             </button>
             <div class="button-menu block--top block--right">
                 <div class="button-menu__close block--top block--right">
-                    <button class="button button-close">
+                    <button class="button button-close" id="btn_close_settings">
                         <img src="img/icons/close.png" alt="close">
                     </button>
                 </div>
+
                 <h3 class="button-menu__title">Настройки</h3>
-                <div>
-                    <label for="" class="input-label">Валюта</label>
-                    <div id="choose_currency" class="wrapper-select-dropdown">
+
+                <div class="button-menu__paragraph">
+                    <label class="input-label">Валюта</label>
+                    <div class="wrapper-select-dropdown" id="choose_currency">
                         <span class="wrapper-select-dropdown__label">
                             <span class="currency-sign">&#8381;</span>Рубль
                         </span>
@@ -65,42 +67,89 @@
                             </li>
                         </ul>
                     </div>
-                </div>
-                <div>
+                </div> <!-- END: .paragraph -->
+
+                <div class="button-menu__paragraph">
                     <label for="" class="input-label">Город вылета</label>
-                    <div id="" class="wrapper-input">
-                        <input type="text" class="input-text">
+                    <div class="wrapper-input-dropdown" data-select-type="internal">
+                        <input type="text" class="input-text" value="Калининград">
                         <ul class="dropdown">
-                            <li class="checked">
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8381;</span>Рубль
+                            <li>
+                                Кишинев,<span> Молдавия, KIV</span>
                             </li>
                             <li>
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&euro;</span>Евро
+                                Москва,<span> Россия, MOW</span>
                             </li>
                             <li>
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&dollar;</span>Доллар
+                                Monte-Carlo,<span> Monaco, MCM</span>
                             </li>
                             <li>
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&yen;</span>Юань
+                                Монастир,<span> Тунис, MIR</span>
                             </li>
                             <li>
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8372;</span>Гривна
-                            </li>
-                            <li>
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8376;</span>Тенге
-                            </li>
-                            <li>
-                                <img src="img/icons/check.png" alt=""><span class="currency-sign">&#8380;</span>Манат
+                                Петропавловск-Камчатский,<span> Россия, PTR</span>
                             </li>
                         </ul>
                     </div>
-                           
-                </div>
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-        </div>
+                </div> <!-- END: .paragraph -->
+
+                <div class="button-menu__paragraph">
+                    <label for="" class="input-label">Не показывать города</label>
+                    <div class="wrapper-input-dropdown" data-select-type="external">
+                        <input type="text" class="input-text" placeholder="Введите название города">
+                        <ul class="dropdown">
+                            <li>
+                                Кишинев,<span> Молдавия, KIV</span>
+                            </li>
+                            <li>
+                                Москва,<span> Россия, MOW</span>
+                            </li>
+                            <li>
+                                Monte-Carlo,<span> Monaco, MCM</span>
+                            </li>
+                            <li>
+                                Монастир,<span> Тунис, MIR</span>
+                            </li>
+                            <li>
+                                Петропавловск-Камчатский,<span> Россия, PTR</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="hidden-cities" id="exclude_cities">
+                        <span class="hidden-cities__item">Санкт-Петербург
+                            <img class="hidden-cities__item-icon" src="img/icons/close_8px_b0bec6.png" alt="">
+                            <img class="hidden-cities__item-icon--hover" src="img/icons/close_8px_263239.png" alt="">
+                        </span>
+                        <span class="hidden-cities__item">Монако
+                            <img class="hidden-cities__item-icon" src="img/icons/close_8px_b0bec6.png" alt="">
+                            <img class="hidden-cities__item-icon--hover" src="img/icons/close_8px_263239.png" alt="">
+                        </span>
+                        <span class="hidden-cities__item">Уфа
+                            <img class="hidden-cities__item-icon" src="img/icons/close_8px_b0bec6.png" alt="">
+                            <img class="hidden-cities__item-icon--hover" src="img/icons/close_8px_263239.png" alt="">
+                        </span>
+                        <span class="hidden-cities__item">Петропавловск-Качатский
+                            <img class="hidden-cities__item-icon" src="img/icons/close_8px_b0bec6.png" alt="">
+                            <img class="hidden-cities__item-icon--hover" src="img/icons/close_8px_263239.png" alt="">
+                        </span>
+                    </div>
+                </div> <!-- END: .paragraph -->
+
+                <div class="button-menu__paragraph">
+                    <label class="control-checkbox">Скрыть комментарии
+                        <input type="checkbox"/>
+                        <div class="control-checkbox__indicator"></div>
+                    </label>
+                </div> <!-- END: .paragraph -->
+
+                <div class="button-menu__paragraph">
+                    <label class="control-checkbox">Скрыть теги
+                        <input type="checkbox"/>
+                        <div class="control-checkbox__indicator"></div>
+                    </label>        
+                </div> <!-- END: .paragraph -->
+            </div> <!-- END: .button-menu -->
+        </div> <!-- END: .button-container -->
     </div>
     
     <div id="place_container" class="place-container">
