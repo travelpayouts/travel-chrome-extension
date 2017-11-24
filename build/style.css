@@ -49,6 +49,10 @@ body {
 .block--right {
   right: 0; }
 
+.block--center {
+  left: 50%;
+  transform: translateX(-50%); }
+
 .btn-container {
   height: 70px; }
 
@@ -145,10 +149,10 @@ body {
   position: absolute;
   z-index: 0;
   transform: translate(0%, -100%);
-  padding: 0px 0 18px 0;
-  width: 284px;
+  padding: 0 0 16px 0;
+  width: 428px;
   opacity: 1;
-  height: 382px;
+  height: 292px;
   transition: transform .2s ease , opacity .3s ease, height .0s; }
 
 .prices-calendar-container.prices-calendar-container--hidden {
@@ -169,8 +173,9 @@ body {
 .prices-calendar-month {
   text-decoration: none;
   display: block;
-  height: 60px;
+  height: 66px;
   width: 140px;
+  border-radius: 3px;
   background: rgba(0, 0, 0, 0.4);
   float: left;
   margin: 0 4px 4px 0;
@@ -179,8 +184,11 @@ body {
   cursor: pointer;
   overflow: hidden; }
 
-.prices-calendar-month:nth-child(even) {
+.prices-calendar-month:nth-child(3n+3) {
   margin-right: 0; }
+
+.prices-calendar-month:nth-child(n + 10):nth-child(-n + 12) {
+  margin-bottom: 0; }
 
 .prices-calendar-month .price {
   font-size: 14px;
@@ -266,10 +274,11 @@ body {
 .options {
   margin-top: 48px; }
 
+.buttons-block .button-container {
+  margin-bottom: 24px; }
+
 .button-container {
   position: relative; }
-  .button-container:first-child {
-    margin-bottom: 24px; }
 
 .button {
   background: none;
@@ -277,17 +286,21 @@ body {
   border: none;
   cursor: pointer;
   outline: none; }
-  .button svg {
+  .button:hover ~ .button-tooltip {
+    visibility: visible;
+    opacity: 0.9;
+    transition: opacity 0.3s ease-out; }
+  .button--rotate:hover svg path:first-child {
+    transform: rotate(-360deg);
+    transform-origin: 50% 50%;
+    transition: transform 0.7s ease-out; }
+  .button--scale svg {
     transform: scale(1);
     transition: transform 0.2s ease-in; }
-  .button:hover svg {
+  .button--scale:hover svg {
     transform: scale(1.1);
-    transition-duration: 0.3;
+    transition-duration: 0.3s;
     transition-timing-function: ease-out; }
-    .button:hover svg path:first-child {
-      transform: rotate(-360deg);
-      transform-origin: 50% 50%;
-      transition: transform 0.7s ease-out; }
   .button.menu-opened svg {
     opacity: 0; }
 
@@ -501,3 +514,28 @@ body {
       display: inline; }
   .hidden-cities__item-icon--hover {
     display: none; }
+
+.loader {
+  padding-top: 10px; }
+
+.button-tooltip {
+  display: inline-block;
+  position: absolute;
+  padding: 2px 8px;
+  visibility: hidden;
+  background-color: black;
+  color: white;
+  white-space: nowrap;
+  border-radius: 3px;
+  opacity: 0;
+  font-family: "Roboto";
+  font-size: 13px;
+  line-height: 24px; }
+  .button-tooltip--left {
+    top: -2px;
+    left: -8px;
+    transform: translateX(-100%); }
+  .button-tooltip--top {
+    top: -8px;
+    left: 50%;
+    transform: translate(-50%, -100%); }

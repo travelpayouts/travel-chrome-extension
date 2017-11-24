@@ -364,7 +364,11 @@ var fill_calendar = function(prices) {
                 month_element.setAttribute("href", p.search_url);
                 month_element.setAttribute("target", "_blank");
             } else {
-                price_container.innerText = "—"
+                var loader = create_element('img', ['loader']);
+                loader.setAttribute('src', 'svg/loader.svg');
+                price_container.appendChild(loader);
+
+                // price_container.innerText = "—"
             }
             
             month_dates.innerText = p.dates;

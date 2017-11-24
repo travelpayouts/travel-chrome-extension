@@ -20,11 +20,14 @@
     margin-top: 48px;
 }
 
+.buttons-block {
+    .button-container {
+        margin-bottom: 24px;        
+    }
+}
+
 .button-container {
     position: relative;
-    &:first-child {
-        margin-bottom: 24px;
-    }
 }
 
 .button {
@@ -33,22 +36,37 @@
     border: none;
     cursor: pointer;
     outline: none;
-    svg {
-        transform: scale(1);
-        transition: transform 0.2s ease-in;        
+
+    &:hover ~ .button-tooltip {
+        visibility: visible;
+        opacity: 0.9;
+        transition: opacity 0.3s ease-out;
     }
-    &:hover {
-        svg {
-            transform: scale(1.1);
-            transition-duration: 0.3;
-            transition-timing-function: ease-out;
-            & path:first-child {
+
+    &--rotate {
+        &:hover {
+            svg path:first-child {
                 transform: rotate(-360deg);
                 transform-origin: 50% 50%;
                 transition: transform 0.7s ease-out;
-            }    
+            }
+        }    
+    }
+
+    &--scale {
+        svg {
+            transform: scale(1);
+            transition: transform 0.2s ease-in;        
+        }
+        &:hover {
+            svg {
+                transform: scale(1.1);
+                transition-duration: 0.3s;
+                transition-timing-function: ease-out;
+            }
         }
     }
+
     &.menu-opened {
         & svg {
             opacity: 0;
@@ -351,5 +369,35 @@
     }
 }
 
-.btn-close-small {
+.loader {
+    padding-top: 10px;
+}
+
+.button-tooltip {
+    display: inline-block;
+    position: absolute;
+    padding: 2px 8px;
+    visibility: hidden;  
+
+    background-color: black;
+    color: white;
+    white-space: nowrap;
+    border-radius: 3px;
+    opacity: 0;
+
+    font-family: "Roboto";
+    font-size: 13px;
+    line-height: 24px;
+
+    &--left {
+        top: -2px;
+        left: -8px;
+        transform: translateX(-100%);
+    }
+
+    &--top {
+        top: -8px;
+        left: 50%;        
+        transform: translate(-50%, -100%);
+    }
 }

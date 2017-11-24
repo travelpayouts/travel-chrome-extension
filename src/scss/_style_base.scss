@@ -59,6 +59,11 @@ body {
     right: 0;
 }
 
+.block--center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .btn-container {
     height: 70px;
 }
@@ -172,10 +177,10 @@ body {
     position: absolute;
     z-index: 0;
     transform: translate(0%, -100%);
-    padding: 0px 0 18px 0;
-    width: 284px;
+    padding: 0 0 16px 0;
+    width: 428px;
     opacity: 1;
-    height: 382px;
+    height: 292px;
     transition: transform .2s ease , opacity .3s ease, height .0s;
 }
 
@@ -200,9 +205,10 @@ body {
 .prices-calendar-month {
     text-decoration: none;
     display: block;
-    height: 60px;
+    height: 66px;
     width: 140px;
-    background: rgba(0,0,0,0.4);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, .4);
     float: left;
     margin: 0 4px 4px 0;
     color: white;
@@ -211,8 +217,12 @@ body {
     overflow: hidden;
 }
 
-.prices-calendar-month:nth-child(even) {
+.prices-calendar-month:nth-child(3n+3) {
     margin-right: 0;
+}
+
+.prices-calendar-month:nth-child(n + 10):nth-child(-n + 12) {
+    margin-bottom: 0;
 }
 
 .prices-calendar-month .price {
