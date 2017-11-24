@@ -401,3 +401,22 @@
         transform: translate(-50%, -100%);
     }
 }
+
+.price-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: -2px;
+    width: calc(100% + 4px);
+    padding: 6px 10px;
+    visibility: hidden;
+
+    background-color: rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 2px;
+    opacity: 0;
+
+    font-family: 'Open Sans', sans-serif;
+	font-size: 12px;
+	font-weight: 600;
+	text-align: center;
+}

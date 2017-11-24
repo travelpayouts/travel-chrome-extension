@@ -209,7 +209,7 @@ var update_price = function(deal) {
     hide(btn_container);
 
     if (deal.price) {
-        btn_price.innerText = deal.price.toLocaleString();
+        btn_price.innerText = deal.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
         btn.onclick = function(e) {
             if (calendar_visible) {
                 calendar_visible = false;
