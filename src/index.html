@@ -147,14 +147,14 @@
         </div>
     </div>
     
-    <div id="place_container" class="place-container">
+    <div class="place-container" id="place_container">
         <div class="block block--bottom block--left">
             <div class="btn-container hidden show-animate">
                 <div class="btn-price">
                     <span class="price-from">от</span>
                     <span class="btn-price-value"></span>
                     <span class="currency-symbol">₽</span>
-                    
+
                     <div class="price-tooltip">7 сентября – 14 сентября (6 ночей)</div>                    
                 </div>
     
@@ -187,7 +187,7 @@
         </div>
 
         <div class="block block--bottom block--center">
-            <div class="button-container">
+            <div class="button-container" id="btn-bottombar">
                 <button class="button button--scale">
                     @@include("svg/arrow-down_other-destinations.svg")
                 </button>
@@ -200,7 +200,8 @@
         <div class="block block--bottom block--right image-copyright">&copy by Jose Arcadio, Flickr</div>
     </div>
 
-    <div class="bottombar"></div>
+    <div class="bottombar" id="bottombar"></div>
+
     <script src="jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>

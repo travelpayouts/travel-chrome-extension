@@ -543,6 +543,13 @@ $(function(){
         $btn_settings.removeClass('menu-opened');
         $btn_settings.next().removeClass('isOpened');
     });
+
+    var $place_container = $('#place_container'),
+        $bottombar = $('#bottombar');
+    $('#btn-bottombar').click(function(){
+        $place_container.toggleClass('slideUp');
+        $bottombar.toggleClass('isOpen');
+    });
 });
 function DropDown(el) {
     this.dd = el;

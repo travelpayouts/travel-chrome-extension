@@ -420,3 +420,29 @@
 	font-weight: 600;
 	text-align: center;
 }
+
+.bottombar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 112px;
+    transform: translateY(100%);
+    background-color: black;
+    transition: -webkit-transform 0.3s ease-out;
+
+    &.isOpen {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
+}
+
+.place-container {
+    position: relative;
+    transform: translateY(0);
+    transition: -webkit-transform 0.3s ease-out;
+    &.slideUp {
+        -webkit-transform: translateY(-112px);
+        transform: translateY(-112px);
+    }
+}
