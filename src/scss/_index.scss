@@ -266,7 +266,6 @@
 
     &:hover {
         cursor: pointer;        
-        border: 1px solid #41c2d2;
     }
 
     &:focus {
@@ -340,6 +339,14 @@
             border: solid #fff;
             border-width: 0 4px 4px 0;
         }
+    }
+}
+
+.wrapper-select-dropdown,
+.input-text,
+.control-checkbox__indicator {
+    &:hover {
+        border: 1px solid #41c2d2;
     }
 }
 

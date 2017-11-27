@@ -451,8 +451,7 @@ body {
   letter-spacing: 0.2px;
   color: #2c2c2c; }
   .input-text:hover {
-    cursor: pointer;
-    border: 1px solid #41c2d2; }
+    cursor: pointer; }
   .input-text:focus {
     cursor: initial;
     border: 2px solid #a1e7f0; }
@@ -508,6 +507,11 @@ body {
       transform: rotate(45deg);
       border: solid #fff;
       border-width: 0 4px 4px 0; }
+
+.wrapper-select-dropdown:hover,
+.input-text:hover,
+.control-checkbox__indicator:hover {
+  border: 1px solid #41c2d2; }
 
 .hidden-cities__item {
   display: inline-block;
