@@ -544,11 +544,9 @@ $(function(){
         $btn_settings.next().removeClass('isOpened');
     });
 
-    var $place_container = $('#place_container'),
-        $bottombar = $('#bottombar');
+    var $place_container = $('#place_container');
     $('#btn-bottombar').click(function(){
         $place_container.toggleClass('slideUp');
-        $bottombar.toggleClass('isOpen');
     });
 });
 function DropDown(el) {
