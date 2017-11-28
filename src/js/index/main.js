@@ -5,6 +5,7 @@ $(function(){
     $(document).click(function() {
         // all dropdowns
         $('.wrapper-select-dropdown, .wrapper-input-dropdown').removeClass('active');
+        $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
 
     var inputDd = $('.wrapper-input-dropdown');

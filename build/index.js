@@ -203,21 +203,24 @@ var update_price = function(deal) {
     var btn_container = document.querySelectorAll('.btn-container')[0],
         calendar_container = btn_container.querySelector('.prices-calendar-container'),
         btn = btn_container.querySelectorAll('.btn-price')[0],
-        btn_price = btn.querySelectorAll('.btn-price-value')[0],
-        calendar_visible = false;
+        btn_price = btn.querySelectorAll('.btn-price-value')[0];
+        // calendar_visible = false;
 
     hide(btn_container);
 
     if (deal.price) {
         btn_price.innerText = deal.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
         btn.onclick = function(e) {
-            if (calendar_visible) {
-                calendar_visible = false;
-                calendar_container.classList.add("prices-calendar-container--hidden");
-            } else {
-                calendar_visible = true;
-                calendar_container.classList.remove("prices-calendar-container--hidden");
-            }
+            e.stopPropagation();
+            calendar_container.classList.toggle("prices-calendar-container--hidden");
+
+            // if (calendar_visible) {
+            //     calendar_visible = false;
+            //     calendar_container.classList.add("prices-calendar-container--hidden");
+            // } else {
+            //     calendar_visible = true;
+            //     calendar_container.classList.remove("prices-calendar-container--hidden");
+            // }
         }
         show(btn_container);
     }
@@ -520,6 +523,7 @@ $(function(){
     $(document).click(function() {
         // all dropdowns
         $('.wrapper-select-dropdown, .wrapper-input-dropdown').removeClass('active');
+        $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
 
     var inputDd = $('.wrapper-input-dropdown');
