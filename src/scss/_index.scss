@@ -148,7 +148,7 @@
     // }
 
     &::after {
-        content: url(img/icons/chevron-down_11px.png);
+        content: url('img/icons/arrow-down-select.svg');
         display: block;
         position: absolute;
         top: 50%;
@@ -210,7 +210,7 @@
 
     img {
         visibility: hidden;
-        margin-right: 18px;
+        margin: 0 18px 2px 0;
     }
 }
 

@@ -365,7 +365,7 @@ var fill_calendar = function(prices) {
                 month_element.setAttribute("target", "_blank");
             } else {
                 var loader = create_element('img', ['loader']);
-                loader.setAttribute('src', 'svg/loader.svg');
+                loader.setAttribute('src', 'img/icons/loader.svg');
                 price_container.appendChild(loader);
 
                 // price_container.innerText = "—"

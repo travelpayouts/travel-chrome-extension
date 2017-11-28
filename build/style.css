@@ -371,7 +371,7 @@ body {
   letter-spacing: 0.2px;
   color: #2c2c2c; }
   .wrapper-select-dropdown::after {
-    content: url(img/icons/chevron-down_11px.png);
+    content: url("img/icons/arrow-down-select.svg");
     display: block;
     position: absolute;
     top: 50%;
@@ -413,7 +413,7 @@ body {
         visibility: visible; }
   .dropdown img {
     visibility: hidden;
-    margin-right: 18px; }
+    margin: 0 18px 2px 0; }
 
 .input-label {
   display: block;
