@@ -356,13 +356,15 @@ var fill_calendar = function(prices) {
             var month_element = calendar.querySelector("#month-" + p.id),
                 price_container = month_element.querySelector('.prices-calendar-preloader'),
                 month_dates = month_element.querySelector('.prices-calendar-month_dates'),
-                price_value = create_element('span', ['price_value']);
+                price_value = create_element('span', ['price_value']),
+                price_currency = create_element('span', ['prices-calendar-currency']);
             price_container.innerHTML = '';
             if (p.price) {
                 price_container.appendChild(document.createTextNode('от '));
-                price_value.innerText = p.price.toLocaleString();
+                price_value.innerText = p.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
                 price_container.appendChild(price_value);
-                price_container.appendChild(document.createTextNode(' ₽'));
+                price_currency.appendChild(document.createTextNode(' ₽'));
+                price_container.appendChild(price_currency);
                 month_element.classList.add("has-price");
                 month_element.setAttribute("href", p.search_url);
                 month_element.setAttribute("target", "_blank");

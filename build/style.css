@@ -206,7 +206,8 @@ body {
   font-size: 14px;
   height: 24px; }
 
-.prices-calendar-month .price .price_value {
+.prices-calendar-month .price .price_value,
+.prices-calendar-currency {
   font-size: 18px; }
 
 .prices-calendar-month:hover {
