@@ -399,14 +399,31 @@
 
     &--left {
         top: -2px;
-        left: -8px;
+        left: -12px;
         transform: translateX(-100%);
+
+        &::after {
+            content: url('img/icons/tooltip-triangle.svg');
+            position: absolute;
+            top: 50%;
+            right: -4px;
+            transform: translateY(-50%);
+        }
     }
 
     &--top {
         top: -8px;
         left: 50%;        
         transform: translate(-50%, -100%);
+
+        &::after {
+            content: url('img/icons/tooltip-triangle.svg');
+            position: absolute;
+            bottom: 1px;
+            left: 50%;
+            transform-origin: 0 100%;
+            transform: translateX(-150%) rotate(90deg);
+        }
     }
 }
 
