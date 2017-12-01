@@ -213,7 +213,6 @@ var update_price = function(deal) {
         btn.onclick = function(e) {
             e.stopPropagation();
             calendar_container.classList.toggle("prices-calendar-container--hidden");
-
             // if (calendar_visible) {
             //     calendar_visible = false;
             //     calendar_container.classList.add("prices-calendar-container--hidden");
@@ -358,6 +357,7 @@ var fill_calendar = function(prices) {
                 month_dates = month_element.querySelector('.prices-calendar-month_dates'),
                 price_value = create_element('span', ['price_value']),
                 price_currency = create_element('span', ['prices-calendar-currency']);
+
             price_container.innerHTML = '';
             if (p.price) {
                 price_container.appendChild(document.createTextNode('от '));
@@ -458,7 +458,9 @@ init();
 
 
 
-
+$('#btn_change_destination').click(function(){
+    init();
+});
 
 /***/ })
 /******/ ]);
