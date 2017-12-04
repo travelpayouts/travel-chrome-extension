@@ -243,10 +243,10 @@ var update_destination = function (deal) {
 
 var update_tags = function(deal) {
     var tags_container = document.querySelectorAll('.tags-container')[0],
-        tags = tags_container.querySelectorAll('.tags')[0];
+        tags = tags_container.querySelectorAll('.tags')[0]; console.log(tags)
 
     hide(tags_container);
-    tags.innerHtml = '';
+    tags.innerHTML = '';
     if (deal.tags && deal.tags.length > 0) {
         for (var i = deal.tags.length - 1; i >= 0; i--) {
             (function(tag_text) {
