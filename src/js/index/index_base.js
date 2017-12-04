@@ -392,8 +392,9 @@ var aviasalesUrl = function(origin_iata, destination_iata, depart_date, return_d
     var base = "https://search.aviasales.ru/",
         dp = depart_date.split("-"),
         rt = return_date.split("-"),
-        passengers_count = 1;
-    return base + origin_iata + dp[2] + dp[1] + destination_iata + rt[2] + rt[1] + passengers_count;
+        passengers_count = 1,
+        utm = 'utm_source=inspiration_tab';
+    return base + origin_iata + dp[2] + dp[1] + destination_iata + rt[2] + rt[1] + passengers_count + '?' + utm;
 }
 
 var get_year_prices = function(origin_iata, destination_iata, callback){
