@@ -427,7 +427,9 @@ var get_year_prices = function(origin_iata, destination_iata, callback){
 var update_tab = function(deal) {
     var blackout = document.querySelectorAll('.blackout')[0];
     hide(blackout);
-    build_prices_calendar();
+    if(!document.getElementById('prices_calendar').children.length) {
+        build_prices_calendar();        
+    }
     get_year_prices(deal.origin_iata, deal.destination_iata, fill_calendar);
     update_bg(deal, function() {
         show(blackout);
