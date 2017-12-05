@@ -100,6 +100,8 @@ body {
 
 .tags-container {
   margin-top: 16px; }
+  .tags-container--hidden {
+    display: none; }
 
 .tags {
   font-size: 0; }
@@ -112,6 +114,9 @@ body {
   border-radius: 3px;
   display: inline-block;
   margin-right: 4px; }
+
+.review-container--hidden {
+  display: none; }
 
 .review {
   position: relative;
@@ -177,6 +182,9 @@ body {
   height: 382px;
   overflow: hidden;
   transition: height .0s; }
+
+.prices-calendar.prices-calendar--off {
+  display: none; }
 
 .prices-calendar-container.prices-calendar-container--hidden .prices-calendar {
   height: 0;
@@ -586,6 +594,8 @@ body {
   font-size: 12px;
   font-weight: 600;
   text-align: center; }
+  .price-tooltip--hidden {
+    display: none; }
 
 .bottombar {
   display: flex;

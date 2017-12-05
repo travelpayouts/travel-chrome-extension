@@ -123,6 +123,9 @@ body {
 
 .tags-container {
     margin-top: 16px;
+    &--hidden {
+        display: none;
+    }
 }
 
 .tags {
@@ -137,6 +140,10 @@ body {
     border-radius: 3px;
     display: inline-block;
     margin-right: 4px;
+}
+
+.review-container--hidden {
+    display: none;
 }
 
 .review {
@@ -213,6 +220,10 @@ body {
     height: 382px;
     overflow: hidden;
     transition: height .0s;
+}
+
+.prices-calendar.prices-calendar--off {
+    display: none;
 }
 
 .prices-calendar-container.prices-calendar-container--hidden .prices-calendar {

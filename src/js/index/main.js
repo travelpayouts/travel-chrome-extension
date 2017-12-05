@@ -34,4 +34,14 @@ $(function(){
     $('#btn-bottombar').click(function(){
         $place_container.toggleClass('slideUp');
     });
+
+    var $comments_container = $('#comments_container');
+    $('#toggle_comments').on('change', function(){
+        $comments_container.toggleClass('review-container--hidden');
+    });
+
+    var $tags_container = $('#tags_container');
+    $('#toggle_tags').on('change', function(){
+        $tags_container.toggleClass('tags-container--hidden');
+    });
 });

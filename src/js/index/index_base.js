@@ -397,6 +397,26 @@ var aviasalesUrl = function(origin_iata, destination_iata, depart_date, return_d
     return base + origin_iata + dp[2] + dp[1] + destination_iata + rt[2] + rt[1] + passengers_count + '?' + utm;
 }
 
+var fill_price_tooltip = function(year_data, year_obj) {
+    var price_tooltip = document.querySelector('#price_tooltip');
+    var calendar = document.querySelector('.prices-calendar');
+    
+    if(Object.keys(year_data).length == 1) {
+        price_tooltip.classList.remove('price-tooltip--hidden');
+        calendar.classList.add('prices-calendar--off');
+        for(var key in year_data) {
+            year_obj.forEach(function(item){
+                if(item.id == key) {
+                    price_tooltip.innerHTML = item.dates;
+                }
+            });
+        }
+    } else {
+        price_tooltip.classList.add('price-tooltip--hidden');
+        calendar.classList.remove('prices-calendar--off');
+    }
+}
+
 var get_year_prices = function(origin_iata, destination_iata, callback){
     var req = new XMLHttpRequest(),
         url = "http://api.travelpayouts.com/v1/prices/monthly?currency=RUB&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
@@ -405,7 +425,7 @@ var get_year_prices = function(origin_iata, destination_iata, callback){
     req.open("GET", url, true);
     req.onload = function () {
       if (req.status == 200) {
-        year_data = JSON.parse(req.responseText).data;
+        year_data = JSON.parse(req.responseText).data;console.log(year_data)
         for (var i=0; i<year_obj.length; i++) {
              if (year_data[year_obj[i].id]) {
                 var month_data = year_data[year_obj[i].id];
@@ -419,6 +439,7 @@ var get_year_prices = function(origin_iata, destination_iata, callback){
             year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
             year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
         }
+        fill_price_tooltip(year_data, year_obj);
         callback(year_obj);
       }
     };

@@ -130,14 +130,14 @@
     
                     <div class="button-menu__paragraph">
                         <label class="control-checkbox">Скрыть комментарии
-                            <input type="checkbox"/>
+                            <input type="checkbox" id="toggle_comments">
                             <div class="control-checkbox__indicator"></div>
                         </label>
                     </div> <!-- END: .paragraph -->
     
                     <div class="button-menu__paragraph">
                         <label class="control-checkbox">Скрыть теги
-                            <input type="checkbox"/>
+                            <input type="checkbox" id="toggle_tags">
                             <div class="control-checkbox__indicator"></div>
                         </label>        
                     </div> <!-- END: .paragraph -->
@@ -155,7 +155,7 @@
                     <span class="btn-price-value"></span>
                     <span class="currency-symbol">₽</span>
 
-                    <div class="price-tooltip">7 сентября – 14 сентября (6 ночей)</div>                    
+                    <div class="price-tooltip price-tooltip--hidden" id="price_tooltip">7 сентября – 14 сентября (6 ночей)</div>                    
                 </div>
     
                 <div class="prices-calendar-container prices-calendar-container--hidden" id="prices_calendar"></div>
@@ -167,13 +167,13 @@
                 <div class="origin"></div>
             </div>
     
-            <div class="tags-container hidden show-animate">
+            <div class="tags-container hidden show-animate" id="tags_container">
                 <div class="tags"></div>
             </div>
         </div>
     
         <div class="block block--bottom block--right">
-            <div class="review-container">
+            <div class="review-container" id="comments_container">
                 <div class="review hidden show-animate">
                     <img class="quote" src="img/icon_quote.svg">
                     <div class="review-content">
