@@ -545,6 +545,14 @@ InputDropdown.prototype = {
     }
 }
 $(function(){
+    // chrome.storage.sync.set({settings: {
+    //     currency: '',
+    //     origin: '',
+    //     hideCities: {},
+    //     showReviews: true,
+    //     showTags: true
+    // }});
+    get_settings(apply_settings);
     var dd = new DropDown($('#choose_currency'));
     var sb = new SelectionBox($('#exclude_cities'));
     
@@ -582,14 +590,57 @@ $(function(){
     });
 
     var $comments_container = $('#comments_container');
-    $('#toggle_comments').on('change', function(){
-        $comments_container.toggleClass('review-container--hidden');
+    var $toggle_comments = $('#toggle_comments');
+    $toggle_comments.on('change', function(){
+        showComments(!this.checked);
+        chrome.storage.sync.get('settings', function(res) {
+            var result = res;
+            result.settings.showReviews = !$toggle_comments[0].checked;
+            chrome.storage.sync.set(result);
+        });
     });
 
     var $tags_container = $('#tags_container');
-    $('#toggle_tags').on('change', function(){
-        $tags_container.toggleClass('tags-container--hidden');
+    var $toggle_tags = $('#toggle_tags');
+    $toggle_tags.on('change', function(){
+        showTags(!this.checked);
+        chrome.storage.sync.get('settings', function(res) {
+            var result = res;
+            result.settings.showTags = !$toggle_tags[0].checked;
+            chrome.storage.sync.set(result);
+        });
     });
+
+    function get_settings(callback) {
+        chrome.storage.sync.get('settings', function(res){
+            if(res.settings) {
+                callback(res.settings);
+            }
+        });
+    }
+
+    function apply_settings(settings) {
+        showComments(settings.showReviews);
+        $toggle_comments[0].checked = !settings.showReviews;
+        showTags(settings.showTags);
+        $toggle_tags[0].checked = !settings.showTags;
+    }
+
+    function showComments(state) {
+        if(state) {
+            $comments_container.removeClass('review-container--hidden');
+        } else {
+            $comments_container.addClass('review-container--hidden');
+        }
+    }
+
+    function showTags(state) {
+        if(state) {
+            $tags_container.removeClass('tags-container--hidden');
+        } else {
+            $tags_container.addClass('tags-container--hidden');
+        }
+    }
 });
 function DropDown(el) {
     this.dd = el;
