@@ -1,7 +1,9 @@
 <head>
     <meta charset="UTF-8" />
     <title>New Tab</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&amp;subset=cyrillic" rel="stylesheet">    
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&amp;subset=cyrillic" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="libs/auto-complete/auto-complete.css"> -->
+    <link rel="stylesheet" href="libs/awesomplete/awesomplete.css">   
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -98,8 +100,8 @@
                     <div class="button-menu__paragraph">
                         <label for="" class="input-label">Не показывать города</label>
                         <div class="wrapper-input-dropdown" data-select-type="external">
-                            <input type="text" class="input-text" placeholder="Введите название города">
-                            <ul class="dropdown">
+                            <input type="text" class="input-text" placeholder="Введите название города" id="hide_cities">
+                            <ul class="dropdown" id="hide_cities_dropdown">
                                 <li>
                                     Кишинев,<span> Молдавия, KIV</span>
                                 </li>
@@ -115,26 +117,42 @@
                                 <li>
                                     Петропавловск-Камчатский,<span> Россия, PTR</span>
                                 </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
+                                <li>
+                                    Кишинев,<span> Молдавия, KIV</span>
+                                </li>
                             </ul>
                         </div>
-                        <div class="hidden-cities" id="exclude_cities">
-                            <span class="hidden-cities__item">Санкт-Петербург
-                                <img class="hidden-cities__item-icon" src="img/icons/close-8px-light.svg" alt="">
-                                <img class="hidden-cities__item-icon--hover" src="img/icons/close-8px-dark.svg" alt="">
-                            </span>
-                            <span class="hidden-cities__item">Монако
-                                <img class="hidden-cities__item-icon" src="img/icons/close-8px-light.svg" alt="">
-                                <img class="hidden-cities__item-icon--hover" src="img/icons/close-8px-dark.svg" alt="">
-                            </span>
-                            <span class="hidden-cities__item">Уфа
-                                <img class="hidden-cities__item-icon" src="img/icons/close-8px-light.svg" alt="">
-                                <img class="hidden-cities__item-icon--hover" src="img/icons/close-8px-dark.svg" alt="">
-                            </span>
-                            <span class="hidden-cities__item">Петропавловск-Качатский
-                                <img class="hidden-cities__item-icon" src="img/icons/close-8px-light.svg" alt="">
-                                <img class="hidden-cities__item-icon--hover" src="img/icons/close-8px-dark.svg" alt="">
-                            </span>
-                        </div>
+                        <div class="hidden-cities" id="exclude_cities"></div>
                     </div> <!-- END: .paragraph -->
     
                     <div class="button-menu__paragraph">
@@ -289,6 +307,8 @@
         </div>
     </div>
 
-    <script src="jquery-3.2.1.min.js"></script>
+    <script src="libs/jquery-3.2.1.min.js"></script>
+    <!-- <script src="libs/auto-complete/auto-complete.min.js"></script> -->
+    <script src="libs/awesomplete/awesomplete.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>

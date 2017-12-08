@@ -83,7 +83,7 @@ var get_chunk_info = function(global_index) {
 var get_deal_by_index = function(global_index, callback){
 	var chunk_data = get_chunk_info(global_index);
     var chunk_name = 'deals_' + chunk_data.number.toString();
-    chrome.storage.sync.get(chunk_name, function(s_data) {
+    chrome.storage.local.get(chunk_name, function(s_data) {
         var deals = s_data[chunk_name];
         callback(deals[chunk_data.index]);
     });
@@ -154,7 +154,7 @@ var default_deals = __webpack_require__(3);
 var storage = __webpack_require__(0)
 
 var get_next_deal_index = function(callback) {
-    chrome.storage.sync.get({"next_deal_index": 0}, function(r) {
+    chrome.storage.local.get({"next_deal_index": 0}, function(r) {
         var next_deal_index = r.next_deal_index;
         callback(next_deal_index)
     })
@@ -165,16 +165,25 @@ var use_default_deals = function(deals_length) {
 }
 
 var get_next_deal = function(callback) {
-    chrome.storage.sync.get(['next_deal_index', 'deals_length'], function(data) {
+    chrome.storage.local.get(['next_deal_index', 'deals_length'], function(data) {
         var next_deal_index = data.next_deal_index;
         if (use_default_deals(data.deals_length)) {
-            console.log('use_default_deals', default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
+            // console.log('use_default_deals', default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
             callback(default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
         } else {
             storage.get_deal_by_index(next_deal_index, function(deal){
-                console.log('choose deal', deal);
-                callback(deal);
-                chrome.storage.sync.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                // console.log('choose deal', deal);
+                chrome.storage.local.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                chrome.storage.sync.get('settings', function(data){
+                    if(data.settings && data.settings.hideCities) {
+                        if(data.settings.hideCities[deal.destination_iata]) {
+                            get_next_deal(update_tab);
+                            shouldExit = true;
+                            return;
+                        }
+                    }
+                    callback(deal);                   
+                });
             })
         }
     });
@@ -192,7 +201,7 @@ var update_bg = function(deal, callback) {
     var place_container = document.getElementById('place_container'),
         img = new Image();
         img.onload = function() {
-            console.log("IMG loaded");
+            // console.log("IMG loaded");
             callback();
         }
         place_container.setAttribute("style", "background-image:url(" + deal.image_url + ")");
@@ -243,7 +252,7 @@ var update_destination = function (deal) {
 
 var update_tags = function(deal) {
     var tags_container = document.querySelectorAll('.tags-container')[0],
-        tags = tags_container.querySelectorAll('.tags')[0]; console.log(tags)
+        tags = tags_container.querySelectorAll('.tags')[0];
 
     hide(tags_container);
     tags.innerHTML = '';
@@ -379,7 +388,7 @@ var fill_calendar = function(prices) {
             month_dates.innerText = p.dates;
         })(prices[i])
     }
-    console.log(prices)
+    // console.log(prices)
 }
 
 var format_date = function(str_date){
@@ -425,7 +434,7 @@ var get_year_prices = function(origin_iata, destination_iata, callback){
     req.open("GET", url, true);
     req.onload = function () {
       if (req.status == 200) {
-        year_data = JSON.parse(req.responseText).data;console.log(year_data)
+        year_data = JSON.parse(req.responseText).data;
         for (var i=0; i<year_obj.length; i++) {
              if (year_data[year_obj[i].id]) {
                 var month_data = year_data[year_obj[i].id];

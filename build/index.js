@@ -83,7 +83,7 @@ var get_chunk_info = function(global_index) {
 var get_deal_by_index = function(global_index, callback){
 	var chunk_data = get_chunk_info(global_index);
     var chunk_name = 'deals_' + chunk_data.number.toString();
-    chrome.storage.sync.get(chunk_name, function(s_data) {
+    chrome.storage.local.get(chunk_name, function(s_data) {
         var deals = s_data[chunk_name];
         callback(deals[chunk_data.index]);
     });
@@ -154,7 +154,7 @@ var default_deals = __webpack_require__(3);
 var storage = __webpack_require__(0)
 
 var get_next_deal_index = function(callback) {
-    chrome.storage.sync.get({"next_deal_index": 0}, function(r) {
+    chrome.storage.local.get({"next_deal_index": 0}, function(r) {
         var next_deal_index = r.next_deal_index;
         callback(next_deal_index)
     })
@@ -165,16 +165,25 @@ var use_default_deals = function(deals_length) {
 }
 
 var get_next_deal = function(callback) {
-    chrome.storage.sync.get(['next_deal_index', 'deals_length'], function(data) {
+    chrome.storage.local.get(['next_deal_index', 'deals_length'], function(data) {
         var next_deal_index = data.next_deal_index;
         if (use_default_deals(data.deals_length)) {
-            console.log('use_default_deals', default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
+            // console.log('use_default_deals', default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
             callback(default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
         } else {
             storage.get_deal_by_index(next_deal_index, function(deal){
-                console.log('choose deal', deal);
-                callback(deal);
-                chrome.storage.sync.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                // console.log('choose deal', deal);
+                chrome.storage.local.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                chrome.storage.sync.get('settings', function(data){
+                    if(data.settings && data.settings.hideCities) {
+                        if(data.settings.hideCities[deal.destination_iata]) {
+                            get_next_deal(update_tab);
+                            shouldExit = true;
+                            return;
+                        }
+                    }
+                    callback(deal);                   
+                });
             })
         }
     });
@@ -192,7 +201,7 @@ var update_bg = function(deal, callback) {
     var place_container = document.getElementById('place_container'),
         img = new Image();
         img.onload = function() {
-            console.log("IMG loaded");
+            // console.log("IMG loaded");
             callback();
         }
         place_container.setAttribute("style", "background-image:url(" + deal.image_url + ")");
@@ -243,7 +252,7 @@ var update_destination = function (deal) {
 
 var update_tags = function(deal) {
     var tags_container = document.querySelectorAll('.tags-container')[0],
-        tags = tags_container.querySelectorAll('.tags')[0]; console.log(tags)
+        tags = tags_container.querySelectorAll('.tags')[0];
 
     hide(tags_container);
     tags.innerHTML = '';
@@ -379,7 +388,7 @@ var fill_calendar = function(prices) {
             month_dates.innerText = p.dates;
         })(prices[i])
     }
-    console.log(prices)
+    // console.log(prices)
 }
 
 var format_date = function(str_date){
@@ -425,7 +434,7 @@ var get_year_prices = function(origin_iata, destination_iata, callback){
     req.open("GET", url, true);
     req.onload = function () {
       if (req.status == 200) {
-        year_data = JSON.parse(req.responseText).data;console.log(year_data)
+        year_data = JSON.parse(req.responseText).data;
         for (var i=0; i<year_obj.length; i++) {
              if (year_data[year_obj[i].id]) {
                 var month_data = year_data[year_obj[i].id];
@@ -519,9 +528,9 @@ InputDropdown.prototype = {
     initEvents : function() {
         var obj = this;
 
-        obj.input.on('focus', function(){
-            obj.dd.addClass('active');
-        });
+        // obj.input.on('focus', function(){
+        //     obj.dd.addClass('active');
+        // });
 
         obj.dd.click(function(e){
             e.stopPropagation();
@@ -545,16 +554,16 @@ InputDropdown.prototype = {
     }
 }
 $(function(){
-    // chrome.storage.sync.set({settings: {
-    //     currency: '',
-    //     origin: '',
-    //     hideCities: {},
-    //     showReviews: true,
-    //     showTags: true
-    // }});
+
+    // chrome.storage.sync.clear();
+    var settings = {};
     get_settings(apply_settings);
     var dd = new DropDown($('#choose_currency'));
     var sb = new SelectionBox($('#exclude_cities'));
+
+    window.addEventListener('update_settings', function() {
+        get_settings();
+    }, false);
     
     $(document).click(function() {
         // all dropdowns
@@ -591,39 +600,51 @@ $(function(){
 
     var $comments_container = $('#comments_container');
     var $toggle_comments = $('#toggle_comments');
+
     $toggle_comments.on('change', function(){
         showComments(!this.checked);
-        chrome.storage.sync.get('settings', function(res) {
-            var result = res;
-            result.settings.showReviews = !$toggle_comments[0].checked;
-            chrome.storage.sync.set(result);
-        });
+        settings.showComments = !$toggle_comments[0].checked;
+        chrome.storage.sync.set({settings});
     });
 
     var $tags_container = $('#tags_container');
     var $toggle_tags = $('#toggle_tags');
+
     $toggle_tags.on('change', function(){
         showTags(!this.checked);
-        chrome.storage.sync.get('settings', function(res) {
-            var result = res;
-            result.settings.showTags = !$toggle_tags[0].checked;
-            chrome.storage.sync.set(result);
-        });
+        settings.showTags = !$toggle_tags[0].checked;
+        chrome.storage.sync.set({settings});
     });
 
     function get_settings(callback) {
         chrome.storage.sync.get('settings', function(res){
             if(res.settings) {
-                callback(res.settings);
+                settings = res.settings;
+                if(callback) {
+                    callback(settings);
+                }
             }
         });
     }
 
     function apply_settings(settings) {
-        showComments(settings.showReviews);
-        $toggle_comments[0].checked = !settings.showReviews;
-        showTags(settings.showTags);
-        $toggle_tags[0].checked = !settings.showTags;
+        for(var key in settings) {
+            switch(key) {
+                case 'hideCities': 
+                    for(var k in settings.hideCities) {
+                        create_hidden_city(settings.hideCities[k], k);
+                    }
+                    break;
+                case 'showComments':
+                    showComments(settings.showComments);
+                    $toggle_comments[0].checked = !settings.showComments;
+                    break;
+                case 'showTags':
+                    showTags(settings.showTags);
+                    $toggle_tags[0].checked = !settings.showTags;
+                    break;
+            }
+        }
     }
 
     function showComments(state) {
@@ -640,6 +661,72 @@ $(function(){
         } else {
             $tags_container.addClass('tags-container--hidden');
         }
+    }
+
+    function get_choices(obj) {
+        var choices = [];
+        var filter = /deals_/;
+        for(var k in obj) {
+            if(filter.test(k) && Array.isArray(obj[k])) {
+                obj[k].forEach(function(item){
+                    var itemName = item.destination_name;
+                    choices.push([itemName.substring(0, itemName.indexOf(',')), (itemName.substring(itemName.indexOf(' '))).substring(1), item.destination_iata]);
+                });
+            }
+        } 
+        return choices;   
+    }
+
+    var hide_cities_choices,
+        autoCompleteCitiesToHide;
+
+    chrome.storage.local.get(function(res){
+        hide_cities_choices = get_choices(res);
+        var input = document.getElementById("hide_cities");
+        autoCompleteCitiesToHide = new Awesomplete(input, {
+            list: hide_cities_choices,
+            data: function(item, input) {
+                    if(settings.hideCities) {
+                        if(settings.hideCities[item[2]]) return;
+                    }
+                    return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
+            }
+        });
+    });
+
+    document.getElementById('hide_cities').addEventListener('awesomplete-selectcomplete', function(e){
+        var cityToHide = e.target.value;
+        e.target.value = '';
+        var selectText = e.text.label;
+        var iata = selectText.slice(-10, -7);
+        if(!settings) {
+            settings = {};
+        }
+        if(settings.hideCities) {
+            settings.hideCities[iata] = cityToHide;
+        } else {
+            settings.hideCities = {};
+            settings.hideCities[iata] = cityToHide;    
+        }             
+
+        chrome.storage.sync.set({settings});
+        // var arrayIndex = selectText.match(/\d+/)[0];
+        // sb.boxItemsArray[arrayIndex] = hide_cities_choices[arrayIndex];
+        // delete hide_cities_choices[arrayIndex];
+        // console.log(e)
+        // console.log(sb.boxItemsArray)
+        // console.log(hide_cities_choices)
+        create_hidden_city(cityToHide, iata);
+    });
+
+    function create_hidden_city(city, iata) {
+        var hidden_cities_box = document.getElementById('exclude_cities');
+        var span = '<span class="hidden-cities__item" data-iata="'+iata+'">' + city + ' ' +
+                   '<img class="hidden-cities__item-icon" src="img/icons/close-8px-light.svg" alt="">'+
+                   '<img class="hidden-cities__item-icon--hover" src="img/icons/close-8px-dark.svg" alt="">'+
+                   '</span>';
+        $(hidden_cities_box).append(span);
+
     }
 });
 function DropDown(el) {
@@ -678,13 +765,10 @@ DropDown.prototype = {
         return this.index;
     }
 }
-// $(function(){
-//     var sb = new SelectionBox($('#exclude_cities'));
-// });
-
 function SelectionBox($el) {
     this.box = $el;
     this.boxItems = $el.children();
+    this.boxItemClassName = 'hidden-cities__item';
     this.initEvents();
 }
 
@@ -692,8 +776,17 @@ SelectionBox.prototype = {
     initEvents : function() {
         var obj = this;
 
-        obj.box.on('click', '.'+obj.boxItems.eq(0).attr('class'), function(){
-            $(this).remove();
+        obj.box.on('click', '.'+obj.boxItemClassName, function(){
+            var boxItem = $(this);
+            boxItem.remove();
+
+            chrome.storage.sync.get('settings', function(data){
+                delete data.settings.hideCities[boxItem.data('iata')];
+                chrome.storage.sync.set(data, function(){
+                    var event = new Event('update_settings');
+                    window.dispatchEvent(event);
+                });
+            });
         });
     },
 }

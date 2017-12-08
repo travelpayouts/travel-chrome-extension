@@ -29,9 +29,9 @@ InputDropdown.prototype = {
     initEvents : function() {
         var obj = this;
 
-        obj.input.on('focus', function(){
-            obj.dd.addClass('active');
-        });
+        // obj.input.on('focus', function(){
+        //     obj.dd.addClass('active');
+        // });
 
         obj.dd.click(function(e){
             e.stopPropagation();

@@ -363,6 +363,11 @@ body {
         position: relative;
         z-index: -2; }
 
+.wrapper-select-dropdown:hover,
+.input-text:hover,
+.control-checkbox__indicator:hover {
+  border: 1px solid #41c2d2; }
+
 .wrapper-select-dropdown {
   /* Size and position */
   position: relative;
@@ -516,11 +521,6 @@ body {
       transform: rotate(45deg);
       border: solid #fff;
       border-width: 0 4px 4px 0; }
-
-.wrapper-select-dropdown:hover,
-.input-text:hover,
-.control-checkbox__indicator:hover {
-  border: 1px solid #41c2d2; }
 
 .hidden-cities__item {
   display: inline-block;
