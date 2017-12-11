@@ -61,6 +61,42 @@ $(function(){
         chrome.storage.sync.set({settings});
     });
 
+    var hide_cities_choices,
+        autoCompleteCitiesToHide;
+
+    chrome.storage.local.get(function(res){
+        hide_cities_choices = get_choices(res);
+        var input = document.getElementById("hide_cities");
+        autoCompleteCitiesToHide = new Awesomplete(input, {
+            list: hide_cities_choices,
+            data: function(item, input) {
+                    if(settings.hideCities) {
+                        if(settings.hideCities[item[2]]) return;
+                    }
+                    return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
+            }
+        });
+    });
+
+    document.getElementById('hide_cities').addEventListener('awesomplete-selectcomplete', function(e){
+        var cityToHide = e.target.value;
+        e.target.value = '';
+        var selectText = e.text.label;
+        var iata = selectText.slice(-10, -7);
+        if(!settings) {
+            settings = {};
+        }
+        if(settings.hideCities) {
+            settings.hideCities[iata] = cityToHide;
+        } else {
+            settings.hideCities = {};
+            settings.hideCities[iata] = cityToHide;    
+        }             
+
+        chrome.storage.sync.set({settings});
+        create_hidden_city(cityToHide, iata);
+    });
+
     function get_settings(callback) {
         chrome.storage.sync.get('settings', function(res){
             if(res.settings) {
@@ -121,48 +157,6 @@ $(function(){
         } 
         return choices;   
     }
-
-    var hide_cities_choices,
-        autoCompleteCitiesToHide;
-
-    chrome.storage.local.get(function(res){
-        hide_cities_choices = get_choices(res);
-        var input = document.getElementById("hide_cities");
-        autoCompleteCitiesToHide = new Awesomplete(input, {
-            list: hide_cities_choices,
-            data: function(item, input) {
-                    if(settings.hideCities) {
-                        if(settings.hideCities[item[2]]) return;
-                    }
-                    return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
-            }
-        });
-    });
-
-    document.getElementById('hide_cities').addEventListener('awesomplete-selectcomplete', function(e){
-        var cityToHide = e.target.value;
-        e.target.value = '';
-        var selectText = e.text.label;
-        var iata = selectText.slice(-10, -7);
-        if(!settings) {
-            settings = {};
-        }
-        if(settings.hideCities) {
-            settings.hideCities[iata] = cityToHide;
-        } else {
-            settings.hideCities = {};
-            settings.hideCities[iata] = cityToHide;    
-        }             
-
-        chrome.storage.sync.set({settings});
-        // var arrayIndex = selectText.match(/\d+/)[0];
-        // sb.boxItemsArray[arrayIndex] = hide_cities_choices[arrayIndex];
-        // delete hide_cities_choices[arrayIndex];
-        // console.log(e)
-        // console.log(sb.boxItemsArray)
-        // console.log(hide_cities_choices)
-        create_hidden_city(cityToHide, iata);
-    });
 
     function create_hidden_city(city, iata) {
         var hidden_cities_box = document.getElementById('exclude_cities');

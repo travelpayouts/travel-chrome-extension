@@ -393,7 +393,7 @@ body {
     transform: translateY(-50%); }
   .wrapper-select-dropdown.active .dropdown {
     padding: 13px 0 11px;
-    max-height: 377px; }
+    max-height: 470px; }
   .wrapper-select-dropdown__label img {
     display: none; }
   .wrapper-select-dropdown .currency-sign {

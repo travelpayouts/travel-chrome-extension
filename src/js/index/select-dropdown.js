@@ -25,6 +25,16 @@ DropDown.prototype = {
             obj.val = opt.html();
             obj.index = opt.index();
             obj.placeholder.html(obj.val);
+
+            chrome.storage.sync.get('settings', function(data){
+                if(data.settings) {
+                    var settings = data.settings;
+                } else {
+                    var settings = {};
+                }
+                settings.currency = opt.data('currency');
+                chrome.storage.sync.set({settings});               
+            });
         });
     },
     getValue : function() {
