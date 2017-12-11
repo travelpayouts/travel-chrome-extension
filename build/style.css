@@ -540,9 +540,6 @@ body {
   .hidden-cities__item-icon--hover {
     display: none; }
 
-.loader {
-  padding-top: 10px; }
-
 .button-tooltip {
   display: inline-block;
   position: absolute;
