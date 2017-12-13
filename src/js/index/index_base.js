@@ -178,7 +178,6 @@ var get_next_deal = function(callback) {
                     if(data.settings && data.settings.hideCities) {
                         if(data.settings.hideCities[deal.destination_iata]) {
                             get_next_deal(update_tab);
-                            shouldExit = true;
                             return;
                         }
                     }

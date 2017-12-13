@@ -12,19 +12,19 @@ $(function(){
     
     $(document).click(function() {
         // all dropdowns
-        $('.wrapper-select-dropdown, .wrapper-input-dropdown').removeClass('active');
+        $('.wrapper-select-dropdown').removeClass('active');
         $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
 
-    var inputDd = $('.wrapper-input-dropdown');
-    inputDd.each(function(){
-        var $item = $(this);
-        if($item.data('select-type') === 'external') {
-            var dd = new InputDropdown($item, sb);
-        } else {
-            var dd = new InputDropdown($item);            
-        }
-    }) 
+    // var inputDd = $('.wrapper-input-dropdown');
+    // inputDd.each(function(){
+    //     var $item = $(this);
+    //     if($item.data('select-type') === 'external') {
+    //         var dd = new InputDropdown($item, sb);
+    //     } else {
+    //         var dd = new InputDropdown($item);            
+    //     }
+    // }) 
     
     var $btn_settings = $('#btn_settings').click(function(){
         var $obj = $(this);
@@ -62,23 +62,25 @@ $(function(){
     });
 
     var hide_cities_choices,
-        autoCompleteCitiesToHide;
+        autoCompleteCitiesToHide,
+        input_hide_cities = document.getElementById("hide_cities");
 
     chrome.storage.local.get(function(res){
         hide_cities_choices = get_choices(res);
-        var input = document.getElementById("hide_cities");
-        autoCompleteCitiesToHide = new Awesomplete(input, {
+        autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
             list: hide_cities_choices,
             data: function(item, input) {
                     if(settings.hideCities) {
                         if(settings.hideCities[item[2]]) return;
                     }
                     return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
-            }
+            },
+            maxItems: 7,
+            sort: Awesomplete.SORT_BYORDER
         });
     });
 
-    document.getElementById('hide_cities').addEventListener('awesomplete-selectcomplete', function(e){
+    input_hide_cities.addEventListener('awesomplete-selectcomplete', function(e){
         var cityToHide = e.target.value;
         e.target.value = '';
         var selectText = e.text.label;
@@ -96,6 +98,74 @@ $(function(){
         chrome.storage.sync.set({settings});
         create_hidden_city(cityToHide, iata);
     });
+
+    input_hide_cities.addEventListener('blur', function(e){
+        if(e.target.value !== '') {
+            e.target.value = '';
+        }
+    });
+
+    var input_origin_city = document.getElementById('input_origin_city');
+    var autoCompleteOrigin = new Awesomplete(input_origin_city, {
+        data: function(item, input) {
+            return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };            
+        }
+    });
+
+    input_origin_city.addEventListener('awesomplete-selectcomplete', function(e){
+        chrome.storage.sync.get('settings', function(res) {
+            res.settings.originCity = {}
+            res.settings.originCity[e.text.slice(-10, -7)] = e.target.value;
+            chrome.storage.sync.set(res, function(){
+                input_origin_city.blur();
+            });
+        });
+    });
+
+    input_origin_city.addEventListener('input', function(e){
+        var list = getCitiesListWithAjax(e.target.value, function(data){
+            autoCompleteOrigin.list = data;
+            autoCompleteOrigin.evaluate();    
+        });
+    });
+
+    input_origin_city.addEventListener('blur', function(e){
+        chrome.storage.sync.get('settings', function(res){
+            var city = res.settings.originCity;
+            for(var key in city) {
+                if(input_origin_city.value !== city[key]) {
+                    input_origin_city.value = city[key];
+                }
+            }
+        });
+    });
+
+    function getCitiesListWithAjax(value, callback) {
+        var req = new XMLHttpRequest(),
+            url = 'http://places.aviasales.ru/match?term='+value+'&locale=ru';
+        
+        req.open('GET', url, true);
+        req.onload = function() {
+            if(req.status == 200) {
+                var place_data = JSON.parse(req.responseText);
+                if(place_data.length > 0) {
+                    var returned_cities = {},
+                        choices = [];
+
+                    place_data.forEach(function(item){
+                        if(item.city_iata) returned_cities[item.city_iata] = item;
+                    });
+
+                    for(var key in returned_cities) {
+                        var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key ];
+                        choices.push(choice);
+                    }
+                } 
+            }
+            callback(choices);
+        };
+        req.send();
+    }
 
     function get_settings(callback) {
         chrome.storage.sync.get('settings', function(res){
@@ -124,6 +194,13 @@ $(function(){
                     showTags(settings.showTags);
                     $toggle_tags[0].checked = !settings.showTags;
                     break;
+                case 'originCity':
+                    for(var key in settings.originCity) {
+                        if(input_origin_city.value !== settings.originCity[key]) {
+                            input_origin_city.value = settings.originCity[key];
+                        }
+                    }
+                    
             }
         }
     }

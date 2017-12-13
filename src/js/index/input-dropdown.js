@@ -1,20 +1,3 @@
-// $(function(){
-//     var inputDd = $('.wrapper-input-dropdown');
-//     inputDd.each(function(){
-//         var $item = $(this);
-//         if($item.data('select-type') === 'external') {
-//             var dd = new InputDropdown($item, $('#exclude_cities'));
-//         } else {
-//             var dd = new InputDropdown($item);            
-//         }
-//     })
-
-//     $(document).click(function(){
-//         $('.wrapper-input-dropdown').removeClass('active');
-//     });
-// });
-
-
 function InputDropdown(el, selectionBox) {
     this.dd = el;
     this.input = this.dd.children('input');
@@ -29,9 +12,9 @@ InputDropdown.prototype = {
     initEvents : function() {
         var obj = this;
 
-        // obj.input.on('focus', function(){
-        //     obj.dd.addClass('active');
-        // });
+        obj.input.on('focus', function(){
+            obj.dd.addClass('active');
+        });
 
         obj.dd.click(function(e){
             e.stopPropagation();
