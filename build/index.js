@@ -538,9 +538,11 @@ InputDropdown.prototype = {
 $(function(){
 
     // chrome.storage.sync.clear();
-    var settings = {};
+    var settings = {},
+        currency_label = document.getElementById('currency_label'),
+        currency_dropdown = document.getElementById('currency_dropdown'),
+        currency_selector;
     get_settings(apply_settings);
-    var dd = new DropDown($('#choose_currency'));
     var sb = new SelectionBox($('#exclude_cities'));
 
     window.addEventListener('update_settings', function() {
@@ -553,16 +555,6 @@ $(function(){
         $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
 
-    // var inputDd = $('.wrapper-input-dropdown');
-    // inputDd.each(function(){
-    //     var $item = $(this);
-    //     if($item.data('select-type') === 'external') {
-    //         var dd = new InputDropdown($item, sb);
-    //     } else {
-    //         var dd = new InputDropdown($item);            
-    //     }
-    // }) 
-    
     var $btn_settings = $('#btn_settings').click(function(){
         var $obj = $(this);
         $obj.addClass('menu-opened');
@@ -668,12 +660,20 @@ $(function(){
 
     input_origin_city.addEventListener('blur', function(e){
         chrome.storage.sync.get('settings', function(res){
-            var city = res.settings.originCity;
-            for(var key in city) {
-                if(input_origin_city.value !== city[key]) {
-                    input_origin_city.value = city[key];
-                }
+            if(res.settings && res.settings.originCity) {
+                var city = res.settings.originCity;
+                for(var key in city) {
+                    if(input_origin_city.value !== city[key]) {
+                        input_origin_city.value = city[key];
+                    }
+                }    
+            } else if(res.settings && !res.settings.originCity || !res.settings) {
+                get_auto_settings('origin_city', function(data){
+                    if(input_origin_city.value !== data.origin_city)
+                        set_origin_city_value(data.origin_city);
+                });
             }
+            
         });
     });
 
@@ -711,7 +711,44 @@ $(function(){
                 if(callback) {
                     callback(settings);
                 }
+            } else {
+                get_auto_settings(['currency', 'origin_city'], apply_auto_settings);
             }
+        });
+    }
+
+    function apply_auto_settings(auto_settings) {console.log(auto_settings)
+        if($.isEmptyObject(auto_settings)) {
+            set_currency_value('RUB');
+            set_origin_city_value('Москва');
+        } else {
+            for(var setting in auto_settings) {
+                switch(setting) {
+                    case 'currency':
+                        set_currency_value(auto_settings.currency);
+                        break;
+                    case 'origin_city':
+                        set_origin_city_value(auto_settings.origin_city);
+                        break;
+                }
+            }    
+        }
+    }
+
+    function set_currency_value(value) {
+        var currencyListElem = currency_dropdown.querySelector('li[data-currency='+ value +']');
+        currency_label.innerHTML = currencyListElem.innerHTML;
+        currencyListElem.classList.add('checked');
+        currency_selector = new DropDown($('#choose_currency'));      
+    }
+
+    function set_origin_city_value(value) {
+        input_origin_city.value = value;
+    }
+
+    function get_auto_settings(settings_name, callback) {
+        chrome.storage.local.get(settings_name, function(res){
+            callback(res);
         });
     }
 
@@ -733,12 +770,20 @@ $(function(){
                     break;
                 case 'originCity':
                     for(var key in settings.originCity) {
-                        if(input_origin_city.value !== settings.originCity[key]) {
-                            input_origin_city.value = settings.originCity[key];
-                        }
+                        set_origin_city_value(settings.originCity[key])
                     }
-                    
+                    break;
+                case 'currency':
+                    set_currency_value(settings.currency);
+                    break;
             }
+        }
+        if(!settings.currency && !settings.originCity) {
+            get_auto_settings(['currency', 'origin_city'], apply_auto_settings);
+        } else if(!settings.currency) {
+            get_auto_settings('currency', apply_auto_settings);
+        } else if(!settings.originCity) {
+            get_auto_settings('origin_city', apply_auto_settings);
         }
     }
 
@@ -817,7 +862,10 @@ DropDown.prototype = {
                     var settings = {};
                 }
                 settings.currency = opt.data('currency');
-                chrome.storage.sync.set({settings});               
+                chrome.storage.sync.set({settings});
+                chrome.runtime.sendMessage({greeting: 'hello'}, function(response){
+                    console.log(response.answer);
+                });              
             });
         });
     },

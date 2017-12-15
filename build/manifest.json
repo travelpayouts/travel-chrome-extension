@@ -2,6 +2,12 @@
    "background": {
       "scripts": [ "background.js" ]
    },
+   "content_scripts": [
+    {
+      "matches": ["http://*/*"],
+      "js": ["index.js"]
+    }
+  ],
    "chrome_url_overrides": {
       "newtab": "index.html"
    },
@@ -12,5 +18,5 @@
    "manifest_version": 2,
    "name": "InspirationTab --test",
    "permissions": [ "tabs", "alarms", "storage" ],
-   "version": "0.16.0"
+   "version": "0.17.0"
 }

@@ -35,11 +35,11 @@
                     <div class="button-menu__paragraph">
                         <label class="input-label">Валюта</label>
                         <div class="wrapper-select-dropdown" id="choose_currency">
-                            <span class="wrapper-select-dropdown__label">
-                                <span class="currency-sign">&#8381;</span>Рубль
+                            <span class="wrapper-select-dropdown__label" id="currency_label">
+                                <!-- <span class="currency-sign">&#8381;</span>Рубль -->
                             </span>
-                            <ul class="dropdown">
-                                <li class="checked" data-currency="RUB">
+                            <ul class="dropdown" id="currency_dropdown">
+                                <li data-currency="RUB">
                                     <img src="img/icons/check.svg" alt=""><span class="currency-sign">&#8381;</span>Рубль
                                 </li>
                                 <li data-currency="EUR">
@@ -71,9 +71,9 @@
                     </div> <!-- END: .paragraph -->
     
                     <div class="button-menu__paragraph">
-                        <label for="" class="input-label">Город вылета</label>
+                        <label class="input-label">Город вылета</label>
                         <div class="wrapper-input-dropdown">
-                            <input type="text" class="input-text" id="input_origin_city" value="Калининград">
+                            <input type="text" class="input-text" id="input_origin_city" value="">
                             <!-- <ul class="dropdown">
                                 <li>
                                     Кишинев,<span> Молдавия, KIV</span>

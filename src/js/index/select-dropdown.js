@@ -33,7 +33,10 @@ DropDown.prototype = {
                     var settings = {};
                 }
                 settings.currency = opt.data('currency');
-                chrome.storage.sync.set({settings});               
+                chrome.storage.sync.set({settings});
+                chrome.runtime.sendMessage({greeting: 'hello'}, function(response){
+                    console.log(response.answer);
+                });              
             });
         });
     },
