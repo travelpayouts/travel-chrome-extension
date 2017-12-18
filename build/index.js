@@ -211,13 +211,17 @@ var update_price = function(deal) {
     var btn_container = document.querySelectorAll('.btn-container')[0],
         calendar_container = btn_container.querySelector('.prices-calendar-container'),
         btn = btn_container.querySelectorAll('.btn-price')[0],
-        btn_price = btn.querySelectorAll('.btn-price-value')[0];
+        btn_price = btn.querySelectorAll('.btn-price-value')[0],
+        btn_currency = btn.querySelector('.currency-symbol');
         // calendar_visible = false;
 
     hide(btn_container);
 
     if (deal.price) {
         btn_price.innerText = deal.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+        get_currency(function(currency){
+            btn_currency.innerText = currency[1];
+        });
         btn.onclick = function(e) {
             e.stopPropagation();
             calendar_container.classList.toggle("prices-calendar-container--hidden");
@@ -356,7 +360,7 @@ var build_prices_calendar = function() {
     prices_calendar_container.appendChild(prices_calendar);
 }
 
-var fill_calendar = function(prices) {
+var fill_calendar = function(prices, currency_symbol) {
     var calendar = document.querySelector('.prices-calendar');
     for (var i = prices.length - 1; i >= 0; i--) {
         (function(p) {
@@ -371,7 +375,7 @@ var fill_calendar = function(prices) {
                 price_container.appendChild(document.createTextNode('от '));
                 price_value.innerText = p.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
                 price_container.appendChild(price_value);
-                price_currency.appendChild(document.createTextNode(' ₽'));
+                price_currency.appendChild(document.createTextNode(' ' + currency_symbol));
                 price_container.appendChild(price_currency);
                 month_element.classList.add("has-price");
                 month_element.setAttribute("href", p.search_url);
@@ -427,7 +431,7 @@ var fill_price_tooltip = function(year_data, year_obj) {
 
 var get_year_prices = function(currency, origin_iata, destination_iata, callback){
     var req = new XMLHttpRequest(),
-        url = "http://api.travelpayouts.com/v1/prices/monthly?currency="+ currency +"&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
+        url = "http://api.travelpayouts.com/v1/prices/monthly?currency="+ currency[0] +"&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
         year_obj = get_year_objs();
 
     req.open("GET", url, true);
@@ -448,7 +452,7 @@ var get_year_prices = function(currency, origin_iata, destination_iata, callback
             year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
         }
         fill_price_tooltip(year_data, year_obj);
-        callback(year_obj);
+        callback(year_obj, currency[1]);
       }
     };
 
@@ -741,7 +745,7 @@ $(function(){
             for(var setting in auto_settings) {
                 switch(setting) {
                     case 'currency':
-                        set_currency_value(auto_settings.currency);
+                        set_currency_value(auto_settings.currency[0]);
                         break;
                     case 'origin_city':
                         set_origin_city_value(auto_settings.origin_city);
@@ -790,7 +794,7 @@ $(function(){
                     }
                     break;
                 case 'currency':
-                    set_currency_value(settings.currency);
+                    set_currency_value(settings.currency[0]);
                     break;
             }
         }
@@ -870,6 +874,7 @@ DropDown.prototype = {
             obj.val = opt.html();
             obj.index = opt.index();
             obj.placeholder.html(obj.val);
+            var currency_symbol = opt.find('.currency-sign').html();
 
             chrome.storage.sync.get('settings', function(data){
                 if(data.settings) {
@@ -877,7 +882,7 @@ DropDown.prototype = {
                 } else {
                     var settings = {};
                 }
-                settings.currency = opt.data('currency');
+                settings.currency = [opt.data('currency'), currency_symbol];
                 chrome.storage.sync.set({settings});
                 chrome.runtime.sendMessage({greeting: 'hello'}, function(response){
                     console.log(response.answer);

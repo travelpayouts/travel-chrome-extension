@@ -25,6 +25,7 @@ DropDown.prototype = {
             obj.val = opt.html();
             obj.index = opt.index();
             obj.placeholder.html(obj.val);
+            var currency_symbol = opt.find('.currency-sign').html();
 
             chrome.storage.sync.get('settings', function(data){
                 if(data.settings) {
@@ -32,7 +33,7 @@ DropDown.prototype = {
                 } else {
                     var settings = {};
                 }
-                settings.currency = opt.data('currency');
+                settings.currency = [opt.data('currency'), currency_symbol];
                 chrome.storage.sync.set({settings});
                 chrome.runtime.sendMessage({greeting: 'hello'}, function(response){
                     console.log(response.answer);

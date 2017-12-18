@@ -188,7 +188,7 @@ $(function(){
             for(var setting in auto_settings) {
                 switch(setting) {
                     case 'currency':
-                        set_currency_value(auto_settings.currency);
+                        set_currency_value(auto_settings.currency[0]);
                         break;
                     case 'origin_city':
                         set_origin_city_value(auto_settings.origin_city);
@@ -237,7 +237,7 @@ $(function(){
                     }
                     break;
                 case 'currency':
-                    set_currency_value(settings.currency);
+                    set_currency_value(settings.currency[0]);
                     break;
             }
         }
