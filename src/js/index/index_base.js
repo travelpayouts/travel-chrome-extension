@@ -491,9 +491,75 @@ var update_tab = function(deal) {
     });
 }
 
+
 var init = function() {
     get_next_deal(update_tab);
 }
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
+    // if(request.message == 'update content') {
+    //     init();
+    // }
+    if(request.cmd == 'update_price') {console.log(11)
+        chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
+            var current_deal;
+            if(res.next_deal_index !== 0) {
+                current_deal = res.next_deal_index - 1;
+            } else {
+                current_deal = res.deals_length - 1;
+            }
+            get_deal_by_index(current_deal, function(d) {
+                console.log(d)
+            })
+        });
+    }
+});
+
+window.addEventListener('update_price', function() {
+    $('.prices-calendar-preloader').each(function(){
+        $(this).html(generate_preloader());
+    });
+    $('.btn-price').html(generate_preloader());
+    // chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
+    //     var current_deal;
+    //     if(res.next_deal_index !== 0) {
+    //         current_deal = res.next_deal_index - 1;
+    //     } else {
+    //         current_deal = res.deals_length - 1;
+    //     }
+    //     storage.get_deal_by_index(current_deal, function(d) {
+    //         var req = new XMLHttpRequest(),
+    //             url = "https://lyssa.aviasales.ru/map?min_trip_duration=2&max_trip_duration=30&affiliate=false&one_way=false&only_direct=false";
+    //             url += '&destination_iata=' + d.destination_iata;
+                
+    //             url += '&origin_iata=' + d.origin_iata;
+    //         url += '&currency_code=' + 'RUB';
+              
+    //         req.open("GET", url, true);
+          
+    //         req.onload = function (request) {
+    //           request = request.target;
+    //           if (request.status == 200) {
+    //             var directions = JSON.parse(request.response);
+    //             var result = directions.map(function(dir){
+    //               return {
+    //                 price: dir.value,
+    //                 return_date: dir.return_date,
+    //                 origin: dir.origin,
+    //                 destination: dir.destination,
+    //                 depart_date: dir.depart_date
+    //               }
+    //             });
+          
+    //             console.log(result);
+    //           }
+    //         };
+    //         req.send(null);
+          
+    //         console.log(d)
+    //     })
+    // });
+}, false);
 
 
 init();

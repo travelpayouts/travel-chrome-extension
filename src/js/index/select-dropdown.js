@@ -35,9 +35,9 @@ DropDown.prototype = {
                 }
                 settings.currency = [opt.data('currency'), currency_symbol];
                 chrome.storage.sync.set({settings});
-                chrome.runtime.sendMessage({greeting: 'hello'}, function(response){
-                    console.log(response.answer);
-                });              
+                var event = new Event('update_price');
+                window.dispatchEvent(event);
+                // chrome.runtime.sendMessage({cmd: 'update_price'});              
             });
         });
     },
