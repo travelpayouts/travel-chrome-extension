@@ -425,9 +425,9 @@ var fill_price_tooltip = function(year_data, year_obj) {
     }
 }
 
-var get_year_prices = function(origin_iata, destination_iata, callback){
+var get_year_prices = function(currency, origin_iata, destination_iata, callback){
     var req = new XMLHttpRequest(),
-        url = "http://api.travelpayouts.com/v1/prices/monthly?currency=RUB&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
+        url = "http://api.travelpayouts.com/v1/prices/monthly?currency="+ currency +"&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
         year_obj = get_year_objs();
 
     req.open("GET", url, true);
@@ -451,7 +451,21 @@ var get_year_prices = function(origin_iata, destination_iata, callback){
         callback(year_obj);
       }
     };
+
     req.send();
+}
+
+var get_currency = function(callback) {
+    chrome.storage.sync.get('settings', function(res) {
+        var currency;
+        if(res.settings && res.settings.currency) {
+            callback(res.settings.currency);
+        } else {
+            chrome.storage.local.get('currency', function(r) {
+                callback(r.currency);
+            });
+        }
+    });
 }
 
 var update_tab = function(deal) {
@@ -460,7 +474,9 @@ var update_tab = function(deal) {
     if(!document.getElementById('prices_calendar').children.length) {
         build_prices_calendar();        
     }
-    get_year_prices(deal.origin_iata, deal.destination_iata, fill_calendar);
+    get_currency(function(currency) {
+        get_year_prices(currency, deal.origin_iata, deal.destination_iata, fill_calendar);        
+    });
     update_bg(deal, function() {
         show(blackout);
         update_price(deal);
