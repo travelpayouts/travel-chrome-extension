@@ -72,6 +72,24 @@
             opacity: 0;
         }
     }
+
+    &.isDisabled {
+        pointer-events: none;
+        svg path:first-child {
+            animation: rotate 0.7s infinite linear;
+        }
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0);
+        transform-origin: 50% 50%;
+    }
+    100% {
+        transform: rotate(-360deg);
+        transform-origin: 50% 50%;        
+    }
 }
 
 .button-menu {

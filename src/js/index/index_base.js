@@ -360,7 +360,7 @@ var build_prices_calendar = function() {
     prices_calendar_container.appendChild(prices_calendar);
 }
 
-var fill_calendar = function(prices, currency_symbol) {
+var fill_calendar = function(prices, currency_symbol) {console.log(prices)
     var calendar = document.querySelector('.prices-calendar');
     for (var i = prices.length - 1; i >= 0; i--) {
         (function(p) {
@@ -515,11 +515,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
     }
 });
 
-window.addEventListener('update_price', function() {
+var clear_btn_price = function() {
+    $('.btn-price').html(generate_preloader());    
+};
+
+var clear_prices_calendar = function() {
     $('.prices-calendar-preloader').each(function(){
         $(this).html(generate_preloader());
     });
-    $('.btn-price').html(generate_preloader());
+};
+
+window.addEventListener('update_price', function(e) {console.log(e.detail)
+    clear_btn_price();
+    clear_prices_calendar();
+    document.getElementById('btn_change_destination').classList.add('isDisabled');
     // chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
     //     var current_deal;
     //     if(res.next_deal_index !== 0) {
