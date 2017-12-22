@@ -588,8 +588,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
 });
 
 window.addEventListener('set_loaders', function(){
-    document.getElementById('btn_change_destination').classList.add('isDisabled');
     document.getElementById('overlay').classList.remove('is-hidden');
+    document.getElementById('btn_change_destination').classList.add('isDisabled');
+    chrome.runtime.sendMessage({cmd: 'update_all'});
 });
 
 

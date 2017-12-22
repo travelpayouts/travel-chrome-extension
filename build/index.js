@@ -588,8 +588,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
 });
 
 window.addEventListener('set_loaders', function(){
-    document.getElementById('btn_change_destination').classList.add('isDisabled');
     document.getElementById('overlay').classList.remove('is-hidden');
+    document.getElementById('btn_change_destination').classList.add('isDisabled');
+    chrome.runtime.sendMessage({cmd: 'update_all'});
 });
 
 
@@ -707,24 +708,45 @@ $(function(){
         chrome.storage.sync.set({settings});
     });
 
-    var hide_cities_choices,
-        autoCompleteCitiesToHide,
-        input_hide_cities = document.getElementById("hide_cities");
+    // var hide_cities_choices,
+    //     autoCompleteCitiesToHide,
+    //     input_hide_cities = document.getElementById("hide_cities");
 
-    chrome.storage.local.get(function(res){
-        hide_cities_choices = get_choices(res);
-        autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
-            list: hide_cities_choices,
-            data: function(item, input) {
-                    if(settings.hideCities) {
-                        if(settings.hideCities[item[2]]) return;
-                    }
-                    return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
-            },
-            maxItems: 7,
-            sort: Awesomplete.SORT_BYORDER
+    var input_hide_cities = document.getElementById("hide_cities");
+    var autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
+        data: function(item, input) {
+            if(settings.hideCities) {
+                if(settings.hideCities[item[2]]) return;
+            }
+            return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };
+        },
+        maxItems: 7,
+        sort: Awesomplete.SORT_BYORDER
+
+    });
+
+    input_hide_cities.addEventListener('input', function(e){
+        var list = getCitiesListWithAjax(e.target.value, function(data){
+            autoCompleteCitiesToHide.list = data;
+            autoCompleteCitiesToHide.evaluate();    
         });
     });
+
+
+    // chrome.storage.local.get(function(res){
+    //     hide_cities_choices = get_choices(res);
+    //     autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
+    //         list: hide_cities_choices,
+    //         data: function(item, input) {
+    //                 if(settings.hideCities) {
+    //                     if(settings.hideCities[item[2]]) return;
+    //                 }
+    //                 return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };
+    //         },
+    //         maxItems: 7,
+    //         sort: Awesomplete.SORT_BYORDER
+    //     });
+    // });
 
     input_hide_cities.addEventListener('awesomplete-selectcomplete', function(e){
         var cityToHide = e.target.value;
@@ -754,19 +776,18 @@ $(function(){
     var input_origin_city = document.getElementById('input_origin_city');
     var autoCompleteOrigin = new Awesomplete(input_origin_city, {
         data: function(item, input) {
-            return { label: item[0]+', '+'<span data-index="'+hide_cities_choices.indexOf(item)+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };            
+            return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };            
         }
     });
 
     input_origin_city.addEventListener('awesomplete-selectcomplete', function(e){
-        chrome.storage.sync.get('settings', function(res) {console.log(e)
+        chrome.storage.sync.get('settings', function(res) {
             res.settings.originCity = {}
             res.settings.originCity[e.text.slice(-10, -7)] = e.target.value;
             chrome.storage.sync.set(res, function(){
                 input_origin_city.blur();
                 var event = new Event('set_loaders');
                 window.dispatchEvent(event);
-                chrome.runtime.sendMessage({cmd: 'update_all'});
             });
         });
     });
