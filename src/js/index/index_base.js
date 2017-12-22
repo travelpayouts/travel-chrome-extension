@@ -164,7 +164,7 @@ var use_default_deals = function(deals_length) {
     return deals_length == 0 || !navigator.onLine;
 }
 
-var get_next_deal = function(callback) {
+var get_next_deal = function(callback, func) {
     chrome.storage.local.get(['next_deal_index', 'deals_length'], function(data) {
         var next_deal_index = data.next_deal_index;
         if (use_default_deals(data.deals_length)) {
@@ -185,7 +185,8 @@ var get_next_deal = function(callback) {
                             return;
                         }
                     }
-                    callback(deal);                   
+                    if(func) callback(deal, func);
+                    else callback(deal);
                 });
             })
         }
@@ -365,7 +366,7 @@ var build_prices_calendar = function() {
     prices_calendar_container.appendChild(prices_calendar);
 }
 
-var fill_calendar = function(prices, currency_symbol) {console.log(prices)
+var fill_calendar = function(prices, currency_symbol) {
     var calendar = document.querySelector('.prices-calendar');
     for (var i = prices.length - 1; i >= 0; i--) {
         (function(p) {
@@ -396,7 +397,6 @@ var fill_calendar = function(prices, currency_symbol) {console.log(prices)
             month_dates.innerText = p.dates;
         })(prices[i])
     }
-    // console.log(prices)
 }
 
 var format_date = function(str_date){
@@ -477,7 +477,7 @@ var get_currency = function(callback) {
     });
 }
 
-var update_tab = function(deal) {
+var update_tab = function(deal, callback) {
     var blackout = document.querySelectorAll('.blackout')[0];
     hide(blackout);
     if(!document.getElementById('prices_calendar').children.length) {
@@ -493,6 +493,7 @@ var update_tab = function(deal) {
         update_origin(deal);
         update_tags(deal);
         update_review(deal);
+        if(callback) callback();
     });
 }
 
@@ -572,13 +573,23 @@ window.addEventListener('update_price', function(e) {
     clear_prices_calendar();
     document.getElementById('btn_change_destination').classList.add('isDisabled');
     get_new_prices(e.detail);
-
 }, false);
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
     if(request.message == 'deals_updated') {
         document.getElementById('btn_change_destination').classList.remove('isDisabled');
     }
+    if(request.cmd == 'update_content') {
+        document.getElementById('btn_change_destination').classList.remove('isDisabled');
+        get_next_deal(update_tab, function(){
+            document.getElementById('overlay').classList.add('is-hidden');  
+        });
+    }
+});
+
+window.addEventListener('set_loaders', function(){
+    document.getElementById('btn_change_destination').classList.add('isDisabled');
+    document.getElementById('overlay').classList.remove('is-hidden');
 });
 
 

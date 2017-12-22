@@ -105,11 +105,14 @@ $(function(){
     });
 
     input_origin_city.addEventListener('awesomplete-selectcomplete', function(e){
-        chrome.storage.sync.get('settings', function(res) {
+        chrome.storage.sync.get('settings', function(res) {console.log(e)
             res.settings.originCity = {}
             res.settings.originCity[e.text.slice(-10, -7)] = e.target.value;
             chrome.storage.sync.set(res, function(){
                 input_origin_city.blur();
+                var event = new Event('set_loaders');
+                window.dispatchEvent(event);
+                chrome.runtime.sendMessage({cmd: 'update_all'});
             });
         });
     });
