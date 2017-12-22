@@ -90,6 +90,23 @@ body {
             transition: opacity 0.3s ease-out; 
         }
     }
+
+    &.isLoading {
+        .price-from,
+        .btn-price-value,
+        .currency-symbol,
+        .price-tooltip {
+            visibility: hidden;
+        }
+
+    }
+
+    .preloader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
 }
 
 .price-from {

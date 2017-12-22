@@ -74,6 +74,16 @@ body {
     visibility: visible;
     opacity: 1;
     transition: opacity 0.3s ease-out; }
+  .btn-price.isLoading .price-from,
+  .btn-price.isLoading .btn-price-value,
+  .btn-price.isLoading .currency-symbol,
+  .btn-price.isLoading .price-tooltip {
+    visibility: hidden; }
+  .btn-price .preloader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); }
 
 .price-from {
   font-size: 30px; }

@@ -37,7 +37,7 @@ DropDown.prototype = {
                 chrome.storage.sync.set({settings});
                 var event = new CustomEvent('update_price', {'detail': settings.currency});
                 window.dispatchEvent(event);
-                // chrome.runtime.sendMessage({cmd: 'update_price'});              
+                chrome.runtime.sendMessage({cmd: 'update_deals'});              
             });
         });
     },

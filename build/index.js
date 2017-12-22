@@ -496,27 +496,8 @@ var init = function() {
     get_next_deal(update_tab);
 }
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-    // if(request.message == 'update content') {
-    //     init();
-    // }
-    if(request.cmd == 'update_price') {console.log(11)
-        chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
-            var current_deal;
-            if(res.next_deal_index !== 0) {
-                current_deal = res.next_deal_index - 1;
-            } else {
-                current_deal = res.deals_length - 1;
-            }
-            get_deal_by_index(current_deal, function(d) {
-                console.log(d)
-            })
-        });
-    }
-});
-
 var clear_btn_price = function() {
-    $('.btn-price').html(generate_preloader());    
+    $('.btn-price').addClass('isLoading').append(generate_preloader());
 };
 
 var clear_prices_calendar = function() {
@@ -525,50 +506,75 @@ var clear_prices_calendar = function() {
     });
 };
 
-window.addEventListener('update_price', function(e) {console.log(e.detail)
+var get_current_deal = function(callback) {
+    chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
+        var current_deal;
+        if(res.next_deal_index !== 0) {
+            current_deal = res.next_deal_index - 1;
+        } else {
+            current_deal = res.deals_length - 1;
+        }
+        storage.get_deal_by_index(current_deal, function(d){
+            callback(d);
+        });
+    });
+};
+
+var get_new_lyssa_deal = function(currency_code, current_deal, callback) {
+    var req = new XMLHttpRequest(),
+        url = 'http://api.travelpayouts.com/v1/prices/cheap?currency='+currency_code+'&origin='+current_deal.origin_iata+'&destination='+current_deal.destination_iata+'&page=1&token=1b7271789cd684c8d93ab5babe311aa4';
+    req.open('GET', url, true);
+    req.onload = function(request) {
+        request = request.target;
+        if (request.status == 200) {
+        var directions = JSON.parse(request.response);
+        var direction = directions.data[current_deal.destination_iata][Object.keys(directions.data[current_deal.destination_iata])[0]];
+        var result = {
+            price: direction.price,
+            return_date: direction.return_at,
+            origin: current_deal.origin_iata,
+            destination: current_deal.destination_iata,
+            depart_date: direction.departure_at
+        }
+        callback(result);
+        }
+    };
+    req.send(null);
+};
+
+var get_new_prices = function(currency) {
+    get_current_deal(function(deal){
+        get_new_lyssa_deal(currency[0], deal, function(updated_deal){
+            fill_btn_price(updated_deal.price, currency[1], function(){
+                var btn_price = document.querySelector('.btn-price');
+                btn_price.querySelector('.preloader').remove();
+                btn_price.classList.remove('isLoading');                    
+            });
+        });
+        get_year_prices(currency, deal.origin_iata, deal.destination_iata, fill_calendar);
+    });
+};
+
+var fill_btn_price = function(value, currency_symbol, callback) {
+    document.querySelector('.btn-price-value').innerText = value;
+    document.querySelector('.currency-symbol').innerText = currency_symbol;
+    callback();
+};
+
+
+window.addEventListener('update_price', function(e) {
     clear_btn_price();
     clear_prices_calendar();
     document.getElementById('btn_change_destination').classList.add('isDisabled');
-    // chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
-    //     var current_deal;
-    //     if(res.next_deal_index !== 0) {
-    //         current_deal = res.next_deal_index - 1;
-    //     } else {
-    //         current_deal = res.deals_length - 1;
-    //     }
-    //     storage.get_deal_by_index(current_deal, function(d) {
-    //         var req = new XMLHttpRequest(),
-    //             url = "https://lyssa.aviasales.ru/map?min_trip_duration=2&max_trip_duration=30&affiliate=false&one_way=false&only_direct=false";
-    //             url += '&destination_iata=' + d.destination_iata;
-                
-    //             url += '&origin_iata=' + d.origin_iata;
-    //         url += '&currency_code=' + 'RUB';
-              
-    //         req.open("GET", url, true);
-          
-    //         req.onload = function (request) {
-    //           request = request.target;
-    //           if (request.status == 200) {
-    //             var directions = JSON.parse(request.response);
-    //             var result = directions.map(function(dir){
-    //               return {
-    //                 price: dir.value,
-    //                 return_date: dir.return_date,
-    //                 origin: dir.origin,
-    //                 destination: dir.destination,
-    //                 depart_date: dir.depart_date
-    //               }
-    //             });
-          
-    //             console.log(result);
-    //           }
-    //         };
-    //         req.send(null);
-          
-    //         console.log(d)
-    //     })
-    // });
+    get_new_prices(e.detail);
+
 }, false);
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
+    if(request.message == 'deals_updated') {
+        document.getElementById('btn_change_destination').classList.remove('isDisabled');
+    }
+});
 
 
 init();
@@ -961,7 +967,7 @@ DropDown.prototype = {
                 chrome.storage.sync.set({settings});
                 var event = new CustomEvent('update_price', {'detail': settings.currency});
                 window.dispatchEvent(event);
-                // chrome.runtime.sendMessage({cmd: 'update_price'});              
+                chrome.runtime.sendMessage({cmd: 'update_deals'});              
             });
         });
     },
