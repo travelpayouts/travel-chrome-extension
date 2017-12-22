@@ -220,7 +220,7 @@ var update_price = function(deal) {
     if (deal.price) {
         btn_price.innerText = deal.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
         get_currency(function(currency){
-            btn_currency.innerText = currency[1];
+            btn_currency.innerHTML = currency[1];
         });
         btn.onclick = function(e) {
             e.stopPropagation();
@@ -375,7 +375,7 @@ var fill_calendar = function(prices, currency_symbol) {console.log(prices)
                 price_container.appendChild(document.createTextNode('от '));
                 price_value.innerText = p.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
                 price_container.appendChild(price_value);
-                price_currency.appendChild(document.createTextNode(' ' + currency_symbol));
+                price_currency.innerHTML = ' ' + currency_symbol;
                 price_container.appendChild(price_currency);
                 month_element.classList.add("has-price");
                 month_element.setAttribute("href", p.search_url);
@@ -556,7 +556,7 @@ var get_new_prices = function(currency) {
 };
 
 var fill_btn_price = function(value, currency_symbol, callback) {
-    document.querySelector('.btn-price-value').innerText = value;
+    document.querySelector('.btn-price-value').innerText = value.toLocaleString('ru-RU', { maximumFractionDigits: 0 });;
     document.querySelector('.currency-symbol').innerText = currency_symbol;
     callback();
 };

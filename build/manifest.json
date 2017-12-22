@@ -18,5 +18,5 @@
    "manifest_version": 2,
    "name": "InspirationTab --test",
    "permissions": [ "tabs", "alarms", "storage" ],
-   "version": "0.20.0"
+   "version": "0.20.1"
 }
