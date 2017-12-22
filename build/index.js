@@ -174,8 +174,12 @@ var get_next_deal = function(callback) {
             storage.get_deal_by_index(next_deal_index, function(deal){
                 // console.log('choose deal', deal);
                 chrome.storage.local.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                if(deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')) {
+                    get_next_deal(update_tab);
+                    return;
+                }
                 chrome.storage.sync.get('settings', function(data){
-                    if(data.settings && data.settings.hideCities) {
+                    if(data.settings && data.settings.hideCities) {console.log(document.getElementById('destination').getAttribute('data-iata'))
                         if(data.settings.hideCities[deal.destination_iata]) {
                             get_next_deal(update_tab);
                             return;
@@ -250,6 +254,7 @@ var update_origin = function(deal) {
 var update_destination = function (deal) {
     var destination = document.querySelectorAll('.destination')[0];
     destination.innerText = deal.destination_name;
+    destination.setAttribute('data-iata', deal.destination_iata)
     show(destination);
 }
 
