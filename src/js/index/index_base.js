@@ -179,7 +179,7 @@ var get_next_deal = function(callback) {
                     return;
                 }
                 chrome.storage.sync.get('settings', function(data){
-                    if(data.settings && data.settings.hideCities) {console.log(document.getElementById('destination').getAttribute('data-iata'))
+                    if(data.settings && data.settings.hideCities) {
                         if(data.settings.hideCities[deal.destination_iata]) {
                             get_next_deal(update_tab);
                             return;
