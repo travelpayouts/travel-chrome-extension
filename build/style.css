@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Roboto Regular';
+  src: url("./fonts/Roboto-Regular.ttf"); }
+
+@font-face {
+  font-family: 'Open Sans Regular';
+  src: url("./fonts/OpenSans-Regular.ttf"); }
+
 *,
 *:after,
 *:before {
@@ -69,7 +77,7 @@ body {
   border-radius: 3px;
   cursor: pointer;
   float: left;
-  font-family: 'Open Sans', sans-serif; }
+  font-family: "Open Sans Regular", sans-serif; }
   .btn-price:hover .price-tooltip {
     visibility: visible;
     opacity: 1;
@@ -92,7 +100,7 @@ body {
   font-weight: bold; }
 
 .currency-symbol {
-  font-family: 'Roboto'; }
+  font-family: "Roboto Regular", sans-serif; }
 
 .destination {
   font-size: 28px;
@@ -228,6 +236,9 @@ body {
 .prices-calendar-currency {
   font-size: 18px; }
 
+.prices-calendar-currency {
+  font-family: "Roboto Regular", sans-serif; }
+
 .prices-calendar-month:hover {
   background: rgba(0, 0, 0, 0.8); }
 
@@ -354,7 +365,7 @@ body {
   border-radius: 4px;
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.22), 0 24px 24px 0 rgba(0, 0, 0, 0.3);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto Regular", sans-serif;
   z-index: 0;
   transform: translateY(-25%);
   opacity: 0;
@@ -419,6 +430,7 @@ body {
   .wrapper-select-dropdown__label img {
     display: none; }
   .wrapper-select-dropdown .currency-sign {
+    font-family: "Roboto Regular", sans-serif;
     margin-right: 18px; }
 
 .dropdown {
@@ -431,6 +443,7 @@ body {
   background: white;
   border-radius: 4px;
   border: 1px solid #b0bec6;
+  overflow-y: auto;
   cursor: default;
   z-index: -1;
   transition: all 0.3s ease-out;
@@ -573,7 +586,7 @@ body {
   border-radius: 3px;
   opacity: 0;
   user-select: none;
-  font-family: "Roboto";
+  font-family: "Roboto Regular", sans-serif;
   font-size: 13px;
   line-height: 24px; }
   .button-tooltip--left {
@@ -609,7 +622,7 @@ body {
   color: rgba(255, 255, 255, 0.8);
   border-radius: 2px;
   opacity: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans Regular", sans-serif;
   font-size: 12px;
   font-weight: 600;
   text-align: center; }
@@ -652,7 +665,7 @@ body {
     .bottombar__item-meta {
       max-width: 142px;
       margin: 0 8px;
-      font-family: 'Open Sans', sans-serif;
+      font-family: "Open Sans Regular", sans-serif;
       color: white; }
       .bottombar__item-meta p {
         margin: 0; }

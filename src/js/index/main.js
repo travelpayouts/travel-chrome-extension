@@ -18,6 +18,10 @@ $(function(){
         $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
 
+    $('.prices-calendar-container').on('click', '.prices-calendar-month', function(e){
+        e.stopPropagation();
+    });
+
     var $btn_settings = $('#btn_settings').click(function(){
         var $obj = $(this);
         $obj.addClass('menu-opened');
@@ -63,11 +67,16 @@ $(function(){
             if(settings.hideCities) {
                 if(settings.hideCities[item[2]]) return;
             }
-            return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };
+            return { label: item[0]+', '+'<span data-searches="'+item[3]+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
         },
-        maxItems: 7,
-        sort: Awesomplete.SORT_BYORDER
-
+        // maxItems: 7,
+        sort: function(a,b) {
+            var a = parseInt(a.label.substring(a.label.search(/="/i), a.label.search(/">/i)).slice(2));
+            var b = parseInt(b.label.substring(b.label.search(/="/i), b.label.search(/">/i)).slice(2));
+            if(a > b) return -1;
+            if(a < b) return 1;
+            return 0;
+        }
     });
 
     input_hide_cities.addEventListener('input', function(e){
@@ -121,21 +130,37 @@ $(function(){
     var input_origin_city = document.getElementById('input_origin_city');
     var autoCompleteOrigin = new Awesomplete(input_origin_city, {
         data: function(item, input) {
-            return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };            
+            return { label: item[0]+', '+'<span data-searches="'+item[3]+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };            
+        },
+        sort: function(a,b) {
+            var a = parseInt(a.label.substring(a.label.search(/="/i), a.label.search(/">/i)).slice(2));
+            var b = parseInt(b.label.substring(b.label.search(/="/i), b.label.search(/">/i)).slice(2));
+            if(a > b) return -1;
+            if(a < b) return 1;
+            return 0;
         }
     });
 
     input_origin_city.addEventListener('awesomplete-selectcomplete', function(e){
         chrome.storage.sync.get('settings', function(res) {
-            res.settings.originCity = {}
-            res.settings.originCity[e.text.slice(-10, -7)] = e.target.value;
-            chrome.storage.sync.set(res, function(){
+            if(res.settings) {
+                var settings = res.settings;
+            } else {
+                var settings = {};
+            }
+            settings.originCity = {}
+            settings.originCity[e.text.slice(-10, -7)] = e.target.value;
+            chrome.storage.sync.set({settings}, function(){
                 input_origin_city.blur();
                 var event = new Event('set_loaders');
                 window.dispatchEvent(event);
             });
         });
     });
+
+     input_origin_city.addEventListener('focus', function(){
+        input_origin_city.value = '';
+     });
 
     input_origin_city.addEventListener('input', function(e){
         var list = getCitiesListWithAjax(e.target.value, function(data){
@@ -159,7 +184,6 @@ $(function(){
                         set_origin_city_value(data.origin_city);
                 });
             }
-            
         });
     });
 
@@ -176,11 +200,11 @@ $(function(){
                         choices = [];
 
                     place_data.forEach(function(item){
-                        if(item.city_iata) returned_cities[item.city_iata] = item;
+                        if(item.city_iata) returned_cities[item.city_iata] = item; //check if there are entries without city_iata
                     });
 
                     for(var key in returned_cities) {
-                        var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key ];
+                        var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key, returned_cities[key].searches_count];
                         choices.push(choice);
                     }
                 } 
@@ -203,7 +227,7 @@ $(function(){
         });
     }
 
-    function apply_auto_settings(auto_settings) {console.log(auto_settings)
+    function apply_auto_settings(auto_settings) {
         if($.isEmptyObject(auto_settings)) {
             set_currency_value('RUB');
             set_origin_city_value('Москва');

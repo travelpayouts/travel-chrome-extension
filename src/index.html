@@ -1,7 +1,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>New Tab</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&amp;subset=cyrillic" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&amp;subset=cyrillic" rel="stylesheet"> -->
     <!-- <link rel="stylesheet" href="libs/auto-complete/auto-complete.css"> -->
     <link rel="stylesheet" href="libs/awesomplete/awesomplete.css">   
     <link rel="stylesheet" href="style.css">
@@ -60,7 +60,7 @@
                                 <li data-currency="AZN">
                                     <img src="img/icons/check.svg" alt=""><span class="currency-sign">&#8380;</span>Манат
                                 </li>
-                                <li data-currency="BYR">
+                                <li data-currency="BYN">
                                     <img src="img/icons/check.svg" alt=""><span class="currency-sign">Br</span>Белорусский рубль
                                 </li>
                                 <li data-currency="THB">
@@ -174,13 +174,15 @@
     <div class="place-container" id="place_container">
         <div class="block block--bottom block--left">
             <div class="btn-container hidden show-animate">
-                <div class="btn-price">
-                    <span class="price-from">от</span>
-                    <span class="btn-price-value"></span>
-                    <span class="currency-symbol"></span>
-
-                    <div class="price-tooltip price-tooltip--hidden" id="price_tooltip">7 сентября – 14 сентября (6 ночей)</div>                    
-                </div>
+                <a href="" id="btn_price" target="_blank">
+                    <div class="btn-price">
+                        <span class="price-from">от</span>
+                        <span class="btn-price-value"></span>
+                        <span class="currency-symbol"></span>
+    
+                        <div class="price-tooltip price-tooltip--hidden" id="price_tooltip">7 сентября – 14 сентября (6 ночей)</div>                    
+                    </div>
+                </a>
     
                 <div class="prices-calendar-container prices-calendar-container--hidden" id="prices_calendar"></div>
             </div>
@@ -188,7 +190,7 @@
             <div class="destination hidden show-animate" id="destination"></div>
     
             <div class="origin-container hidden show-animate">
-                <div class="origin"></div>
+                <div class="origin" id="origin"></div>
             </div>
     
             <div class="tags-container hidden show-animate" id="tags_container">

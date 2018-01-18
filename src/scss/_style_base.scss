@@ -81,7 +81,7 @@ body {
     border-radius: 3px;
     cursor: pointer;
     float: left;
-    font-family: 'Open Sans', sans-serif;
+    font-family: $OpenSans;
 
     &:hover {
         .price-tooltip {
@@ -118,7 +118,7 @@ body {
 }
 
 .currency-symbol {
-    font-family: 'Roboto';
+    font-family: $Roboto;
 }
 
 .destination {
@@ -279,6 +279,10 @@ body {
 .prices-calendar-month .price .price_value,
 .prices-calendar-currency {
     font-size: 18px;
+}
+
+.prices-calendar-currency {
+    font-family: $Roboto;
 }
 
 .prices-calendar-month:hover {

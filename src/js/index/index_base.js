@@ -249,13 +249,16 @@ var update_origin = function(deal) {
     if (deal.origin_name) {
         origin.innerText = "из " + deal.origin_name;
         show(origin_container);
-    }
+    } 
+    if(deal.origin_iata) {
+        origin.setAttribute('data-iata', deal.origin_iata);
+    } else { console.log('Deal has no origin_iata'); }
 }
 
 var update_destination = function (deal) {
     var destination = document.querySelectorAll('.destination')[0];
     destination.innerText = deal.destination_name;
-    destination.setAttribute('data-iata', deal.destination_iata)
+    destination.setAttribute('data-iata', deal.destination_iata);
     show(destination);
 }
 
@@ -367,16 +370,25 @@ var build_prices_calendar = function() {
 }
 
 var fill_calendar = function(prices, currency_symbol) {
-    var calendar = document.querySelector('.prices-calendar');
+    var btn_price = document.getElementById('btn_price');
+    btn_price.addEventListener('click', function(e){
+        e.preventDefault;
+    });
+    btn_price.removeAttribute('href');
+
+    document.querySelector('#price_tooltip').classList.add('price-tooltip--hidden');
+    document.querySelector('.prices-calendar').classList.remove('prices-calendar--off');
+
     for (var i = prices.length - 1; i >= 0; i--) {
         (function(p) {
-            var month_element = calendar.querySelector("#month-" + p.id),
+            var month_element = document.querySelector("#month-" + p.id),
                 price_container = month_element.querySelector('.prices-calendar-preloader'),
                 month_dates = month_element.querySelector('.prices-calendar-month_dates'),
                 price_value = create_element('span', ['price_value']),
                 price_currency = create_element('span', ['prices-calendar-currency']);
 
             price_container.innerHTML = '';
+
             if (p.price) {
                 price_container.appendChild(document.createTextNode('от '));
                 price_value.innerText = p.price.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
@@ -387,15 +399,11 @@ var fill_calendar = function(prices, currency_symbol) {
                 month_element.setAttribute("href", p.search_url);
                 month_element.setAttribute("target", "_blank");
             } else {
-                // var loader = create_element('img', ['loader']);
-                // loader.setAttribute('src', 'img/icons/loader.svg');
-                // price_container.appendChild(loader);
-
                 price_container.innerText = "—"
             }
             
             month_dates.innerText = p.dates;
-        })(prices[i])
+        })(prices[i]);
     }
 }
 
@@ -414,27 +422,42 @@ var aviasalesUrl = function(origin_iata, destination_iata, depart_date, return_d
     return base + origin_iata + dp[2] + dp[1] + destination_iata + rt[2] + rt[1] + passengers_count + '?' + utm;
 }
 
-var fill_price_tooltip = function(year_data, year_obj) {
-    var price_tooltip = document.querySelector('#price_tooltip');
-    var calendar = document.querySelector('.prices-calendar');
+var fill_price_tooltip = function(deal) {
+    var price_tooltip = document.querySelector('#price_tooltip'),
+        calendar = document.querySelector('.prices-calendar'),
+        btn_price = document.getElementById('btn_price');
     
-    if(Object.keys(year_data).length == 1) {
-        price_tooltip.classList.remove('price-tooltip--hidden');
-        calendar.classList.add('prices-calendar--off');
-        for(var key in year_data) {
-            year_obj.forEach(function(item){
-                if(item.id == key) {
-                    price_tooltip.innerHTML = item.dates;
-                }
-            });
-        }
+    price_tooltip.classList.remove('price-tooltip--hidden');
+    calendar.classList.add('prices-calendar--off');
+
+    var depart_date = new Date(deal.depart_date),
+        return_date = new Date(deal.return_date),
+        depart_date_formatted = depart_date.toLocaleString('ru', {day: 'numeric', month: 'long'}),
+        return_date_formatted = return_date.toLocaleString('ru', {day: 'numeric', month: 'long'});
+        
+    if(depart_date.getFullYear() === return_date.getFullYear()) {
+        var nights = calc_day_of_year(return_date) - calc_day_of_year(depart_date);
     } else {
-        price_tooltip.classList.add('price-tooltip--hidden');
-        calendar.classList.remove('prices-calendar--off');
+        var nights = calc_day_of_year(return_date) + (calc_day_of_year(new Date(depart_date.getFullYear(), 11, 31)) - calc_day_of_year(depart_date));
     }
+    
+    price_tooltip.innerText = depart_date_formatted + ' - ' + return_date_formatted + ' (' + nights + ' ночей)';
+
+    btn_price.setAttribute('href', aviasalesUrl(deal.origin_iata, deal.destination_iata, deal.depart_date, deal.return_date));
+    btn_price.addEventListener('click', function(e){
+        return true;
+    });
 }
 
-var get_year_prices = function(currency, origin_iata, destination_iata, callback){
+function calc_day_of_year(date) {
+    var start = new Date(date.getFullYear(), 0, 0);
+    var diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+    var oneDay = 1000 * 60 * 60 * 24;
+    var day = Math.floor(diff / oneDay);
+    return day;
+}
+ 
+var get_year_prices = function(currency, origin_iata, destination_iata, deal, callback){
     var req = new XMLHttpRequest(),
         url = "http://api.travelpayouts.com/v1/prices/monthly?currency="+ currency[0] +"&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
         year_obj = get_year_objs();
@@ -442,25 +465,30 @@ var get_year_prices = function(currency, origin_iata, destination_iata, callback
     req.open("GET", url, true);
     req.onload = function () {
       if (req.status == 200) {
-        year_data = JSON.parse(req.responseText).data;
-        for (var i=0; i<year_obj.length; i++) {
-             if (year_data[year_obj[i].id]) {
-                var month_data = year_data[year_obj[i].id];
-                var depart_date = month_data.departure_at.slice(0, 10);
-                var return_date = month_data.return_at.slice(0, 10);
-                year_obj[i].price = month_data.price;
-            } else {
-                var depart_date = year_obj[i].id + '-01';
-                var return_date = year_obj[i].id + '-08';
+        var year_data = JSON.parse(req.responseText).data;console.log(year_data)
+        if(Object.keys(year_data).length == 0) {
+            fill_price_tooltip(deal);
+        } else {
+            for (var i=0; i<year_obj.length; i++) {
+                if (year_data[year_obj[i].id]) {
+                    var month_data = year_data[year_obj[i].id];
+                    var depart_date = month_data.departure_at.slice(0, 10);
+                    var return_date = month_data.return_at.slice(0, 10);
+                    year_obj[i].price = month_data.price;
+                    year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
+                    year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
+                } 
+                // else {
+                //     var depart_date = year_obj[i].id + '-01';
+                //     var return_date = year_obj[i].id + '-08';
+                // }
+                // year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
+                // year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
             }
-            year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
-            year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
+            callback(year_obj, currency[1]);
         }
-        fill_price_tooltip(year_data, year_obj);
-        callback(year_obj, currency[1]);
       }
     };
-
     req.send();
 }
 
@@ -480,11 +508,14 @@ var get_currency = function(callback) {
 var update_tab = function(deal, callback) {
     var blackout = document.querySelectorAll('.blackout')[0];
     hide(blackout);
-    if(!document.getElementById('prices_calendar').children.length) {
+    var prices_calendar_child = document.getElementById('prices_calendar').children;
+    if(!prices_calendar_child.length) {
         build_prices_calendar();        
+    } else {
+        clear_calendar_attributes(prices_calendar_child[0]);
     }
     get_currency(function(currency) {
-        get_year_prices(currency, deal.origin_iata, deal.destination_iata, fill_calendar);        
+        get_year_prices(currency, deal.origin_iata, deal.destination_iata, deal, fill_calendar);        
     });
     update_bg(deal, function() {
         show(blackout);
@@ -510,20 +541,38 @@ var clear_prices_calendar = function() {
     $('.prices-calendar-preloader').each(function(){
         $(this).html(generate_preloader());
     });
+    clear_calendar_attributes(document.querySelector('.prices-calendar'));
+};
+
+var clear_calendar_attributes = function(monthes_container) {
+    for(var i = 0; i < monthes_container.children.length; i++) {
+        (function(month){
+            month.classList.remove('has-price');
+            month.removeAttribute('href');
+            month.removeAttribute('target');
+        })(monthes_container.children[i]);
+    }
 };
 
 var get_current_deal = function(callback) {
-    chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
-        var current_deal;
-        if(res.next_deal_index !== 0) {
-            current_deal = res.next_deal_index - 1;
-        } else {
-            current_deal = res.deals_length - 1;
-        }
-        storage.get_deal_by_index(current_deal, function(d){
-            callback(d);
-        });
-    });
+    var origin = document.getElementById('origin');
+    var destination = document.getElementById('destination');
+    var deal_obj = {
+        origin_iata: origin.getAttribute('data-iata'),
+        destination_iata: destination.getAttribute('data-iata')
+    }
+    callback(deal_obj);
+    // chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
+    //     var current_deal;
+    //     if(res.next_deal_index !== 0) {
+    //         current_deal = res.next_deal_index - 1;
+    //     } else {
+    //         current_deal = res.deals_length - 1;
+    //     }
+    //     storage.get_deal_by_index(current_deal, function(d){
+    //         callback(d);
+    //     });
+    // });
 };
 
 var get_new_lyssa_deal = function(currency_code, current_deal, callback) {
@@ -557,7 +606,7 @@ var get_new_prices = function(currency) {
                 btn_price.classList.remove('isLoading');                    
             });
         });
-        get_year_prices(currency, deal.origin_iata, deal.destination_iata, fill_calendar);
+        get_year_prices(currency, deal.origin_iata, deal.destination_iata, deal, fill_calendar);
     });
 };
 
