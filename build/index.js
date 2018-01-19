@@ -174,14 +174,17 @@ var get_next_deal = function(callback, func) {
             storage.get_deal_by_index(next_deal_index, function(deal){
                 // console.log('choose deal', deal);
                 chrome.storage.local.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
-                if(deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')) {
-                    get_next_deal(update_tab);
+                if(deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')
+                   && deal.origin_iata == document.getElementById('origin').getAttribute('data-iata')) {
+                    if(!func) get_next_deal(update_tab);
+                    else get_next_deal(update_tab, func);
                     return;
                 }
                 chrome.storage.sync.get('settings', function(data){
                     if(data.settings && data.settings.hideCities) {
                         if(data.settings.hideCities[deal.destination_iata]) {
-                            get_next_deal(update_tab);
+                            if(!func) get_next_deal(update_tab);
+                            else get_next_deal(update_tab, func);        
                             return;
                         }
                     }
@@ -252,6 +255,7 @@ var update_origin = function(deal) {
     } 
     if(deal.origin_iata) {
         origin.setAttribute('data-iata', deal.origin_iata);
+        origin.setAttribute('data-depart', deal.depart_date);
     } else { console.log('Deal has no origin_iata'); }
 }
 
@@ -259,6 +263,7 @@ var update_destination = function (deal) {
     var destination = document.querySelectorAll('.destination')[0];
     destination.innerText = deal.destination_name;
     destination.setAttribute('data-iata', deal.destination_iata);
+    destination.setAttribute('data-return', deal.return_date);
     show(destination);
 }
 
@@ -425,7 +430,9 @@ var aviasalesUrl = function(origin_iata, destination_iata, depart_date, return_d
 var fill_price_tooltip = function(deal) {
     var price_tooltip = document.querySelector('#price_tooltip'),
         calendar = document.querySelector('.prices-calendar'),
-        btn_price = document.getElementById('btn_price');
+        btn_price = document.getElementById('btn_price'),
+        text = '',
+        text_variants = ['ночь', 'ночи', 'ночей'];
     
     price_tooltip.classList.remove('price-tooltip--hidden');
     calendar.classList.add('prices-calendar--off');
@@ -434,14 +441,21 @@ var fill_price_tooltip = function(deal) {
         return_date = new Date(deal.return_date),
         depart_date_formatted = depart_date.toLocaleString('ru', {day: 'numeric', month: 'long'}),
         return_date_formatted = return_date.toLocaleString('ru', {day: 'numeric', month: 'long'});
-console.log(return_date.getFullYear())
+
     if(depart_date.getFullYear() === return_date.getFullYear()) {
         var nights = calc_day_of_year(return_date) - calc_day_of_year(depart_date);
     } else {
         var nights = calc_day_of_year(return_date) + (calc_day_of_year(new Date(depart_date.getFullYear(), 11, 31)) - calc_day_of_year(depart_date));
     }
+
+    var remainder = nights % 10;
+    var base_remainder = (Math.floor(nights / 10)) % 10;
+
+    if(base_remainder === 1 || remainder > 4 || remainder === 0) text = text_variants[2]; 
+    else if(remainder === 1) text = text_variants[0];
+    else if(remainder < 5 && remainder > 1) text = text_variants[1];
     
-    price_tooltip.innerText = depart_date_formatted + ' - ' + return_date_formatted + ' (' + nights + ' ночей)';
+    price_tooltip.innerText = depart_date_formatted + ' - ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
 
     btn_price.setAttribute('href', aviasalesUrl(deal.origin_iata, deal.destination_iata, deal.depart_date, deal.return_date));
     btn_price.addEventListener('click', function(e){
@@ -559,7 +573,9 @@ var get_current_deal = function(callback) {
     var destination = document.getElementById('destination');
     var deal_obj = {
         origin_iata: origin.getAttribute('data-iata'),
-        destination_iata: destination.getAttribute('data-iata')
+        destination_iata: destination.getAttribute('data-iata'),
+        depart_date: origin.getAttribute('data-depart'),
+        return_date: destination.getAttribute('data-return')
     }
     callback(deal_obj);
     // chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
@@ -577,19 +593,18 @@ var get_current_deal = function(callback) {
 
 var get_new_lyssa_deal = function(currency_code, current_deal, callback) {
     var req = new XMLHttpRequest(),
-        url = 'http://api.travelpayouts.com/v1/prices/cheap?currency='+currency_code+'&origin='+current_deal.origin_iata+'&destination='+current_deal.destination_iata+'&page=1&token=1b7271789cd684c8d93ab5babe311aa4';
+        url = 'https://lyssa.aviasales.ru/day_price?origin='+current_deal.origin_iata+'&destination='+current_deal.destination_iata+'&depart_date='+current_deal.depart_date+'&return_date='+current_deal.return_date+'&currency_code='+currency_code;
     req.open('GET', url, true);
     req.onload = function(request) {
         request = request.target;
         if (request.status == 200) {
-        var directions = JSON.parse(request.response);
-        var direction = directions.data[current_deal.destination_iata][Object.keys(directions.data[current_deal.destination_iata])[0]];
+        var direction = JSON.parse(request.response);
         var result = {
-            price: direction.price,
-            return_date: direction.return_at,
-            origin: current_deal.origin_iata,
-            destination: current_deal.destination_iata,
-            depart_date: direction.departure_at
+            price: direction.value,
+            return_date: direction.return_date,
+            origin: direction.origin,
+            destination: direction.destination,
+            depart_date: direction.depart_date
         }
         callback(result);
         }
@@ -900,17 +915,23 @@ $(function(){
             if(req.status == 200) {
                 var place_data = JSON.parse(req.responseText);
                 if(place_data.length > 0) {
-                    var returned_cities = {},
-                        choices = [];
+                    var choices = [];
+                    // var returned_cities = {},
+                    //     choices = [];
 
+                    // place_data.forEach(function(item){
+                    //     if(item.city_iata) returned_cities[item.city_iata] = item; //check if there are entries without city_iata
+                    // });
+
+                    // for(var key in returned_cities) {
+                    //     var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key, returned_cities[key].searches_count];
+                    //     choices.push(choice);
+                    // }
                     place_data.forEach(function(item){
-                        if(item.city_iata) returned_cities[item.city_iata] = item; //check if there are entries without city_iata
-                    });
-
-                    for(var key in returned_cities) {
-                        var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key, returned_cities[key].searches_count];
+                        if(!item.city_iata) return; //check if there are entries without city_iata
+                        var choice = [ item.name.substring(0, item.name.indexOf(',')), item.name.substring(item.name.indexOf(',')).substring(2), item.city_iata, item.searches_count];
                         choices.push(choice);
-                    }
+                    });
                 } 
             }
             callback(choices);
