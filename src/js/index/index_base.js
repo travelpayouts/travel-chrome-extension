@@ -205,14 +205,45 @@ var hide = function (el) {
 }
 
 var update_bg = function(deal, callback) {
-    var place_container = document.getElementById('place_container'),
-    img = new Image();
-    img.onload = function() {
-        // console.log("IMG loaded");
-        callback();
+    var bg_holder = document.getElementById('bg_img'),
+        img = new Image();
+    img.onerror = function() {
+        img.src = 'https://' + img.src.slice(9);
+        // chrome.runtime.sendMessage({cmd: 'sendKeenEvent', destination: deal.destination_iata});
+    };
+    if(deal.alt_image_url) {
+        chrome.storage.sync.get('alternate_images', function(res){
+            if(res.alternate_images) {
+                img.src = deal.alt_image_url;
+            } else img.src = deal.image_url;
+        });
+    } else img.src = deal.image_url;
+    
+    bg_holder.classList.add('is-hidden');
+    var isTransitionEnd = false;
+    bg_holder.addEventListener('transitionend', function(){
+        if(isTransitionEnd) return;
+        isTransitionEnd = true;
+        show_new_bg(img, function() {
+            bg_holder.setAttribute("style", "background-image:url(" + img.src + ")");
+            bg_holder.classList.remove('is-hidden');
+            callback();
+        });
+    });
+}
+
+function show_new_bg(image, cb) {
+    if(isLoaded(image)) {
+        cb();
+    } else {
+        image.onload = function(){
+            cb();
+        }
     }
-    place_container.setAttribute("style", "background-image:url(" + deal.image_url + ")");
-    img.src = deal.image_url;
+}
+
+function isLoaded(image) {
+    return image.complete;
 }
 
 var update_price = function(deal) {
@@ -221,7 +252,6 @@ var update_price = function(deal) {
         btn = btn_container.querySelectorAll('.btn-price')[0],
         btn_price = btn.querySelectorAll('.btn-price-value')[0],
         btn_currency = btn.querySelector('.currency-symbol');
-        // calendar_visible = false;
 
     hide(btn_container);
 
@@ -231,15 +261,9 @@ var update_price = function(deal) {
             btn_currency.innerHTML = currency[1];
         });
         btn.onclick = function(e) {
+            _gaq.push(['_trackEvent', 'price', 'price_button']);
             e.stopPropagation();
             calendar_container.classList.toggle("prices-calendar-container--hidden");
-            // if (calendar_visible) {
-            //     calendar_visible = false;
-            //     calendar_container.classList.add("prices-calendar-container--hidden");
-            // } else {
-            //     calendar_visible = true;
-            //     calendar_container.classList.remove("prices-calendar-container--hidden");
-            // }
         }
         show(btn_container);
     }
@@ -368,6 +392,10 @@ var build_prices_calendar = function() {
             
             month_element.appendChild(preloader);
             month_element.appendChild(date_container);
+            month_element.onclick = function() {
+                _gaq.push(['_trackEvent', 'click', 'price', 'calendar']);
+                return true;
+            };
             prices_calendar.appendChild(month_element);
         })(year_objs[i])
     }
@@ -455,7 +483,7 @@ var fill_price_tooltip = function(deal) {
     else if(remainder === 1) text = text_variants[0];
     else if(remainder < 5 && remainder > 1) text = text_variants[1];
     
-    price_tooltip.innerText = depart_date_formatted + ' - ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
+    price_tooltip.innerHTML = depart_date_formatted + ' &ndash; ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
 
     btn_price.setAttribute('href', aviasalesUrl(deal.origin_iata, deal.destination_iata, deal.depart_date, deal.return_date));
     btn_price.addEventListener('click', function(e){
@@ -661,19 +689,9 @@ window.addEventListener('set_loaders', function(){
 init();
 
 
-
-
-
-
-
-
-
-
-
-
-
-$('#btn_change_destination').click(function(){
+$('#btn_change_destination').click(function(e){
     init();
+    _gaq.push(['_trackEvent', 'click', 'other_destination']);
 });
 
 /***/ })

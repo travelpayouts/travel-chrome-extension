@@ -12,12 +12,11 @@ $(function(){
         get_settings();
     }, false);
     
-    $(document).click(function() {
-        // all dropdowns
+    $(document).click(function(e) {
         $('.wrapper-select-dropdown').removeClass('active');
         $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
-
+   
     $('.prices-calendar-container').on('click', '.prices-calendar-month', function(e){
         e.stopPropagation();
     });
@@ -26,6 +25,7 @@ $(function(){
         var $obj = $(this);
         $obj.addClass('menu-opened');
         $obj.next().addClass('isOpened');
+        _gaq.push(['_trackEvent', 'click', 'settings']);
         return $obj;
     });
 
@@ -37,6 +37,11 @@ $(function(){
     var $place_container = $('#place_container');
     $('#btn-bottombar').click(function(){
         $place_container.toggleClass('slideUp');
+        // send event to Google Analytics
+        _gaq.push(['_trackEvent', 'more_destinations', 'click']);
+        if($place_container.is('.slideUp')) {
+            _gaq.push(['_trackEvent', 'more_destinations', 'open']);
+        }
     });
 
     var $comments_container = $('#comments_container');
@@ -46,7 +51,14 @@ $(function(){
         showComments(!this.checked);
         settings.showComments = !$toggle_comments[0].checked;
         chrome.storage.sync.set({settings});
+        // send event to Google Analytics
+        _gaq.push(['_trackEvent', 'settings', 'comments', get_toggle_state(this)]);
     });
+
+    function get_toggle_state(checkbox) {
+        if(checkbox.checked) return 'hide';
+        else return 'show';
+    }
 
     var $tags_container = $('#tags_container');
     var $toggle_tags = $('#toggle_tags');
@@ -55,11 +67,9 @@ $(function(){
         showTags(!this.checked);
         settings.showTags = !$toggle_tags[0].checked;
         chrome.storage.sync.set({settings});
+        // send event to Google Analytics
+        _gaq.push(['_trackEvent', 'settings', 'tags', get_toggle_state(this)]);
     });
-
-    // var hide_cities_choices,
-    //     autoCompleteCitiesToHide,
-    //     input_hide_cities = document.getElementById("hide_cities");
 
     var input_hide_cities = document.getElementById("hide_cities");
     var autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
@@ -69,7 +79,6 @@ $(function(){
             }
             return { label: item[0]+', '+'<span data-searches="'+item[3]+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
         },
-        // maxItems: 7,
         sort: function(a,b) {
             var a = parseInt(a.label.substring(a.label.search(/="/i), a.label.search(/">/i)).slice(2));
             var b = parseInt(b.label.substring(b.label.search(/="/i), b.label.search(/">/i)).slice(2));
@@ -85,22 +94,6 @@ $(function(){
             autoCompleteCitiesToHide.evaluate();    
         });
     });
-
-
-    // chrome.storage.local.get(function(res){
-    //     hide_cities_choices = get_choices(res);
-    //     autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
-    //         list: hide_cities_choices,
-    //         data: function(item, input) {
-    //                 if(settings.hideCities) {
-    //                     if(settings.hideCities[item[2]]) return;
-    //                 }
-    //                 return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };
-    //         },
-    //         maxItems: 7,
-    //         sort: Awesomplete.SORT_BYORDER
-    //     });
-    // });
 
     input_hide_cities.addEventListener('awesomplete-selectcomplete', function(e){
         var cityToHide = e.target.value;
@@ -189,7 +182,7 @@ $(function(){
 
     function getCitiesListWithAjax(value, callback) {
         var req = new XMLHttpRequest(),
-            url = 'http://places.aviasales.ru/match?term='+value+'&locale=ru';
+            url = 'https://places.aviasales.ru/v2/places.json?term='+ value +'&locale=ru&types%5B%5D=city';
         
         req.open('GET', url, true);
         req.onload = function() {
@@ -197,20 +190,8 @@ $(function(){
                 var place_data = JSON.parse(req.responseText);
                 if(place_data.length > 0) {
                     var choices = [];
-                    // var returned_cities = {},
-                    //     choices = [];
-
-                    // place_data.forEach(function(item){
-                    //     if(item.city_iata) returned_cities[item.city_iata] = item; //check if there are entries without city_iata
-                    // });
-
-                    // for(var key in returned_cities) {
-                    //     var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key, returned_cities[key].searches_count];
-                    //     choices.push(choice);
-                    // }
                     place_data.forEach(function(item){
-                        if(!item.city_iata) return; //check if there are entries without city_iata
-                        var choice = [ item.name.substring(0, item.name.indexOf(',')), item.name.substring(item.name.indexOf(',')).substring(2), item.city_iata, item.searches_count];
+                        var choice = [ item.name, item.country_name, item.code, item.weight];
                         choices.push(choice);
                     });
                 } 

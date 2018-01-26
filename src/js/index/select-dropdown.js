@@ -39,6 +39,9 @@ DropDown.prototype = {
                 window.dispatchEvent(event);
                 chrome.runtime.sendMessage({cmd: 'update_deals'});              
             });
+
+            // send event to Google Analytics
+            _gaq.push(['_trackEvent', 'settings', 'currency_change', opt.data('currency')]);
         });
     },
     getValue : function() {

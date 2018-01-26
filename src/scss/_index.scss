@@ -1,9 +1,9 @@
 .place-container {
     position: relative;
     height: 100%;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: 0% 90%;
+    // background-size: cover;
+    // background-repeat: no-repeat;
+    // background-position: 0% 90%;
 }
 
 .image-copyright {
@@ -598,5 +598,23 @@
         text-align: center;
         white-space: nowrap;
         font-size: 16px;
+    }
+}
+
+.bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 0% 90%;
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+
+    &.is-hidden {
+        opacity: 0;
     }
 }

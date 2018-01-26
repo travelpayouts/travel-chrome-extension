@@ -1,13 +1,12 @@
 <head>
     <meta charset="UTF-8" />
     <title>New Tab</title>
-    <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto&amp;subset=cyrillic" rel="stylesheet"> -->
-    <!-- <link rel="stylesheet" href="libs/auto-complete/auto-complete.css"> -->
     <link rel="stylesheet" href="libs/awesomplete/awesomplete.css">   
     <link rel="stylesheet" href="style.css">
+    <script src="initAnalytics.js"></script>
 </head>
 <body>
-    <a href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
+    <a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
         <img class="logo-aviasales" src="img/logo_aviasales.svg"></img>
     </a>
 
@@ -212,7 +211,7 @@
             </div>
         </div>
 
-        <div class="block block--bottom block--center">
+        <div class="block block--bottom block--center" style="display:none;">
             <div class="button-container" id="btn-bottombar">
                 <button class="button button--scale">
                     @@include("svg/arrow-down-destinations.svg")
@@ -224,9 +223,11 @@
         <div class="blackout hidden show-animate"></div>
 
         <div class="block block--bottom block--right image-copyright">&copy by Jose Arcadio, Flickr</div>
+
+        <div class="bg-image" id="bg_img"></div>
     </div>
 
-    <div class="bottombar" id="bottombar">
+    <div class="bottombar" id="bottombar" style="display:none;">
         <div class="bottombar__item">
             <div class="bottombar__item-meta block block--left block--bottom">
                 <p class="bottombar__item-title">Petropavlovsk-Kamchatskiy</p>
@@ -314,7 +315,6 @@
 
 
     <script src="libs/jquery-3.2.1.min.js"></script>
-    <!-- <script src="libs/auto-complete/auto-complete.min.js"></script> -->
     <script src="libs/awesomplete/awesomplete.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>

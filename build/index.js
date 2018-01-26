@@ -205,14 +205,45 @@ var hide = function (el) {
 }
 
 var update_bg = function(deal, callback) {
-    var place_container = document.getElementById('place_container'),
-    img = new Image();
-    img.onload = function() {
-        // console.log("IMG loaded");
-        callback();
+    var bg_holder = document.getElementById('bg_img'),
+        img = new Image();
+    img.onerror = function() {
+        img.src = 'https://' + img.src.slice(9);
+        // chrome.runtime.sendMessage({cmd: 'sendKeenEvent', destination: deal.destination_iata});
+    };
+    if(deal.alt_image_url) {
+        chrome.storage.sync.get('alternate_images', function(res){
+            if(res.alternate_images) {
+                img.src = deal.alt_image_url;
+            } else img.src = deal.image_url;
+        });
+    } else img.src = deal.image_url;
+    
+    bg_holder.classList.add('is-hidden');
+    var isTransitionEnd = false;
+    bg_holder.addEventListener('transitionend', function(){
+        if(isTransitionEnd) return;
+        isTransitionEnd = true;
+        show_new_bg(img, function() {
+            bg_holder.setAttribute("style", "background-image:url(" + img.src + ")");
+            bg_holder.classList.remove('is-hidden');
+            callback();
+        });
+    });
+}
+
+function show_new_bg(image, cb) {
+    if(isLoaded(image)) {
+        cb();
+    } else {
+        image.onload = function(){
+            cb();
+        }
     }
-    place_container.setAttribute("style", "background-image:url(" + deal.image_url + ")");
-    img.src = deal.image_url;
+}
+
+function isLoaded(image) {
+    return image.complete;
 }
 
 var update_price = function(deal) {
@@ -221,7 +252,6 @@ var update_price = function(deal) {
         btn = btn_container.querySelectorAll('.btn-price')[0],
         btn_price = btn.querySelectorAll('.btn-price-value')[0],
         btn_currency = btn.querySelector('.currency-symbol');
-        // calendar_visible = false;
 
     hide(btn_container);
 
@@ -231,15 +261,9 @@ var update_price = function(deal) {
             btn_currency.innerHTML = currency[1];
         });
         btn.onclick = function(e) {
+            _gaq.push(['_trackEvent', 'price', 'price_button']);
             e.stopPropagation();
             calendar_container.classList.toggle("prices-calendar-container--hidden");
-            // if (calendar_visible) {
-            //     calendar_visible = false;
-            //     calendar_container.classList.add("prices-calendar-container--hidden");
-            // } else {
-            //     calendar_visible = true;
-            //     calendar_container.classList.remove("prices-calendar-container--hidden");
-            // }
         }
         show(btn_container);
     }
@@ -368,6 +392,10 @@ var build_prices_calendar = function() {
             
             month_element.appendChild(preloader);
             month_element.appendChild(date_container);
+            month_element.onclick = function() {
+                _gaq.push(['_trackEvent', 'click', 'price', 'calendar']);
+                return true;
+            };
             prices_calendar.appendChild(month_element);
         })(year_objs[i])
     }
@@ -455,7 +483,7 @@ var fill_price_tooltip = function(deal) {
     else if(remainder === 1) text = text_variants[0];
     else if(remainder < 5 && remainder > 1) text = text_variants[1];
     
-    price_tooltip.innerText = depart_date_formatted + ' - ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
+    price_tooltip.innerHTML = depart_date_formatted + ' &ndash; ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
 
     btn_price.setAttribute('href', aviasalesUrl(deal.origin_iata, deal.destination_iata, deal.depart_date, deal.return_date));
     btn_price.addEventListener('click', function(e){
@@ -661,19 +689,9 @@ window.addEventListener('set_loaders', function(){
 init();
 
 
-
-
-
-
-
-
-
-
-
-
-
-$('#btn_change_destination').click(function(){
+$('#btn_change_destination').click(function(e){
     init();
+    _gaq.push(['_trackEvent', 'click', 'other_destination']);
 });
 
 /***/ })
@@ -731,12 +749,11 @@ $(function(){
         get_settings();
     }, false);
     
-    $(document).click(function() {
-        // all dropdowns
+    $(document).click(function(e) {
         $('.wrapper-select-dropdown').removeClass('active');
         $('.prices-calendar-container').addClass('prices-calendar-container--hidden');
     });
-
+   
     $('.prices-calendar-container').on('click', '.prices-calendar-month', function(e){
         e.stopPropagation();
     });
@@ -745,6 +762,7 @@ $(function(){
         var $obj = $(this);
         $obj.addClass('menu-opened');
         $obj.next().addClass('isOpened');
+        _gaq.push(['_trackEvent', 'click', 'settings']);
         return $obj;
     });
 
@@ -756,6 +774,11 @@ $(function(){
     var $place_container = $('#place_container');
     $('#btn-bottombar').click(function(){
         $place_container.toggleClass('slideUp');
+        // send event to Google Analytics
+        _gaq.push(['_trackEvent', 'more_destinations', 'click']);
+        if($place_container.is('.slideUp')) {
+            _gaq.push(['_trackEvent', 'more_destinations', 'open']);
+        }
     });
 
     var $comments_container = $('#comments_container');
@@ -765,7 +788,14 @@ $(function(){
         showComments(!this.checked);
         settings.showComments = !$toggle_comments[0].checked;
         chrome.storage.sync.set({settings});
+        // send event to Google Analytics
+        _gaq.push(['_trackEvent', 'settings', 'comments', get_toggle_state(this)]);
     });
+
+    function get_toggle_state(checkbox) {
+        if(checkbox.checked) return 'hide';
+        else return 'show';
+    }
 
     var $tags_container = $('#tags_container');
     var $toggle_tags = $('#toggle_tags');
@@ -774,11 +804,9 @@ $(function(){
         showTags(!this.checked);
         settings.showTags = !$toggle_tags[0].checked;
         chrome.storage.sync.set({settings});
+        // send event to Google Analytics
+        _gaq.push(['_trackEvent', 'settings', 'tags', get_toggle_state(this)]);
     });
-
-    // var hide_cities_choices,
-    //     autoCompleteCitiesToHide,
-    //     input_hide_cities = document.getElementById("hide_cities");
 
     var input_hide_cities = document.getElementById("hide_cities");
     var autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
@@ -788,7 +816,6 @@ $(function(){
             }
             return { label: item[0]+', '+'<span data-searches="'+item[3]+'">'+item[1]+', '+item[2]+'</span>', value: item[0] };
         },
-        // maxItems: 7,
         sort: function(a,b) {
             var a = parseInt(a.label.substring(a.label.search(/="/i), a.label.search(/">/i)).slice(2));
             var b = parseInt(b.label.substring(b.label.search(/="/i), b.label.search(/">/i)).slice(2));
@@ -804,22 +831,6 @@ $(function(){
             autoCompleteCitiesToHide.evaluate();    
         });
     });
-
-
-    // chrome.storage.local.get(function(res){
-    //     hide_cities_choices = get_choices(res);
-    //     autoCompleteCitiesToHide = new Awesomplete(input_hide_cities, {
-    //         list: hide_cities_choices,
-    //         data: function(item, input) {
-    //                 if(settings.hideCities) {
-    //                     if(settings.hideCities[item[2]]) return;
-    //                 }
-    //                 return { label: item[0]+', '+'<span>'+item[1]+', '+item[2]+'</span>', value: item[0] };
-    //         },
-    //         maxItems: 7,
-    //         sort: Awesomplete.SORT_BYORDER
-    //     });
-    // });
 
     input_hide_cities.addEventListener('awesomplete-selectcomplete', function(e){
         var cityToHide = e.target.value;
@@ -908,7 +919,7 @@ $(function(){
 
     function getCitiesListWithAjax(value, callback) {
         var req = new XMLHttpRequest(),
-            url = 'http://places.aviasales.ru/match?term='+value+'&locale=ru';
+            url = 'https://places.aviasales.ru/v2/places.json?term='+ value +'&locale=ru&types%5B%5D=city';
         
         req.open('GET', url, true);
         req.onload = function() {
@@ -916,20 +927,8 @@ $(function(){
                 var place_data = JSON.parse(req.responseText);
                 if(place_data.length > 0) {
                     var choices = [];
-                    // var returned_cities = {},
-                    //     choices = [];
-
-                    // place_data.forEach(function(item){
-                    //     if(item.city_iata) returned_cities[item.city_iata] = item; //check if there are entries without city_iata
-                    // });
-
-                    // for(var key in returned_cities) {
-                    //     var choice = [ returned_cities[key].name.substring(0, returned_cities[key].name.indexOf(',')), returned_cities[key].name.substring(returned_cities[key].name.indexOf(',')).substring(2), key, returned_cities[key].searches_count];
-                    //     choices.push(choice);
-                    // }
                     place_data.forEach(function(item){
-                        if(!item.city_iata) return; //check if there are entries without city_iata
-                        var choice = [ item.name.substring(0, item.name.indexOf(',')), item.name.substring(item.name.indexOf(',')).substring(2), item.city_iata, item.searches_count];
+                        var choice = [ item.name, item.country_name, item.code, item.weight];
                         choices.push(choice);
                     });
                 } 
@@ -1103,6 +1102,9 @@ DropDown.prototype = {
                 window.dispatchEvent(event);
                 chrome.runtime.sendMessage({cmd: 'update_deals'});              
             });
+
+            // send event to Google Analytics
+            _gaq.push(['_trackEvent', 'settings', 'currency_change', opt.data('currency')]);
         });
     },
     getValue : function() {
