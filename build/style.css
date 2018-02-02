@@ -330,6 +330,8 @@ body {
     visibility: visible;
     opacity: 0.9;
     transition: opacity 0.3s ease-out; }
+  .button:hover ~ .button-tooltip_loading {
+    visibility: hidden; }
   .button--rotate:hover svg path:first-child {
     transform: rotate(-360deg);
     transform-origin: 50% 50%;
@@ -347,6 +349,12 @@ body {
     pointer-events: none; }
     .button.isDisabled svg path:first-child {
       animation: rotate 0.7s infinite linear; }
+    .button.isDisabled ~ .button-tooltip {
+      visibility: hidden; }
+    .button.isDisabled ~ .button-tooltip_loading {
+      visibility: visible;
+      opacity: 0.9;
+      transition: opacity 0.3s ease-out; }
 
 @keyframes rotate {
   0% {
@@ -689,7 +697,7 @@ body {
 .place-container {
   position: relative;
   transform: translateY(0);
-  background-color: white;
+  background-color: #212121;
   transition: -webkit-transform 0.3s ease-out; }
   .place-container.slideUp {
     -webkit-transform: translateY(-112px);
@@ -737,3 +745,6 @@ body {
   transition: opacity 0.3s ease-out; }
   .bg-image.is-hidden {
     opacity: 0; }
+
+.no-pointer-events {
+  pointer-events: none; }

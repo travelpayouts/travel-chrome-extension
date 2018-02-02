@@ -37,10 +37,15 @@
     cursor: pointer;
     outline: none;
 
-    &:hover ~ .button-tooltip {
-        visibility: visible;
-        opacity: 0.9;
-        transition: opacity 0.3s ease-out;
+    &:hover {
+        & ~ .button-tooltip {
+            visibility: visible;
+            opacity: 0.9;
+            transition: opacity 0.3s ease-out;
+        }
+        & ~ .button-tooltip_loading {
+            visibility: hidden;
+        }
     }
 
     &--rotate {
@@ -78,6 +83,17 @@
         svg path:first-child {
             animation: rotate 0.7s infinite linear;
         }
+        
+        & ~ .button-tooltip {
+            visibility: hidden;
+        }   
+
+        & ~ .button-tooltip_loading {
+            visibility: visible;
+            opacity: 0.9;
+            transition: opacity 0.3s ease-out;   
+        }   
+
     }
 }
 
@@ -558,7 +574,7 @@
 .place-container {
     position: relative;
     transform: translateY(0);
-    background-color: white; 
+    background-color: #212121; 
     transition: -webkit-transform 0.3s ease-out;
     &.slideUp {
         -webkit-transform: translateY(-112px);
@@ -617,4 +633,8 @@
     &.is-hidden {
         opacity: 0;
     }
+}
+
+.no-pointer-events {
+    pointer-events: none;
 }

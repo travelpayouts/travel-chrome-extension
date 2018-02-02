@@ -85,7 +85,7 @@ var get_deal_by_index = function(global_index, callback){
     var chunk_name = 'deals_' + chunk_data.number.toString();
     chrome.storage.local.get(chunk_name, function(s_data) {
         var deals = s_data[chunk_name];
-        callback(deals[chunk_data.index]);
+        callback(deals[chunk_data.index], s_data, chunk_name, chunk_data.index);
     });
 };
 
@@ -165,28 +165,43 @@ var use_default_deals = function(deals_length) {
 }
 
 var get_next_deal = function(callback, func) {
-    chrome.storage.local.get(['next_deal_index', 'deals_length'], function(data) {
+    chrome.storage.local.get(['next_deal_index', 'deals_length', 'preloaded'], function(data) {
         var next_deal_index = data.next_deal_index;
         if (use_default_deals(data.deals_length)) {
             // console.log('use_default_deals', default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
             callback(default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
         } else {
             storage.get_deal_by_index(next_deal_index, function(deal){
-                // console.log('choose deal', deal);
                 chrome.storage.local.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                if(deal.skip_deal) {
+                    if(!func) get_next_deal(update_tab);
+                    else get_next_deal(update_tab, func);
+                    return;
+                }
                 if(deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')
                    && deal.origin_iata == document.getElementById('origin').getAttribute('data-iata')) {
                     if(!func) get_next_deal(update_tab);
                     else get_next_deal(update_tab, func);
                     return;
                 }
-                chrome.storage.sync.get('settings', function(data){
-                    if(data.settings && data.settings.hideCities) {
-                        if(data.settings.hideCities[deal.destination_iata]) {
+                chrome.storage.sync.get('settings', function(res){
+                    if(res.settings && res.settings.hideCities) {
+                        if(res.settings.hideCities[deal.destination_iata]) {
                             if(!func) get_next_deal(update_tab);
-                            else get_next_deal(update_tab, func);        
+                            else get_next_deal(update_tab, func);
                             return;
                         }
+                    }
+
+                    data.preloaded--;
+                    chrome.storage.local.set({"preloaded": data.preloaded});
+                    if(data.preloaded == 0) {
+                        // console.log('Run preloading');
+                        var btn = document.getElementById('btn_change_destination');
+                        btn.classList.add('isDisabled');
+                        preload_dest_images(function(){
+                            btn.classList.remove('isDisabled'); 
+                        });
                     }
                     if(func) callback(deal, func);
                     else callback(deal);
@@ -207,29 +222,30 @@ var hide = function (el) {
 var update_bg = function(deal, callback) {
     var bg_holder = document.getElementById('bg_img'),
         img = new Image();
-    img.onerror = function() {
-        img.src = 'https://' + img.src.slice(9);
-        // chrome.runtime.sendMessage({cmd: 'sendKeenEvent', destination: deal.destination_iata});
-    };
+    // img.onerror = function() {
+    //     // img.src = 'https://' + img.src.slice(9);
+    //     // chrome.runtime.sendMessage({cmd: 'sendKeenEvent', destination: deal.destination_iata});
+    //     get_next_deal(update_tab);
+    // };
     if(deal.alt_image_url) {
-        chrome.storage.sync.get('alternate_images', function(res){
+        chrome.storage.local.get('alternate_images', function(res){
             if(res.alternate_images) {
                 img.src = deal.alt_image_url;
             } else img.src = deal.image_url;
         });
     } else img.src = deal.image_url;
-    
+
     bg_holder.classList.add('is-hidden');
-    var isTransitionEnd = false;
-    bg_holder.addEventListener('transitionend', function(){
-        if(isTransitionEnd) return;
-        isTransitionEnd = true;
+    bg_holder.addEventListener('transitionend', fade_out_handler, false);
+
+    function fade_out_handler() {
+        bg_holder.removeEventListener('transitionend', fade_out_handler, false);
         show_new_bg(img, function() {
             bg_holder.setAttribute("style", "background-image:url(" + img.src + ")");
             bg_holder.classList.remove('is-hidden');
             callback();
         });
-    });
+    }    
 }
 
 function show_new_bg(image, cb) {
@@ -239,7 +255,7 @@ function show_new_bg(image, cb) {
         image.onload = function(){
             cb();
         }
-    }
+    }    
 }
 
 function isLoaded(image) {
@@ -507,7 +523,7 @@ var get_year_prices = function(currency, origin_iata, destination_iata, deal, ca
     req.open("GET", url, true);
     req.onload = function () {
       if (req.status == 200) {
-        var year_data = JSON.parse(req.responseText).data;console.log(year_data)
+        var year_data = JSON.parse(req.responseText).data;
         if(Object.keys(year_data).length == 0) {
             fill_price_tooltip(deal);
         } else {
@@ -570,7 +586,6 @@ var update_tab = function(deal, callback) {
     });
 }
 
-
 var init = function() {
     get_next_deal(update_tab);
 }
@@ -606,17 +621,6 @@ var get_current_deal = function(callback) {
         return_date: destination.getAttribute('data-return')
     }
     callback(deal_obj);
-    // chrome.storage.local.get(['deals_length', 'next_deal_index'], function(res){
-    //     var current_deal;
-    //     if(res.next_deal_index !== 0) {
-    //         current_deal = res.next_deal_index - 1;
-    //     } else {
-    //         current_deal = res.deals_length - 1;
-    //     }
-    //     storage.get_deal_by_index(current_deal, function(d){
-    //         callback(d);
-    //     });
-    // });
 };
 
 var get_new_lyssa_deal = function(currency_code, current_deal, callback) {
@@ -659,25 +663,180 @@ var fill_btn_price = function(value, currency_symbol, callback) {
     callback();
 };
 
+function preload_dest_images(callback) {
+    chrome.runtime.sendMessage({preloading: 'true'});
+    chrome.storage.local.get(['next_preload_deal_index', 'next_deal_index', 'alternate_images', 'preloaded', 'deals_length'], function(res){
+        if(res.preloaded > 0) {
+            get_next_deal(update_tab);
+            return;
+        }
+        if(!callback) {
+            document.getElementById('overlay').classList.remove('is-hidden');
+        }
+
+        if(callback) preload(callback);
+        else preload();
+
+        function preload(cb) {
+            storage.get_deal_by_index(res.next_preload_deal_index, function(deal, deals, chunk_name, deal_index){
+                var img = new Image;
+                img.onload = function(){
+                    chrome.storage.sync.get('settings', function(r){
+                        var origin = document.getElementById('origin').getAttribute('data-iata');
+                        var destination = document.getElementById('destination').getAttribute('data-iata');
+                        if (
+                            ( !r.settings ||
+                              !r.settings.hideCities ||
+                              !r.settings.hideCities[deal.destination_iata] ) &&
+
+                            ( ((deal.origin_iata != origin) && (deal.destination_iata == destination)) ||
+                              ((deal.origin_iata == origin) && (deal.destination_iata != destination)) ||
+                              ((deal.origin_iata != origin) && (deal.destination_iata != destination))
+                            )
+                        ) {
+                            res.preloaded++;
+                        }
+                        res.next_preload_deal_index = (res.next_preload_deal_index + 1) % res.deals_length;
+                        
+                        if(deal.skip_deal) {
+                            deals[chunk_name][deal_index].skip_deal = false;
+                            var obj = {};
+                            obj[chunk_name] = deals[chunk_name];
+                            chrome.storage.local.set(obj);        
+                        }
+                    
+                        if(res.preloaded < 5) {
+                            if(cb) preload(cb);
+                            else preload();
+                        }
+                        else {
+                            chrome.storage.local.set(res, function(){
+                                if(cb) {
+                                    cb();
+                                    return;
+                                }
+                                chrome.runtime.sendMessage({cmd: 'setListener'});
+                                get_next_deal(update_tab, function(){
+                                    document.getElementById('overlay').classList.add('is-hidden');
+                                    chrome.runtime.sendMessage({message: 'green_light'}); 
+                                });                    
+                            });
+                        }    
+                    });
+                };
+
+                img.onerror = function() {
+                    res.next_preload_deal_index = (res.next_preload_deal_index + 1) % res.deals_length;
+                    deals[chunk_name][deal_index].skip_deal = true;
+                    var obj = {};
+                    obj[chunk_name] = deals[chunk_name];
+                    chrome.storage.local.set(obj);
+                    if(cb) preload(cb);
+                    else preload();
+
+                    // Send to event Keen.io
+                    chrome.runtime.sendMessage({
+                        cmd: 'send_keen',
+                        keen_event_dest: deal.destination_iata,
+                        keen_event_url: img.src
+                    }); 
+                };
+
+                if (
+                    (!res.alternate_images && (res.next_preload_deal_index >= res.next_deal_index)) || 
+                    !deal.alt_image_url ||
+                    (res.alternate_images && (res.next_preload_deal_index < res.next_deal_index))
+                ) {
+                    img.src = deal.image_url;
+                } else {
+                    img.src = deal.alt_image_url;
+                }            
+            });    
+        }
+    });
+}
+
+function first_tab_listener(request, sender, sendResponse) {
+    if(request.message === 'green_light') {
+        chrome.runtime.onMessage.removeListener(first_tab_listener);
+        get_next_deal(update_tab, function(){
+            document.getElementById('overlay').classList.add('is-hidden');
+        });
+    }
+}
+
+function check_background(callback) {
+    chrome.runtime.sendMessage({cmd: 'isProcessing'}, function(response){
+        callback(response);
+    });
+}
+
+function background_process_listener(request, sender, sendResponse) {
+    if(request.message == 'processed') {
+        chrome.runtime.onMessage.removeListener(background_process_listener);
+        sendResponse({message: 'ok'});
+        preload_dest_images();
+    }
+}
+
+function init_tab() {
+    check_background(function(result){
+        if(result.message == 'false') {
+            chrome.runtime.sendMessage({cmd: 'isPreloading'}, function(response) {
+                if(response.message == 'true') {
+                    chrome.runtime.onMessage.addListener(first_tab_listener);
+                } else {
+                    preload_dest_images();
+                }
+            });
+            
+        } else if(result.message == 'true' && result.busy == 'false') {
+            document.getElementById('overlay').classList.remove('is-hidden');
+            chrome.runtime.onMessage.addListener(background_process_listener);
+        } else if(result.message == 'true' && result.busy == 'true') {
+            document.getElementById('overlay').classList.remove('is-hidden');
+            chrome.runtime.onMessage.addListener(first_tab_listener);
+        }
+    });
+}
+
+//==============================================================================
+// EVENTS LISTENERS
+//==============================================================================                        
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+
+    if(request.message == 'deals_updated') {
+        preload_dest_images(function(){
+            chrome.runtime.sendMessage({cmd: 'setListener'});
+            document.getElementById('btn_change_destination').classList.remove('isDisabled');
+            chrome.runtime.sendMessage({message: 'green_light'});
+        });
+    }
+
+    if(request.cmd == 'update_content') {
+        preload_dest_images(function(){
+            chrome.runtime.sendMessage({cmd: 'setListener'});
+            document.getElementById('btn_change_destination').classList.remove('isDisabled');
+            get_next_deal(update_tab, function(){
+                document.getElementById('overlay').classList.add('is-hidden');
+                chrome.runtime.sendMessage({message: 'green_light'});
+            });    
+        });
+    }
+
+    if(request.cmd == 'disable_next_destination_button') {
+        document.getElementById('btn_change_destination').classList.add('isDisabled');
+    }
+});
 
 window.addEventListener('update_price', function(e) {
+    document.getElementById('btn_change_destination').classList.add('isDisabled');
     clear_btn_price();
     clear_prices_calendar();
-    document.getElementById('btn_change_destination').classList.add('isDisabled');
     get_new_prices(e.detail);
 }, false);
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-    if(request.message == 'deals_updated') {
-        document.getElementById('btn_change_destination').classList.remove('isDisabled');
-    }
-    if(request.cmd == 'update_content') {
-        document.getElementById('btn_change_destination').classList.remove('isDisabled');
-        get_next_deal(update_tab, function(){
-            document.getElementById('overlay').classList.add('is-hidden');  
-        });
-    }
-});
 
 window.addEventListener('set_loaders', function(){
     document.getElementById('overlay').classList.remove('is-hidden');
@@ -686,13 +845,18 @@ window.addEventListener('set_loaders', function(){
 });
 
 
-init();
-
-
-$('#btn_change_destination').click(function(e){
-    init();
+document.getElementById('btn_change_destination').addEventListener('click', function(e) {
+    var btn = this;
+    btn.classList.add('no-pointer-events');
+    get_next_deal(update_tab, function(){
+        btn.classList.remove('no-pointer-events');
+    });
     _gaq.push(['_trackEvent', 'click', 'other_destination']);
-});
+}, false);
+
+
+init_tab();
+
 
 /***/ })
 /******/ ]);
