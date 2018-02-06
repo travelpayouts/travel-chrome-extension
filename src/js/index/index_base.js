@@ -794,7 +794,6 @@ function init_tab() {
                     preload_dest_images();
                 } else {
                     chrome.runtime.sendMessage({cmd: 'isPreloading'}, function(response) {
-                        console.log(response)
                         if(response.message == 'true') {
                             chrome.runtime.onMessage.addListener(first_tab_listener);
                         } else {
