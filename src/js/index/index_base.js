@@ -200,7 +200,8 @@ var get_next_deal = function(callback, func) {
                         var btn = document.getElementById('btn_change_destination');
                         btn.classList.add('isDisabled');
                         preload_dest_images(function(){
-                            btn.classList.remove('isDisabled'); 
+                            btn.classList.remove('isDisabled');
+                            chrome.runtime.sendMessage({message: 'green_light'});
                         });
                     }
                     if(func) callback(deal, func);
@@ -668,6 +669,7 @@ function preload_dest_images(callback) {
     chrome.storage.local.get(['next_preload_deal_index', 'next_deal_index', 'alternate_images', 'preloaded', 'deals_length'], function(res){
         if(res.preloaded > 0) {
             get_next_deal(update_tab);
+            chrome.runtime.sendMessage({message: 'green_light'}); 
             return;
         }
         if(!callback) {
@@ -781,18 +783,26 @@ function background_process_listener(request, sender, sendResponse) {
 
 function init_tab() {
     check_background(function(result){
-        if(result.message == 'false') {
-            chrome.runtime.sendMessage({cmd: 'isPreloading'}, function(response) {
-                if(response.message == 'true') {
-                    chrome.runtime.onMessage.addListener(first_tab_listener);
-                } else {
-                    preload_dest_images();
-                }
-            });
-            
-        } else if(result.message == 'true' && result.busy == 'false') {
+        if((typeof result == 'undefined') ||
+           (result.message == 'true' && result.busy == 'false')) {
             document.getElementById('overlay').classList.remove('is-hidden');
             chrome.runtime.onMessage.addListener(background_process_listener);
+        }
+        else if(result.message == 'false') {
+            chrome.tabs.query({}, function(data) {
+                if(data.length < 2) {
+                    preload_dest_images();
+                } else {
+                    chrome.runtime.sendMessage({cmd: 'isPreloading'}, function(response) {
+                        console.log(response)
+                        if(response.message == 'true') {
+                            chrome.runtime.onMessage.addListener(first_tab_listener);
+                        } else {
+                            preload_dest_images();
+                        }
+                    });        
+                }
+            });
         } else if(result.message == 'true' && result.busy == 'true') {
             document.getElementById('overlay').classList.remove('is-hidden');
             chrome.runtime.onMessage.addListener(first_tab_listener);
