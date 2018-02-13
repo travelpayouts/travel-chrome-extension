@@ -35,9 +35,16 @@ DropDown.prototype = {
                 }
                 settings.currency = [opt.data('currency'), currency_symbol];
                 chrome.storage.sync.set({settings});
-                var event = new CustomEvent('update_price', {'detail': settings.currency});
+                var event = new CustomEvent('update_prices', {'detail': settings.currency});
                 window.dispatchEvent(event);
-                chrome.runtime.sendMessage({cmd: 'update_deals'});              
+                
+                var origin = document.getElementById('origin').getAttribute('data-iata');
+                var destination = document.getElementById('destination').getAttribute('data-iata');
+                chrome.runtime.sendMessage({
+                    cmd: 'update_deals',
+                    current_origin: origin,
+                    current_destination: destination
+                });              
             });
 
             // send event to Google Analytics

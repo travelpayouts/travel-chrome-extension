@@ -145,7 +145,7 @@ $(function(){
             settings.originCity[e.text.slice(-10, -7)] = e.target.value;
             chrome.storage.sync.set({settings}, function(){
                 input_origin_city.blur();
-                var event = new Event('set_loaders');
+                var event = new Event('update_all');
                 window.dispatchEvent(event);
             });
         });

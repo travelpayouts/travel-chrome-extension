@@ -638,3 +638,8 @@
 .no-pointer-events {
     pointer-events: none;
 }
+
+.disabled {
+    pointer-events: none;
+    background-color: #e0e0e0;
+}

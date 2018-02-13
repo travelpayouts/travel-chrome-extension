@@ -196,13 +196,7 @@ var get_next_deal = function(callback, func) {
                     data.preloaded--;
                     chrome.storage.local.set({"preloaded": data.preloaded});
                     if(data.preloaded == 0) {
-                        // console.log('Run preloading');
-                        var btn = document.getElementById('btn_change_destination');
-                        btn.classList.add('isDisabled');
-                        preload_dest_images(function(){
-                            btn.classList.remove('isDisabled');
-                            chrome.runtime.sendMessage({message: 'green_light'});
-                        });
+                        chrome.runtime.sendMessage({cmd: 'preload'});
                     }
                     if(func) callback(deal, func);
                     else callback(deal);
@@ -223,11 +217,7 @@ var hide = function (el) {
 var update_bg = function(deal, callback) {
     var bg_holder = document.getElementById('bg_img'),
         img = new Image();
-    // img.onerror = function() {
-    //     // img.src = 'https://' + img.src.slice(9);
-    //     // chrome.runtime.sendMessage({cmd: 'sendKeenEvent', destination: deal.destination_iata});
-    //     get_next_deal(update_tab);
-    // };
+
     if(deal.alt_image_url) {
         chrome.storage.local.get('alternate_images', function(res){
             if(res.alternate_images) {
@@ -664,109 +654,6 @@ var fill_btn_price = function(value, currency_symbol, callback) {
     callback();
 };
 
-function preload_dest_images(callback) {
-    chrome.runtime.sendMessage({preloading: 'true'});
-    chrome.storage.local.get(['next_preload_deal_index', 'next_deal_index', 'alternate_images', 'preloaded', 'deals_length'], function(res){
-        if(res.preloaded > 0) {
-            get_next_deal(update_tab);
-            chrome.runtime.sendMessage({message: 'green_light'}); 
-            return;
-        }
-        if(!callback) {
-            document.getElementById('overlay').classList.remove('is-hidden');
-        }
-
-        if(callback) preload(callback);
-        else preload();
-
-        function preload(cb) {
-            storage.get_deal_by_index(res.next_preload_deal_index, function(deal, deals, chunk_name, deal_index){
-                var img = new Image;
-                img.onload = function(){
-                    chrome.storage.sync.get('settings', function(r){
-                        var origin = document.getElementById('origin').getAttribute('data-iata');
-                        var destination = document.getElementById('destination').getAttribute('data-iata');
-                        if (
-                            ( !r.settings ||
-                              !r.settings.hideCities ||
-                              !r.settings.hideCities[deal.destination_iata] ) &&
-
-                            ( ((deal.origin_iata != origin) && (deal.destination_iata == destination)) ||
-                              ((deal.origin_iata == origin) && (deal.destination_iata != destination)) ||
-                              ((deal.origin_iata != origin) && (deal.destination_iata != destination))
-                            )
-                        ) {
-                            res.preloaded++;
-                        }
-                        res.next_preload_deal_index = (res.next_preload_deal_index + 1) % res.deals_length;
-                        
-                        if(deal.skip_deal) {
-                            deals[chunk_name][deal_index].skip_deal = false;
-                            var obj = {};
-                            obj[chunk_name] = deals[chunk_name];
-                            chrome.storage.local.set(obj);        
-                        }
-                    
-                        if(res.preloaded < 5) {
-                            if(cb) preload(cb);
-                            else preload();
-                        }
-                        else {
-                            chrome.storage.local.set(res, function(){
-                                if(cb) {
-                                    cb();
-                                    return;
-                                }
-                                chrome.runtime.sendMessage({cmd: 'setListener'});
-                                get_next_deal(update_tab, function(){
-                                    document.getElementById('overlay').classList.add('is-hidden');
-                                    chrome.runtime.sendMessage({message: 'green_light'}); 
-                                });                    
-                            });
-                        }    
-                    });
-                };
-
-                img.onerror = function() {
-                    res.next_preload_deal_index = (res.next_preload_deal_index + 1) % res.deals_length;
-                    deals[chunk_name][deal_index].skip_deal = true;
-                    var obj = {};
-                    obj[chunk_name] = deals[chunk_name];
-                    chrome.storage.local.set(obj);
-                    if(cb) preload(cb);
-                    else preload();
-
-                    // Send to event Keen.io
-                    chrome.runtime.sendMessage({
-                        cmd: 'send_keen',
-                        keen_event_dest: deal.destination_iata,
-                        keen_event_url: img.src
-                    }); 
-                };
-
-                if (
-                    (!res.alternate_images && (res.next_preload_deal_index >= res.next_deal_index)) || 
-                    !deal.alt_image_url ||
-                    (res.alternate_images && (res.next_preload_deal_index < res.next_deal_index))
-                ) {
-                    img.src = deal.image_url;
-                } else {
-                    img.src = deal.alt_image_url;
-                }            
-            });    
-        }
-    });
-}
-
-function first_tab_listener(request, sender, sendResponse) {
-    if(request.message === 'green_light') {
-        chrome.runtime.onMessage.removeListener(first_tab_listener);
-        get_next_deal(update_tab, function(){
-            document.getElementById('overlay').classList.add('is-hidden');
-        });
-    }
-}
-
 function check_background(callback) {
     chrome.runtime.sendMessage({cmd: 'isProcessing'}, function(response){
         callback(response);
@@ -776,35 +663,20 @@ function check_background(callback) {
 function background_process_listener(request, sender, sendResponse) {
     if(request.message == 'processed') {
         chrome.runtime.onMessage.removeListener(background_process_listener);
-        sendResponse({message: 'ok'});
-        preload_dest_images();
+        get_next_deal(update_tab, function(){
+            document.getElementById('overlay').classList.add('is-hidden');
+        });
     }
 }
 
 function init_tab() {
     check_background(function(result){
-        if((typeof result == 'undefined') ||
-           (result.message == 'true' && result.busy == 'false')) {
+        if(typeof result == 'undefined' || result.message == 'true') {
             document.getElementById('overlay').classList.remove('is-hidden');
             chrome.runtime.onMessage.addListener(background_process_listener);
         }
-        else if(result.message == 'false') {
-            chrome.tabs.query({}, function(data) {
-                if(data.length < 2) {
-                    preload_dest_images();
-                } else {
-                    chrome.runtime.sendMessage({cmd: 'isPreloading'}, function(response) {
-                        if(response.message == 'true') {
-                            chrome.runtime.onMessage.addListener(first_tab_listener);
-                        } else {
-                            preload_dest_images();
-                        }
-                    });        
-                }
-            });
-        } else if(result.message == 'true' && result.busy == 'true') {
-            document.getElementById('overlay').classList.remove('is-hidden');
-            chrome.runtime.onMessage.addListener(first_tab_listener);
+        else {
+            init();
         }
     });
 }
@@ -815,41 +687,39 @@ function init_tab() {
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
-    if(request.message == 'deals_updated') {
-        preload_dest_images(function(){
-            chrome.runtime.sendMessage({cmd: 'setListener'});
-            document.getElementById('btn_change_destination').classList.remove('isDisabled');
-            chrome.runtime.sendMessage({message: 'green_light'});
+    if(request.cmd === 'finish_currency_update') {
+        get_next_deal(update_tab);
+    }
+
+    if(request.cmd === 'finish_origin_change') {
+        get_next_deal(update_tab, function(){
+            document.getElementById('overlay').classList.add('is-hidden');
         });
     }
 
-    if(request.cmd == 'update_content') {
-        preload_dest_images(function(){
-            chrome.runtime.sendMessage({cmd: 'setListener'});
-            document.getElementById('btn_change_destination').classList.remove('isDisabled');
-            get_next_deal(update_tab, function(){
-                document.getElementById('overlay').classList.add('is-hidden');
-                chrome.runtime.sendMessage({message: 'green_light'});
-            });    
-        });
-    }
-
-    if(request.cmd == 'disable_next_destination_button') {
+    if(request.cmd === 'disable_settings_change') {
         document.getElementById('btn_change_destination').classList.add('isDisabled');
+        document.getElementById('choose_currency').classList.add('disabled');
+        document.getElementById('input_origin_city').classList.add('disabled');
+        document.getElementById('hide_cities').classList.add('disabled');
+    }
+    if(request.cmd === 'enable_settings_change') {
+        document.getElementById('btn_change_destination').classList.remove('isDisabled');
+        document.getElementById('choose_currency').classList.remove('disabled');
+        document.getElementById('input_origin_city').classList.remove('disabled');
+        document.getElementById('hide_cities').classList.remove('disabled');
     }
 });
 
-window.addEventListener('update_price', function(e) {
-    document.getElementById('btn_change_destination').classList.add('isDisabled');
+window.addEventListener('update_prices', function(e) {
     clear_btn_price();
     clear_prices_calendar();
     get_new_prices(e.detail);
 }, false);
 
 
-window.addEventListener('set_loaders', function(){
+window.addEventListener('update_all', function(){
     document.getElementById('overlay').classList.remove('is-hidden');
-    document.getElementById('btn_change_destination').classList.add('isDisabled');
     chrome.runtime.sendMessage({cmd: 'update_all'});
 });
 
