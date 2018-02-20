@@ -628,7 +628,7 @@
     background-repeat: no-repeat;
     background-position: 0% 90%;
     opacity: 1;
-    transition: opacity 0.3s ease-out;
+    transition: opacity 0.15s ease;
 
     &.is-hidden {
         opacity: 0;
