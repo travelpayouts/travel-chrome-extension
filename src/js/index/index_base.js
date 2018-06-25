@@ -218,16 +218,18 @@ var update_bg = function(deal, callback) {
     var bg_holder = document.getElementById('bg_img'),
         img = new Image();
 
-    if(deal.alt_image_url) {
-        chrome.storage.local.get('alternate_images', function(res){
-            if(res.alternate_images) {
-                img.src = deal.alt_image_url;
-            } else img.src = deal.image_url;
-        });
-    } else img.src = deal.image_url;
+    // if(deal.alt_image_url) {
+    //     chrome.storage.local.get('alternate_images', function(res){
+    //         if(res.alternate_images) {
+    //             img.src = deal.alt_image_url;
+    //         } else img.src = deal.image_url;
+    //     });
+    // } else img.src = deal.image_url;
 
-    bg_holder.classList.add('is-hidden');
+    img.src = deal.image_url;
+
     bg_holder.addEventListener('transitionend', fade_out_handler, false);
+    bg_holder.classList.add('is-hidden');
 
     function fade_out_handler() {
         bg_holder.removeEventListener('transitionend', fade_out_handler, false);
