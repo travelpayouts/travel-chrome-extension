@@ -151,7 +151,8 @@ module.exports = default_deals;
 /***/ (function(module, exports, __webpack_require__) {
 
 var default_deals = __webpack_require__(3);
-var storage = __webpack_require__(0)
+var storage = __webpack_require__(0);
+var isPrevDealLoaded = false;
 
 var get_next_deal_index = function(callback) {
     chrome.storage.local.get({"next_deal_index": 0}, function(r) {
@@ -165,25 +166,29 @@ var use_default_deals = function(deals_length) {
 }
 
 var get_next_deal = function(callback, func) {
-    chrome.storage.local.get(['next_deal_index', 'deals_length', 'preloaded'], function(data) {
+    isPrevDealLoaded = false;
+    chrome.storage.local.get(['next_deal_index', 'deals_length'], function(data) {
         var next_deal_index = data.next_deal_index;
+
         if (use_default_deals(data.deals_length)) {
-            // console.log('use_default_deals', default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
             callback(default_deals[Math.floor(Math.random() * default_deals.length + 1) - 1]);
         } else {
             storage.get_deal_by_index(next_deal_index, function(deal){
                 chrome.storage.local.set({"next_deal_index": (next_deal_index + 1) % data.deals_length});
+                
                 if(deal.skip_deal) {
                     if(!func) get_next_deal(update_tab);
                     else get_next_deal(update_tab, func);
                     return;
                 }
+
                 if(deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')
                    && deal.origin_iata == document.getElementById('origin').getAttribute('data-iata')) {
                     if(!func) get_next_deal(update_tab);
                     else get_next_deal(update_tab, func);
                     return;
                 }
+
                 chrome.storage.sync.get('settings', function(res){
                     if(res.settings && res.settings.hideCities) {
                         if(res.settings.hideCities[deal.destination_iata]) {
@@ -191,12 +196,6 @@ var get_next_deal = function(callback, func) {
                             else get_next_deal(update_tab, func);
                             return;
                         }
-                    }
-
-                    data.preloaded--;
-                    chrome.storage.local.set({"preloaded": data.preloaded});
-                    if(data.preloaded == 0) {
-                        chrome.runtime.sendMessage({cmd: 'preload'});
                     }
                     if(func) callback(deal, func);
                     else callback(deal);
@@ -236,9 +235,14 @@ var update_bg = function(deal, callback) {
         show_new_bg(img, function() {
             bg_holder.setAttribute("style", "background-image:url(" + img.src + ")");
             bg_holder.classList.remove('is-hidden');
-            callback();
+            bg_holder.addEventListener('transitionend', fade_in_handler, false);
         });
-    }    
+    }
+    
+    function fade_in_handler() {
+        bg_holder.removeEventListener('transitionend', fade_in_handler, false);
+        callback();
+    }
 }
 
 function show_new_bg(image, cb) {
@@ -575,6 +579,7 @@ var update_tab = function(deal, callback) {
         update_origin(deal);
         update_tags(deal);
         update_review(deal);
+        isPrevDealLoaded = true;
         if(callback) callback();
     });
 }
@@ -663,17 +668,17 @@ function check_background(callback) {
 }
 
 function background_process_listener(request, sender, sendResponse) {
-    if(request.message == 'processed') {
+    if(request.message == 'processed') {console.log('Caught!')
         chrome.runtime.onMessage.removeListener(background_process_listener);
-        get_next_deal(update_tab, function(){
-            document.getElementById('overlay').classList.add('is-hidden');
+        get_next_deal(update_tab, function(){console.log('And??')
+            document.getElementById('overlay').classList.add('is-hidden');console.log(Date.now())
         });
     }
 }
 
 function init_tab() {
     check_background(function(result){
-        if(typeof result == 'undefined' || result.message == 'true') {
+        if(typeof(result) == 'undefined' || result.message == 'true') {console.log('is listening')
             document.getElementById('overlay').classList.remove('is-hidden');
             chrome.runtime.onMessage.addListener(background_process_listener);
         }
@@ -727,12 +732,10 @@ window.addEventListener('update_all', function(){
 
 
 document.getElementById('btn_change_destination').addEventListener('click', function(e) {
-    var btn = this;
-    btn.classList.add('no-pointer-events');
-    get_next_deal(update_tab, function(){
-        btn.classList.remove('no-pointer-events');
-    });
-    _gaq.push(['_trackEvent', 'click', 'other_destination']);
+    if(isPrevDealLoaded) {
+        get_next_deal(update_tab);
+        _gaq.push(['_trackEvent', 'click', 'other_destination']);
+    }    
 }, false);
 
 
