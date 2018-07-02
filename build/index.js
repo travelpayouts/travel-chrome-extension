@@ -646,6 +646,7 @@ var get_new_lyssa_deal = function(currency_code, current_deal, callback) {
 var get_new_prices = function(currency) {
     get_current_deal(function(deal){
         get_new_lyssa_deal(currency[0], deal, function(updated_deal){
+            
             fill_btn_price(updated_deal.price, currency[1], function(){
                 var btn_price = document.querySelector('.btn-price');
                 btn_price.querySelector('.preloader').remove();
@@ -695,27 +696,41 @@ function init_tab() {
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
-    if(request.cmd === 'finish_currency_update') {
-        get_next_deal(update_tab);
-    }
+    switch(request.cmd) {
+        case 'finish_currency_update':
+            get_next_deal(update_tab);
+            break;
 
-    if(request.cmd === 'finish_origin_change') {
-        get_next_deal(update_tab, function(){
-            document.getElementById('overlay').classList.add('is-hidden');
-        });
-    }
+        case 'finish_origin_change':
+            get_next_deal(update_tab, function(){
+                document.getElementById('overlay').classList.add('is-hidden');
+            });
+            break;
 
-    if(request.cmd === 'disable_settings_change') {
-        document.getElementById('btn_change_destination').classList.add('isDisabled');
-        document.getElementById('choose_currency').classList.add('disabled');
-        document.getElementById('input_origin_city').classList.add('disabled');
-        document.getElementById('hide_cities').classList.add('disabled');
-    }
-    if(request.cmd === 'enable_settings_change') {
-        document.getElementById('btn_change_destination').classList.remove('isDisabled');
-        document.getElementById('choose_currency').classList.remove('disabled');
-        document.getElementById('input_origin_city').classList.remove('disabled');
-        document.getElementById('hide_cities').classList.remove('disabled');
+        case 'disable_settings_change':
+            document.getElementById('btn_change_destination').classList.add('isDisabled');
+            document.getElementById('choose_currency').classList.add('disabled');
+            document.getElementById('input_origin_city').classList.add('disabled');
+            document.getElementById('hide_cities').classList.add('disabled');
+            break;
+
+        case 'enable_settings_change':
+            document.getElementById('btn_change_destination').classList.remove('isDisabled');
+            document.getElementById('choose_currency').classList.remove('disabled');
+            document.getElementById('input_origin_city').classList.remove('disabled');
+            document.getElementById('hide_cities').classList.remove('disabled');
+            break;
+
+        case 'disable_main_options':
+            document.getElementById('btn_change_destination').classList.remove('isDisabled');
+            document.getElementById('choose_currency').classList.add('disabled');
+            document.getElementById('input_origin_city').classList.add('disabled');
+            break;
+
+        case 'enable_main_options':
+            document.getElementById('choose_currency').classList.remove('disabled');
+            document.getElementById('input_origin_city').classList.remove('disabled');
+            break;
     }
 });
 
