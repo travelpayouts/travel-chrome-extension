@@ -353,7 +353,7 @@ var get_year_objs = function(){
        var month = ('0' + (future_date.getMonth() + 1)).slice(-2);
 
        result.push({
-         id: future_date.getFullYear() + '-' + month,
+         id: future_date.getFullYear() + '-' + month + '-01',
          month_name: month_f_names[future_date.getMonth()]
        })
     }
@@ -514,22 +514,23 @@ function calc_day_of_year(date) {
  
 var get_year_prices = function(currency, origin_iata, destination_iata, deal, callback){
     var req = new XMLHttpRequest(),
-        url = "http://api.travelpayouts.com/v1/prices/monthly?currency="+ currency[0] +"&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
+        url = "https://lyssa.aviasales.ru/v2/widget/year?origin_iata=" + origin_iata + "&destination_iata=" + destination_iata + "&one_way=false&min_trip_duration=1&max_trip_duration=10",
+        // url = "http://api.travelpayouts.com/v1/prices/monthly?currency="+ currency[0] +"&origin=" + origin_iata + "&destination=" + destination_iata + "&token=2db8244a0b9521ca2b0e0fbb24c4d1015b7e7a6b",
         year_obj = get_year_objs();
 
     req.open("GET", url, true);
     req.onload = function () {
       if (req.status == 200) {
-        var year_data = JSON.parse(req.responseText).data;
-        if(Object.keys(year_data).length == 0) {
+        var year_data = JSON.parse(req.responseText);
+        if(Object.keys(year_data.year).length == 0) {
             fill_price_tooltip(deal);
         } else {
             for (var i=0; i<year_obj.length; i++) {
-                if (year_data[year_obj[i].id]) {
-                    var month_data = year_data[year_obj[i].id];
-                    var depart_date = month_data.departure_at.slice(0, 10);
-                    var return_date = month_data.return_at.slice(0, 10);
-                    year_obj[i].price = month_data.price;
+                if (year_data.year[year_obj[i].id]) {
+                    var month_data = year_data.year[year_obj[i].id];
+                    var depart_date = month_data.depart_date;
+                    var return_date = month_data.return_date;
+                    year_obj[i].price = parseInt(month_data.value) * parseFloat(year_data.currency[currency[0]].rate);
                     year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
                     year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
                 } 
