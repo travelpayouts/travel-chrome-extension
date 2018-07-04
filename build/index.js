@@ -670,17 +670,17 @@ function check_background(callback) {
 }
 
 function background_process_listener(request, sender, sendResponse) {
-    if(request.message == 'processed') {console.log('Caught!')
+    if(request.message == 'processed') {
         chrome.runtime.onMessage.removeListener(background_process_listener);
-        get_next_deal(update_tab, function(){console.log('And??')
-            document.getElementById('overlay').classList.add('is-hidden');console.log(Date.now())
+        get_next_deal(update_tab, function(){
+            document.getElementById('overlay').classList.add('is-hidden');
         });
     }
 }
 
 function init_tab() {
     check_background(function(result){
-        if(typeof(result) == 'undefined' || result.message == 'true') {console.log('is listening')
+        if(typeof(result) == 'undefined' || result.message == 'true') {
             document.getElementById('overlay').classList.remove('is-hidden');
             chrome.runtime.onMessage.addListener(background_process_listener);
         }
