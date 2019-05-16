@@ -1,17 +1,20 @@
 {
-	"background": {
-		"scripts": [ "./libs/keen-tracking.min.js", "initKeen.js", "background.js" ]
-	},
-	"chrome_url_overrides": {
-		"newtab": "index.html"
-	},
-	"content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://api.keen.io; object-src 'self'",
-	"description": "Beautifull flickr photos + amazing aviasales prices",
-	"icons": {
-		"128": "img/icon128.png"
-	},
-	"manifest_version": 2,
-	"name": "InspirationTab",
-	"permissions": ["alarms", "storage"],
-	"version": "0.30.4"
+  "name": "InspirationTab",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "Beautifull flickr photos + amazing aviasales prices",
+  "icons": {
+    "128": "img/icon128.png"
+  },
+  "background": {
+    "page": "bg.html"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://api.keen.io; object-src 'self'",
+  "permissions": [
+    "alarms",
+    "storage"
+  ]
 }
