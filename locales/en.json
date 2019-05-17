@@ -174,7 +174,18 @@
         "xof",
         "zar",
         "zmw"
-      ]
+      ],
+      "signs": {
+        "rub": "\u20BD",
+        "eur": "€",
+        "usd": "$",
+        "cny": "¥",
+        "uah": "₴",
+        "kzt": "₸",
+        "azn": "\u20BC",
+        "byn": "Br",
+        "thb": "฿"
+      }
     },
     "currency_abbreviation": {
       "amd": {

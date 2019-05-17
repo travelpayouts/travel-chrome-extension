@@ -2,6 +2,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss'
 import copy from 'rollup-plugin-copy'
 import commonjs from 'rollup-plugin-commonjs';
+import symbol from 'rollup-plugin-lit-html-svg';
 
 export default {
     input: [
@@ -31,6 +32,7 @@ export default {
             minimize: false,
             extract: 'build/style.css'
         }),
+        symbol(),
         copy({
             targets: [
                 'manifest.json',

@@ -27,15 +27,17 @@ DropDown.prototype = {
             obj.val = opt.html();
             obj.index = opt.index();
             obj.placeholder.html(obj.val);
-            var currency_symbol = opt.find('.currency-sign').html();
+            var currency_symbol = opt.find('.currency-sign').text();
 
-            if (typeof opt.data('currency') !== 'undefined') {
-                chrome.storage.sync.get('settings', function (data) {
-                    if (data.settings) {
-                        var settings = data.settings;
-                    } else {
-                        var settings = {};
-                    }
+
+            chrome.storage.sync.get('settings', function (data) {
+                let settings;
+                if (data.settings) {
+                    settings = data.settings;
+                } else {
+                    settings = {};
+                }
+                if (typeof opt.data('currency') !== 'undefined') {
                     settings.currency = [opt.data('currency'), currency_symbol];
                     chrome.storage.sync.set({settings});
                     var event = new CustomEvent('update_prices', {'detail': settings.currency});
@@ -48,10 +50,16 @@ DropDown.prototype = {
                         current_origin: origin,
                         current_destination: destination
                     });
-                });
-            } else {
-                use(opt.data('lang'));
-            }
+                } else {
+                    use(opt.data('lang'));
+                    settings.lang = opt.data('lang');
+                    chrome.storage.sync.set({settings});
+                    chrome.runtime.sendMessage({
+                        cmd: 'update_deals',
+                        lang: settings.lang
+                    });
+                }
+            });
 
             // send event to Google Analytics
             // _gaq.push(['_trackEvent', 'settings', 'currency_change', opt.data('currency')]); //dev

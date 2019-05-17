@@ -1,7 +1,8 @@
 import {html} from 'lit-html';
+import {repeat} from 'lit-html/directives/repeat';
 import {translate} from "@appnest/lit-translate";
 
-let index_template = () => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
+let index_template = (currencies) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
     <img class="logo-aviasales" src="../img/logo_aviasales.svg" alt="">
 </a>
 
@@ -11,8 +12,7 @@ let index_template = () => html`<a id="logo" href="https://www.aviasales.ru/?utm
             <button class="button button--rotate button--scale" id="btn_change_destination" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <g fill="#FFF" fill-rule="evenodd">
-                        <path fill-rule="nonzero"
-                              d="M19.177 21.619l-.13.714a1 1 0 0 0 1.967.36l.69-3.784a1.062 1.062 0 0 0-1.242-1.241l-3.782.69a1 1 0 0 0 .358 1.967l.688-.125a10.004 10.004 0 0 1-9.79.931 9.995 9.995 0 0 1-5.592-11.72 1 1 0 0 0-1.932-.517c-1.715 6.402 2.084 12.982 8.485 14.697a11.962 11.962 0 0 0 10.28-1.972zM4.826 2.384l.13-.714a1 1 0 0 0-1.967-.36l-.69 3.784a1.062 1.062 0 0 0 1.242 1.241l3.782-.69a1 1 0 0 0-.358-1.967l-.688.125a10.004 10.004 0 0 1 9.79-.931 9.995 9.995 0 0 1 5.592 11.72 1 1 0 1 0 1.932.517C25.306 8.707 21.507 2.127 15.106.412a11.962 11.962 0 0 0-10.28 1.972z"/>
+                        <path fill-rule="nonzero" d="M19.177 21.619l-.13.714a1 1 0 0 0 1.967.36l.69-3.784a1.062 1.062 0 0 0-1.242-1.241l-3.782.69a1 1 0 0 0 .358 1.967l.688-.125a10.004 10.004 0 0 1-9.79.931 9.995 9.995 0 0 1-5.592-11.72 1 1 0 0 0-1.932-.517c-1.715 6.402 2.084 12.982 8.485 14.697a11.962 11.962 0 0 0 10.28-1.972zM4.826 2.384l.13-.714a1 1 0 0 0-1.967-.36l-.69 3.784a1.062 1.062 0 0 0 1.242 1.241l3.782-.69a1 1 0 0 0-.358-1.967l-.688.125a10.004 10.004 0 0 1 9.79-.931 9.995 9.995 0 0 1 5.592 11.72 1 1 0 1 0 1.932.517C25.306 8.707 21.507 2.127 15.106.412a11.962 11.962 0 0 0-10.28 1.972z"/>
                         <path d="M9.308 10.755c.195-.604.85-1.255 1.447-1.447l5.526-2.33c.604-.195.934.143.741.741l-2.33 5.526c-.195.604-.85 1.255-1.447 1.447l-5.526 2.33c-.604.195-.934-.143-.741-.741l2.33-5.526zm1.278 2.66a2 2 0 1 0 2.828-2.83 2 2 0 0 0-2.828 2.83z"/>
                     </g>
                 </svg>
@@ -42,10 +42,10 @@ let index_template = () => html`<a id="logo" href="https://www.aviasales.ru/?utm
 						<span class="wrapper-select-dropdown__label" id="lang_label"></span>
                         <ul class="dropdown" id="lang_dropdown">
                             <li data-lang="ru">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&#8381;</span>RU
+                                <img src="../img/check.svg" alt=""></span>RU
                             </li>
                             <li data-lang="en">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&euro;</span>EN
+                                <img src="../img/check.svg" alt=""></span>EN
                             </li>
                         </ul>
                     </div>
@@ -57,34 +57,12 @@ let index_template = () => html`<a id="logo" href="https://www.aviasales.ru/?utm
 						<span class="wrapper-select-dropdown__label" id="currency_label">
 						</span>
                         <ul class="dropdown" id="currency_dropdown">
-                            <li data-currency="RUB">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&#8381;</span>Рубль
-                            </li>
-                            <li data-currency="EUR">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&euro;</span>Евро
-                            </li>
-                            <li data-currency="USD">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&dollar;</span>Доллар
-                            </li>
-                            <li data-currency="CNY">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&yen;</span>Юань
-                            </li>
-                            <li data-currency="UAH">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&#8372;</span>Гривна
-                            </li>
-                            <li data-currency="KZT">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&#8376;</span>Тенге
-                            </li>
-                            <li data-currency="AZN">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&#8380;</span>Манат
-                            </li>
-                            <li data-currency="BYN">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">Br</span>Белорусский
-                                рубль
-                            </li>
-                            <li data-currency="THB">
-                                <img src="../img/check.svg" alt=""><span class="currency-sign">&#3647;</span>Тайский бат
-                            </li>
+                            ${repeat(currencies.order, currency => html`<li data-currency="${currency.toUpperCase()}">
+                                <img src="../img/check.svg" alt="">
+                                ${currencies.signs[currency] ? html`
+                                <span class="currency-sign">${currencies.signs[currency]}</span>` : ''}
+                                ${translate('auto_generated.currency.translations.' + currency.toLowerCase())}
+                                </li>`)}
                         </ul>
                     </div>
                 </div>

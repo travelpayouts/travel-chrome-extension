@@ -34,7 +34,8 @@ chrome.runtime.onMessage.addListener(
             isAppStarted = false;
             // chrome.storage.onChanged.removeListener(storageOnChangeListener);
             chrome.runtime.sendMessage({cmd: 'disable_settings_change'});
-            updateAllData();
+            // updateAllData();
+            updateAllData(null, request.lang);
         }
 
         if (request.cmd == 'update_all') {
@@ -126,9 +127,9 @@ var destinationPhotos = function (destination_iata, callback) {
 
 // destinationPhotos('BCN', 'Barcelona', console.log);
 
-var where_am_i = function (callback) {
+var where_am_i = function (lang, callback) {
     var req = new XMLHttpRequest(),
-        url = "http://www.travelpayouts.com/whereami?locale=en";
+        url = "http://www.travelpayouts.com/whereami?locale=" + lang;
 
     req.open("GET", url, true);
     req.onload = function () {
@@ -160,7 +161,10 @@ var where_am_i = function (callback) {
                     origin_iata = result.iata;
                     origin_name = ro_city_name(result.iata, cities_data);
                 }
-                chrome.storage.local.set({currency: currency, origin_city: im_city_name(result.iata, cities_data)});
+                chrome.storage.local.set({
+                    currency: currency, origin_city: im_city_name(result.iata, cities_data),
+                    lang: 'ru'
+                });
                 callback(result, origin_iata, origin_name, currency[0]);
             });
         }
@@ -242,10 +246,10 @@ var im_country_name = function (iata, city_data) {
     return im_country_name;
 }
 
-var updateAllData = function (param) {
+var updateAllData = function (param, lang) {
     isProcessing = true;
     isUpdating = true;
-    where_am_i(function (l, origin_iata, origin_name, currency) {
+    where_am_i(lang, function (l, origin_iata, origin_name, currency) {
 
         fetchDirections(origin_iata, currency, function (directions) {
             // Show only flickr photos for Moscow
@@ -306,7 +310,7 @@ var updateAllData = function (param) {
 };
 
 var updateDataSoftly = function (callback) {
-    where_am_i(function (l, origin_iata, origin_name, currency) {
+    where_am_i('en', function (l, origin_iata, origin_name, currency) {
         fetchDirections(origin_iata, currency, function (directions) {
             eachAsync(directions, function (direction, cb) {
                 if (!cities_data[direction.destination]) {
