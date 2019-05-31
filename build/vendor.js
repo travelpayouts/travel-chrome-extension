@@ -1,7 +1,19 @@
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
+function commonjsRequire () {
+	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
+}
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+function getCjsExportFromNamespace (n) {
+	return n && n['default'] || n;
 }
 
 var jquery = createCommonjsModule(function (module) {
@@ -20,7 +32,9 @@ var jquery = createCommonjsModule(function (module) {
  */
 ( function( global, factory ) {
 
-	{
+	"use strict";
+
+	if ( 'object' === "object" && 'object' === "object" ) {
 
 		// For CommonJS and CommonJS-like environments where a proper `window`
 		// is present, execute the factory and get jQuery.
@@ -37,10 +51,18 @@ var jquery = createCommonjsModule(function (module) {
 				}
 				return factory( w );
 			};
+	} else {
+		factory( global );
 	}
 
 // Pass this if window is not defined yet
 } )( typeof window !== "undefined" ? window : commonjsGlobal, function( window, noGlobal ) {
+
+// Edge <= 12 - 13+, Firefox <=18 - 45+, IE 10 - 11, Safari 5.1 - 9+, iOS 6 - 9.1
+// throw exceptions when non-strict code (e.g., ASP.NET 4.5) accesses strict mode
+// arguments.callee.caller (trac-13335). But as of jQuery 3.0 (2016), strict mode should be common
+// enough that all such attempts are guarded in a try block.
+"use strict";
 
 var arr = [];
 
@@ -2824,7 +2846,8 @@ function nodeName( elem, name ) {
 
   return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
 
-}var rsingleTag = ( /^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i );
+};
+var rsingleTag = ( /^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i );
 
 
 
@@ -10538,6 +10561,28 @@ jQuery.isNumeric = function( obj ) {
 
 
 
+// Register as a named AMD module, since jQuery can be concatenated with other
+// files that may use define, but not via a proper concatenation script that
+// understands anonymous AMD modules. A named AMD is safest and most robust
+// way to register. Lowercase jquery is used because AMD module names are
+// derived from file names, and jQuery is normally delivered in a lowercase
+// file name. Do this after creating the global so that if an AMD module wants
+// to call noConflict to hide this version of jQuery, it will work.
+
+// Note that for maximum portability, libraries that are not jQuery should
+// declare themselves as anonymous modules, and avoid setting a global if an
+// AMD loader is present. jQuery is a special case. For more information, see
+// https://github.com/jrburke/requirejs/wiki/Updating-existing-libraries#wiki-anon
+
+if ( typeof undefined === "function" && undefined.amd ) {
+	undefined( "jquery", [], function() {
+		return jQuery;
+	} );
+}
+
+
+
+
 var
 
 	// Map over jQuery in case of overwrite
@@ -11112,7 +11157,7 @@ _.$ = $;
 _.$$ = $$;
 
 // Expose Awesomplete as a CJS module
-if (module.exports) {
+if ('object' === "object" && module.exports) {
 	module.exports = _;
 }
 
@@ -11120,132 +11165,6 @@ return _;
 
 }());
 });
-
-const CLEANUP_PARTS_MS = 1000 * 60;
-
-/**
- * Interpolates the values into the string.
- * @param text
- * @param values
- */
-function interpolate(text, values) {
-    return Object.entries(extract(values)).reduce((text, [key, value]) => text.replace(new RegExp(`{{[  ]*${key}[  ]*}}`), String(extract(value))), text);
-}
-/**
- * Returns a string based on a chain of keys using the dot notation.
- * @param key
- * @param config
- */
-function lookup(key, config) {
-    // Split the key in parts (example: hello.world)
-    const parts = key.split(".");
-    // Find the string by traversing through the strings matching the chain of keys
-    let string = config.strings;
-    // Do not continue if the string is not defined or if we have traversed all of the key parts
-    while (string != null && parts.length > 0) {
-        string = string[parts.shift()];
-    }
-    // Make sure the string is in fact a string!
-    return string != null ? string.toString() : null;
-}
-/**
- * Extracts either the value from the function or returns the value that was passed in.
- * @param obj
- */
-function extract(obj) {
-    return (typeof obj === "function") ? obj() : obj;
-}
-
-/**
- * Default configuration object.
- */
-const defaultTranslateConfig = () => {
-    return {
-        loader: () => Promise.resolve({}),
-        empty: key => `[${key}]`,
-        lookup: lookup,
-        interpolate: interpolate,
-        translationCache: {}
-    };
-};
-// The current configuration.
-let translateConfig = defaultTranslateConfig();
-/**
- * Registers a translation config.
- * @param config
- */
-function registerTranslateConfig(config) {
-    return (translateConfig = Object.assign({}, translateConfig, config));
-}
-/**
- * Loads the strings using the provided loader.
- * @param lang
- * @param config
- */
-async function loadStrings(lang, config = translateConfig) {
-    return await config.loader(lang, config);
-}
-/**
- * Dispatches a language changed event.
- * @param detail
- */
-function dispatchLangChanged(detail) {
-    window.dispatchEvent(new CustomEvent("langChanged" /* LANG_CHANGED */, { detail }));
-}
-/**
- * Updates the configuration object with a new language and strings.
- * Then dispatches that the language has changed.
- * @param newLang
- * @param newStrings
- * @param config
- */
-function updateLang(newLang, newStrings, config = translateConfig) {
-    dispatchLangChanged({
-        previousStrings: config.strings,
-        previousLang: config.lang,
-        lang: (config.lang = newLang),
-        strings: (config.strings = newStrings)
-    });
-}
-/**
- * Listens for changes in the language.
- * Returns a method for unsubscribing from the event.
- * @param callback
- * @param options
- */
-function listenForLangChanged(callback, options) {
-    const handler = (e) => callback(e.detail);
-    window.addEventListener("langChanged" /* LANG_CHANGED */, handler, options);
-    return () => window.removeEventListener("langChanged" /* LANG_CHANGED */, handler);
-}
-/**
- * Sets a new current language and dispatches a global language changed event.
- * @param lang
- * @param config
- */
-async function use(lang, config = translateConfig) {
-    // Load the translations and set the cache
-    const strings = await loadStrings(lang, config);
-    config.translationCache = {};
-    // Dispatch global language changed event while setting the new values
-    updateLang(lang, strings, config);
-}
-/**
- * Translates a key and interpolates if values are defined.
- * Uses the current strings and translation cache to fetch the translation.
- * @param key (eg. "common.get_started")
- * @param values (eg. { count: 42 })
- * @param config
- */
-function get(key, values, config = translateConfig) {
-    // Either use the translation from the cache or get it and add it to the cache
-    let translation = config.translationCache[key]
-        || (config.translationCache[key] = config.lookup(key, config) || config.empty(key, config));
-    // Extract the values
-    values = values != null ? extract(values) : null;
-    // Interpolate the values and return the translation
-    return values != null ? translateConfig.interpolate(translation, values, config) : translation;
-}
 
 /**
  * @license
@@ -11706,6 +11625,26 @@ class TemplateResult {
     getTemplateElement() {
         const template = document.createElement('template');
         template.innerHTML = this.getHTML();
+        return template;
+    }
+}
+/**
+ * A TemplateResult for SVG fragments.
+ *
+ * This class wraps HTMl in an `<svg>` tag in order to parse its contents in the
+ * SVG namespace, then modifies the template to remove the `<svg>` tag so that
+ * clones only container the original fragment.
+ */
+class SVGTemplateResult extends TemplateResult {
+    getHTML() {
+        return `<svg>${super.getHTML()}</svg>`;
+    }
+    getTemplateElement() {
+        const template = super.getTemplateElement();
+        const content = template.content;
+        const svgElement = content.firstChild;
+        content.removeChild(svgElement);
+        reparentNodes(content, svgElement.firstChild);
         return template;
     }
 }
@@ -12294,6 +12233,137 @@ const render = (result, container, options) => {
  * render to and update a container.
  */
 const html = (strings, ...values) => new TemplateResult(strings, values, 'html', defaultTemplateProcessor);
+/**
+ * Interprets a template literal as an SVG template that can efficiently
+ * render to and update a container.
+ */
+const svg = (strings, ...values) => new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
+
+const CLEANUP_PARTS_MS = 1000 * 60;
+
+/**
+ * Interpolates the values into the string.
+ * @param text
+ * @param values
+ */
+function interpolate(text, values) {
+    return Object.entries(extract(values)).reduce((text, [key, value]) => text.replace(new RegExp(`{{[  ]*${key}[  ]*}}`), String(extract(value))), text);
+}
+/**
+ * Returns a string based on a chain of keys using the dot notation.
+ * @param key
+ * @param config
+ */
+function lookup(key, config) {
+    // Split the key in parts (example: hello.world)
+    const parts = key.split(".");
+    // Find the string by traversing through the strings matching the chain of keys
+    let string = config.strings;
+    // Do not continue if the string is not defined or if we have traversed all of the key parts
+    while (string != null && parts.length > 0) {
+        string = string[parts.shift()];
+    }
+    // Make sure the string is in fact a string!
+    return string != null ? string.toString() : null;
+}
+/**
+ * Extracts either the value from the function or returns the value that was passed in.
+ * @param obj
+ */
+function extract(obj) {
+    return (typeof obj === "function") ? obj() : obj;
+}
+
+/**
+ * Default configuration object.
+ */
+const defaultTranslateConfig = () => {
+    return {
+        loader: () => Promise.resolve({}),
+        empty: key => `[${key}]`,
+        lookup: lookup,
+        interpolate: interpolate,
+        translationCache: {}
+    };
+};
+// The current configuration.
+let translateConfig = defaultTranslateConfig();
+/**
+ * Registers a translation config.
+ * @param config
+ */
+function registerTranslateConfig(config) {
+    return (translateConfig = Object.assign({}, translateConfig, config));
+}
+/**
+ * Loads the strings using the provided loader.
+ * @param lang
+ * @param config
+ */
+async function loadStrings(lang, config = translateConfig) {
+    return await config.loader(lang, config);
+}
+/**
+ * Dispatches a language changed event.
+ * @param detail
+ */
+function dispatchLangChanged(detail) {
+    window.dispatchEvent(new CustomEvent("langChanged" /* LANG_CHANGED */, { detail }));
+}
+/**
+ * Updates the configuration object with a new language and strings.
+ * Then dispatches that the language has changed.
+ * @param newLang
+ * @param newStrings
+ * @param config
+ */
+function updateLang(newLang, newStrings, config = translateConfig) {
+    dispatchLangChanged({
+        previousStrings: config.strings,
+        previousLang: config.lang,
+        lang: (config.lang = newLang),
+        strings: (config.strings = newStrings)
+    });
+}
+/**
+ * Listens for changes in the language.
+ * Returns a method for unsubscribing from the event.
+ * @param callback
+ * @param options
+ */
+function listenForLangChanged(callback, options) {
+    const handler = (e) => callback(e.detail);
+    window.addEventListener("langChanged" /* LANG_CHANGED */, handler, options);
+    return () => window.removeEventListener("langChanged" /* LANG_CHANGED */, handler);
+}
+/**
+ * Sets a new current language and dispatches a global language changed event.
+ * @param lang
+ * @param config
+ */
+async function use(lang, config = translateConfig) {
+    // Load the translations and set the cache
+    const strings = await loadStrings(lang, config);
+    config.translationCache = {};
+    // Dispatch global language changed event while setting the new values
+    updateLang(lang, strings, config);
+}
+/**
+ * Translates a key and interpolates if values are defined.
+ * Uses the current strings and translation cache to fetch the translation.
+ * @param key (eg. "common.get_started")
+ * @param values (eg. { count: 42 })
+ * @param config
+ */
+function get(key, values, config = translateConfig) {
+    // Either use the translation from the cache or get it and add it to the cache
+    let translation = config.translationCache[key]
+        || (config.translationCache[key] = config.lookup(key, config) || config.empty(key, config));
+    // Extract the values
+    values = values != null ? extract(values) : null;
+    // Interpolate the values and return the translation
+    return values != null ? translateConfig.interpolate(translation, values, config) : translation;
+}
 
 /** #################################################################################
  ** The purpose of this module is to provide an API to clean up the node parts cache.
@@ -12828,4 +12898,252 @@ const repeat = directive((items, keyFnOrTemplate, template) => {
     };
 });
 
-export { use as a, html as b, translate as c, repeat as d, jquery as e, registerTranslateConfig as f, translateConfig as g, render as h, get as i };
+const chromeP = {};
+
+/** Wrap an API that uses callbacks with Promises
+ * This expects the pattern function withCallback(arg1, arg2, ... argN, callback)
+ * @author Keith Henry <keith.henry@evolutionjobs.co.uk>
+ * @license MIT */
+(function () {
+    'use strict';
+
+    /** Wrap a function with a callback with a Promise.
+     * @param {function} f The function to wrap, should be pattern: withCallback(arg1, arg2, ... argN, callback).
+     * @param {function} parseCB Optional function to parse multiple callback parameters into a single object.
+     * @returns {Promise} Promise that resolves when the callback fires. */
+    function promisify(f, parseCB) {
+        return (...args) => {
+            let safeArgs = args;
+            let callback;
+            // The Chrome API functions all use arguments, so we can't use f.length to check
+
+            // If there is a last arg
+            if (args && args.length > 0) {
+
+                // ... and the last arg is a function
+                const last = args[args.length - 1];
+                if (typeof last === 'function') {
+                    // Trim the last callback arg if it's been passed
+                    safeArgs = args.slice(0, args.length - 1);
+                    callback = last;
+                }
+            }
+
+            // Return a promise
+            return new Promise((resolve, reject) => {
+                try {
+                    // Try to run the original function, with the trimmed args list
+                    f(...safeArgs, (...cbArgs) => {
+
+                        // If a callback was passed at the end of the original arguments
+                        if (callback) {
+                            // Don't allow a bug in the callback to stop the promise resolving
+                            try { callback(...cbArgs); }
+                            catch (cbErr) { reject(cbErr); }
+                        }
+
+                        // Chrome extensions always fire the callback, but populate chrome.runtime.lastError with exception details
+                        if (chrome.runtime.lastError)
+                        // Return as an error for the awaited catch block
+                            reject(new Error(chrome.runtime.lastError.message || `Error thrown by API ${chrome.runtime.lastError}`));
+                        else {
+                            if (parseCB) {
+                                const cbObj = parseCB(...cbArgs);
+                                resolve(cbObj);
+                            }
+                            else if (!cbArgs || cbArgs.length === 0)
+                                resolve();
+                            else if (cbArgs.length === 1)
+                                resolve(cbArgs[0]);
+                            else
+                                resolve(cbArgs);
+                        }
+                    });
+                }
+                catch (err) { reject(err); }
+            });
+        }
+    }
+
+    /** Promisify all the known functions in the map
+     * @param {object} api The Chrome native API to extend
+     * @param {Array} apiMap Collection of sub-API and functions to promisify */
+    function applyMap(api, apiMap, apiName, exportObj) {
+        if (!api)
+        // Not supported by current permissions
+            return;
+
+        for (let funcDef of apiMap) {
+            let funcName;
+            if (typeof funcDef === 'string')
+                funcName = funcDef;
+            else {
+                funcName = funcDef.n;
+            }
+
+            if (!api.hasOwnProperty(funcName))
+            // Member not in API
+                continue;
+            const m = api[funcName];
+            if (typeof m === 'function'){
+
+                exportObj[funcName] = promisify(m.bind(api), funcDef.cb);
+            }else{
+                // Sub-API, recurse this func with the mapped props
+                exportObj[funcName] = {};
+                applyMap(m, funcDef.props, apiName, exportObj[funcName]);
+            }
+        }
+    }
+
+    /** Apply promise-maps to the Chrome native API.
+     * @param {object} apiMaps The API to apply. */
+    function applyMaps(apiMaps) {
+        for (let apiName in apiMaps) {
+            const callbackApi = chrome[apiName];
+            if (!callbackApi) {
+                // Not supported by current permissions
+                continue;
+            }
+            chromeP[apiName] = {};
+            const apiMap = apiMaps[apiName];
+            applyMap(callbackApi, apiMap, apiName, chromeP[apiName]);
+        }
+    }
+
+    // accessibilityFeatures https://developer.chrome.com/extensions/accessibilityFeatures
+    const knownA11ySetting = ['get', 'set', 'clear'];
+
+    // ContentSetting https://developer.chrome.com/extensions/contentSettings#type-ContentSetting
+    const knownInContentSetting = ['clear', 'get', 'set', 'getResourceIdentifiers'];
+
+    // StorageArea https://developer.chrome.com/extensions/storage#type-StorageArea
+    const knownInStorageArea = ['get', 'getBytesInUse', 'set', 'remove', 'clear'];
+
+    /** Map of API functions that follow the callback pattern that we can 'promisify' */
+    applyMaps({
+        accessibilityFeatures: [  // Todo: this should extend AccessibilityFeaturesSetting.prototype instead
+            { n: 'spokenFeedback', props: knownA11ySetting },
+            { n: 'largeCursor', props: knownA11ySetting },
+            { n: 'stickyKeys', props: knownA11ySetting },
+            { n: 'highContrast', props: knownA11ySetting },
+            { n: 'screenMagnifier', props: knownA11ySetting },
+            { n: 'autoclick', props: knownA11ySetting },
+            { n: 'virtualKeyboard', props: knownA11ySetting },
+            { n: 'animationPolicy', props: knownA11ySetting }],
+        alarms: ['get', 'getAll', 'clear', 'clearAll'],
+        bookmarks: [
+            'get', 'getChildren', 'getRecent', 'getTree', 'getSubTree',
+            'search', 'create', 'move', 'update', 'remove', 'removeTree'],
+        browser: ['openTab'],
+        browserAction: [
+            'getTitle', 'setIcon', 'getPopup', 'getBadgeText', 'getBadgeBackgroundColor'],
+        browsingData: [
+            'settings', 'remove', 'removeAppcache', 'removeCache',
+            'removeCookies', 'removeDownloads', 'removeFileSystems',
+            'removeFormData', 'removeHistory', 'removeIndexedDB',
+            'removeLocalStorage', 'removePluginData', 'removePasswords',
+            'removeWebSQL'],
+        commands: ['getAll'],
+        contentSettings: [  // Todo: this should extend ContentSetting.prototype instead
+            { n: 'cookies', props: knownInContentSetting },
+            { n: 'images', props: knownInContentSetting },
+            { n: 'javascript', props: knownInContentSetting },
+            { n: 'location', props: knownInContentSetting },
+            { n: 'plugins', props: knownInContentSetting },
+            { n: 'popups', props: knownInContentSetting },
+            { n: 'notifications', props: knownInContentSetting },
+            { n: 'fullscreen', props: knownInContentSetting },
+            { n: 'mouselock', props: knownInContentSetting },
+            { n: 'microphone', props: knownInContentSetting },
+            { n: 'camera', props: knownInContentSetting },
+            { n: 'unsandboxedPlugins', props: knownInContentSetting },
+            { n: 'automaticDownloads', props: knownInContentSetting }],
+        contextMenus: ['create', 'update', 'remove', 'removeAll'],
+        cookies: ['get', 'getAll', 'set', 'remove', 'getAllCookieStores'],
+        debugger: ['attach', 'detach', 'sendCommand', 'getTargets'],
+        desktopCapture: ['chooseDesktopMedia'],
+        // TODO: devtools.*
+        documentScan: ['scan'],
+        downloads: [
+            'download', 'search', 'pause', 'resume', 'cancel',
+            'getFileIcon', 'erase', 'removeFile', 'acceptDanger'],
+        enterprise: [{ n: 'platformKeys', props: ['getToken', 'getCertificates', 'importCertificate', 'removeCertificate'] }],
+        extension: ['isAllowedIncognitoAccess', 'isAllowedFileSchemeAccess'], // mostly deprecated in favour of runtime
+        fileBrowserHandler: ['selectFile'],
+        fileSystemProvider: ['mount', 'unmount', 'getAll', 'get', 'notify'],
+        fontSettings: [
+            'setDefaultFontSize', 'getFont', 'getDefaultFontSize', 'getMinimumFontSize',
+            'setMinimumFontSize', 'getDefaultFixedFontSize', 'clearDefaultFontSize',
+            'setDefaultFixedFontSize', 'clearFont', 'setFont', 'clearMinimumFontSize',
+            'getFontList', 'clearDefaultFixedFontSize'],
+        gcm: ['register', 'unregister', 'send'],
+        history: ['search', 'getVisits', 'addUrl', 'deleteUrl', 'deleteRange', 'deleteAll'],
+        i18n: ['getAcceptLanguages', 'detectLanguage'],
+        identity: [
+            'getAuthToken', 'getProfileUserInfo', 'removeCachedAuthToken',
+            'launchWebAuthFlow', 'getRedirectURL'],
+        idle: ['queryState'],
+        input: [{
+            n: 'ime', props: [
+                'setMenuItems', 'commitText', 'setCandidates', 'setComposition', 'updateMenuItems',
+                'setCandidateWindowProperties', 'clearComposition', 'setCursorPosition', 'sendKeyEvents',
+                'deleteSurroundingText']
+        }],
+        management: [
+            'setEnabled', 'getPermissionWarningsById', 'get', 'getAll',
+            'getPermissionWarningsByManifest', 'launchApp', 'uninstall', 'getSelf',
+            'uninstallSelf', 'createAppShortcut', 'setLaunchType', 'generateAppForLink'],
+        networking: [{ n: 'config', props: ['setNetworkFilter', 'finishAuthentication'] }],
+        notifications: ['create', 'update', 'clear', 'getAll', 'getPermissionLevel'],
+        pageAction: ['getTitle', 'setIcon', 'getPopup'],
+        pageCapture: ['saveAsMHTML'],
+        permissions: ['getAll', 'contains', 'request', 'remove'],
+        platformKeys: ['selectClientCertificates', 'verifyTLSServerCertificate',
+            { n: "getKeyPair", cb: (publicKey, privateKey) => { return { publicKey, privateKey }; } }],
+        runtime: [
+            'getBackgroundPage', 'openOptionsPage', 'setUninstallURL',
+            'restartAfterDelay', 'sendMessage',
+            'sendNativeMessage', 'getPlatformInfo', 'getPackageDirectoryEntry',
+            { n: "requestUpdateCheck", cb: (status, details) => { return { status, details }; } }],
+        scriptBadge: ['getPopup'],
+        sessions: ['getRecentlyClosed', 'getDevices', 'restore'],
+        storage: [          // Todo: this should extend StorageArea.prototype instead
+            { n: 'sync', props: knownInStorageArea },
+            { n: 'local', props: knownInStorageArea },
+            { n: 'managed', props: knownInStorageArea }],
+        socket: [
+            'create', 'connect', 'bind', 'read', 'write', 'recvFrom', 'sendTo',
+            'listen', 'accept', 'setKeepAlive', 'setNoDelay', 'getInfo', 'getNetworkList'],
+        sockets: [
+            { n: 'tcp', props: [
+                    'create','update','setPaused','setKeepAlive','setNoDelay','connect',
+                    'disconnect','secure','send','close','getInfo','getSockets'] },
+            { n: 'tcpServer', props: [
+                    'create','update','setPaused','listen','disconnect','close','getInfo','getSockets'] },
+            { n: 'udp', props: [
+                    'create','update','setPaused','bind','send','close','getInfo',
+                    'getSockets','joinGroup','leaveGroup','setMulticastTimeToLive',
+                    'setMulticastLoopbackMode','getJoinedGroups','setBroadcast'] }],
+        system: [
+            { n: 'cpu', props: ['getInfo'] },
+            { n: 'memory', props: ['getInfo'] },
+            { n: 'storage', props: ['getInfo', 'ejectDevice', 'getAvailableCapacity'] }],
+        tabCapture: ['capture', 'getCapturedTabs'],
+        tabs: [
+            'get', 'getCurrent', 'sendMessage', 'create', 'duplicate',
+            'query', 'highlight', 'update', 'move', 'reload', 'remove',
+            'detectLanguage', 'captureVisibleTab', 'executeScript',
+            'insertCSS', 'setZoom', 'getZoom', 'setZoomSettings',
+            'getZoomSettings', 'discard'],
+        topSites: ['get'],
+        tts: ['isSpeaking', 'getVoices', 'speak'],
+        types: ['set', 'get', 'clear'],
+        vpnProvider: ['createConfig', 'destroyConfig', 'setParameters', 'sendPacket', 'notifyConnectionStateChanged'],
+        wallpaper: ['setWallpaper'],
+        webNavigation: ['getFrame', 'getAllFrames', 'handlerBehaviorChanged'],
+        windows: ['get', 'getCurrent', 'getLastFocused', 'getAll', 'create', 'update', 'remove']
+    });
+})();
+
+export { html as a, translate as b, repeat as c, jquery as d, registerTranslateConfig as e, chromeP as f, use as g, translateConfig as h, render as i, get as j };

@@ -23,6 +23,7 @@
     "rollup-plugin-commonjs": "^10.0.0",
     "rollup-plugin-copy": "^2.0.1",
     "rollup-plugin-image": "^1.0.2",
+    "rollup-plugin-img": "^1.1.0",
     "rollup-plugin-inline-image": "^0.1.0",
     "rollup-plugin-node-resolve": "^5.0.0",
     "rollup-plugin-postcss": "^2.0.3"
@@ -30,6 +31,8 @@
   "dependencies": {
     "@appnest/lit-translate": "^1.1.16",
     "awesomplete": "^1.1.4",
+    "chrome-extension-async": "^3.3.2",
+    "chromep": "^3.3.5",
     "jquery": "^3.4.1",
     "keen-tracking": "^4.4.0",
     "lit-html": "^1.0.0",

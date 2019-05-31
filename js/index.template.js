@@ -2,8 +2,31 @@ import {html} from 'lit-html';
 import {repeat} from 'lit-html/directives/repeat';
 import {translate} from "@appnest/lit-translate";
 
-let index_template = (currencies) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
-    <img class="logo-aviasales" src="../img/logo_aviasales.svg" alt="">
+const languages = {"en": "English", "ru": "Русский"};
+
+const signs = {
+    "rub": "\u20BD",
+    "eur": "€",
+    "usd": "$",
+    "cny": "¥",
+    "uah": "₴",
+    "kzt": "₸",
+    "azn": "\u20BC",
+    "byn": "Br",
+    "thb": "฿"
+};
+
+// currency: (2) ["EUR", "€"]
+// lang: "ru"
+// originCity:
+//     IEV: "Киев"
+// __proto__: Object
+// showComments: true
+// showTags: true
+
+
+let index_template = (currencies, settings) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
+    <img class="logo-aviasales" src="../img/logo.png" alt="">
 </a>
 
 <div class="block block--top block--right">
@@ -41,12 +64,11 @@ let index_template = (currencies) => html`<a id="logo" href="https://www.aviasal
                     <div class="wrapper-select-dropdown" id="choose_lang">
 						<span class="wrapper-select-dropdown__label" id="lang_label"></span>
                         <ul class="dropdown" id="lang_dropdown">
-                            <li data-lang="ru">
-                                <img src="../img/check.svg" alt=""></span>RU
-                            </li>
-                            <li data-lang="en">
-                                <img src="../img/check.svg" alt=""></span>EN
-                            </li>
+                            ${repeat(Object.keys(languages), language => html`
+                                <li data-lang="${language}">
+                                    <img src="../img/check.svg" alt=""></span>${languages[language]}
+                                </li>
+                            `)}
                         </ul>
                     </div>
                 </div>
@@ -55,12 +77,14 @@ let index_template = (currencies) => html`<a id="logo" href="https://www.aviasal
                     <label class="input-label">${translate('titles.currency')}</label>
                     <div class="wrapper-select-dropdown" id="choose_currency">
 						<span class="wrapper-select-dropdown__label" id="currency_label">
+						${html`<span class="currency-sign">${signs[settings.currency[0].toLowerCase()]}</span>
+							${translate('auto_generated.currency.translations.' + settings.currency[0].toLowerCase())}`}
 						</span>
                         <ul class="dropdown" id="currency_dropdown">
                             ${repeat(currencies.order, currency => html`<li data-currency="${currency.toUpperCase()}">
                                 <img src="../img/check.svg" alt="">
-                                ${currencies.signs[currency] ? html`
-                                <span class="currency-sign">${currencies.signs[currency]}</span>` : ''}
+                                ${signs[currency] ? html`
+                                <span class="currency-sign">${signs[currency]}</span>` : ''}
                                 ${translate('auto_generated.currency.translations.' + currency.toLowerCase())}
                                 </li>`)}
                         </ul>
@@ -124,7 +148,7 @@ let index_template = (currencies) => html`<a id="logo" href="https://www.aviasal
         <div class="destination hidden show-animate" id="destination"></div>
 
         <div class="origin-container hidden show-animate">
-            <div class="origin" id="origin"></div>
+            <div class="origin" id="origin">${translate('titles.from_city')} <span></span></div>
         </div>
 
         <div class="tags-container hidden show-animate" id="tags_container">

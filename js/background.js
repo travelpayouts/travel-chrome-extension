@@ -2,6 +2,7 @@ import cities_data from './cities_data.js';
 import booking_reviews from './booking_reviews.js';
 import storage from './storage.js';
 import client from './initKeen.js';
+import iata_codes from './iata_codes.js';
 
 var items_per_key = storage.items_per_key;
 window.cities_data = cities_data;
@@ -21,7 +22,6 @@ var currencies_dictionary = {
     'United States': ['USD', '&dollar;']
 };
 
-
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.cmd == 'isProcessing') {
@@ -35,7 +35,7 @@ chrome.runtime.onMessage.addListener(
             // chrome.storage.onChanged.removeListener(storageOnChangeListener);
             chrome.runtime.sendMessage({cmd: 'disable_settings_change'});
             // updateAllData();
-            updateAllData(null, request.lang);
+            updateAllData(false, request.lang);
         }
 
         if (request.cmd == 'update_all') {
@@ -44,16 +44,18 @@ chrome.runtime.onMessage.addListener(
             isAppStarted = false;
             // chrome.storage.onChanged.removeListener(storageOnChangeListener);
             chrome.runtime.sendMessage({cmd: 'disable_settings_change'});
-            updateAllData(true);
+            chrome.storage.sync.get('settings', res => {
+                updateAllData(true, res.settings.lang);
+            });
         }
 
-        // if(request.cmd === 'preload') {
-        // 	chrome.runtime.sendMessage({cmd: 'disable_settings_change'});
-        // 	preload_dest_images({}, function(){
-        // 		chrome.runtime.sendMessage({cmd: 'enable_settings_change'});
-        // 	});
-        // }
-
+        if (request.cmd == 'get_translated_destination') {
+            let destination_name = im_city_name(request.current_destination, cities_data, request.lang) + ', ' +
+                im_country_name(request.current_destination, cities_data, request.lang);
+            let originFrom = ro_city_name(request.current_origin, cities_data, request.lang);
+            let originSettings = im_city_name(request.current_origin, cities_data, request.lang);
+            sendResponse({destination_name: destination_name, originFrom: originFrom, originSettings: originSettings});
+        }
     }
 );
 
@@ -61,26 +63,28 @@ var get_origin_currency = function (origin_country) {
     return currencies_dictionary[origin_country] || currencies_dictionary['Russia'];
 };
 
-var ro_city_name = function (iata, city_data) {
+var ro_city_name = function (iata, city_data, lang) {
+    console.log(city_data[iata]);
     var ro_city_names = city_data[iata].names;
+    console.log(ro_city_names);
     var ro_city_name;
-    if (ro_city_names.ru) {
+    if (lang === 'ru' && ro_city_names.ru) {
         if (ro_city_names.ru.cases && ro_city_names.ru.cases.ro) {
             ro_city_name = ro_city_names.ru.cases.ro;
         } else {
             ro_city_name = ro_city_names.ru.name;
         }
     } else {
-        ro_city_name = ro_city_names.en.city_name;
+        ro_city_name = ro_city_names.en.name;
     }
     return ro_city_name;
 }
 
-var im_city_name = function (iata, city_data) {
+var im_city_name = function (iata, city_data, lang) {
     var im_city_names = cities_data[iata].names,
         im_city_name;
 
-    if (im_city_names.ru && im_city_names.ru.name) {
+    if (lang === 'ru' && im_city_names.ru && im_city_names.ru.name) {
         im_city_name = im_city_names.ru.name;
     } else {
         im_city_name = im_city_names.en.name;
@@ -88,44 +92,18 @@ var im_city_name = function (iata, city_data) {
     return im_city_name;
 }
 
-// var destinationPhotos = function(destination_iata, destination_name, callback) {
-//   var req = new XMLHttpRequest(),
-//       url = "https://api.flickr.com/services/rest/?format=json&sort=relevance&method=flickr.photos.search&text=" + destination_name + "&tag_mode=all&api_key=b21208f1b8cc963fb247131159f97320&nojsoncallback=1&per_page=3&media=photos";
-
-//   console.log('url', url);
-//   req.open("GET", url, true);
-//     req.onload = function () {
-//       if (req.status == 200) {
-//         response = JSON.parse(req.responseText);
-//         var result = response.photos.photo.map(function(p){
-//           return "https://farm" + p.farm + ".staticflickr.com/" + p.server + "/" + p.id + "_" + p.secret + "_b.jpg"
-//         })
-//         callback(destination_iata, result);
-//       }
-//     };
-//     req.send();
-// };
-
 var destinationPhotos = function (destination_iata, callback) {
     var photo;
-    // var	alt_photo = null;
-    // if(flickr_photos[destination_iata]) {
-    // 	photo = flickr_photos[destination_iata];
-    // 	alt_photo = "https://mphoto.hotellook.com/static/cities/3000x1500/" + destination_iata + ".auto";
-    // } else {
-
-    // }
-
+    let w = Math.round(window.screen.width * devicePixelRatio);
+    let h = Math.round(window.screen.height * devicePixelRatio);
     photo = {
         // image_url: "https://mphoto.hotellook.com/static/cities/3000x1500/" + destination_iata + ".auto",
-        // image_url: "https://mphoto.hotellook.com/static/cities/1680x1050/" + destination_iata + ".auto",
-        image_url: "https://mphoto.hotellook.com/static/cities/480x320/" + destination_iata + ".auto",
+        // image_url: "https://mphoto.hotellook.com/static/cities/480x320/" + destination_iata + ".auto",
+        image_url: `https://mphoto.hotellook.com/static/cities/${w}x${h}/${destination_iata}.auto`,
     };
 
     callback(photo);
 };
-
-// destinationPhotos('BCN', 'Barcelona', console.log);
 
 var where_am_i = function (lang, callback) {
     var req = new XMLHttpRequest(),
@@ -136,35 +114,63 @@ var where_am_i = function (lang, callback) {
         if (req.status == 200) {
             let result = JSON.parse(req.responseText);
             // DELETE ME!
-            var origin_iata,
-                origin_name,
-                currency;
+            var origin_iata, origin_name, currency;
 
             chrome.storage.sync.get('settings', function (res) {
+                let settings;
                 if (res.settings) {
-                    var settings = res.settings;
+                    settings = res.settings;
 
                     if (settings.currency) currency = settings.currency;
                     else currency = get_origin_currency(result.country_name);
 
                     if (settings.originCity) {
-                        for (var key in settings.originCity) {
+                        for (let key in settings.originCity) {
+                            // console.log(settings);
                             origin_iata = key;
-                            origin_name = ro_city_name(key, cities_data);
+                            origin_name = ro_city_name(key, cities_data, lang);
+                        }
+                        if (settings.hasOwnProperty('lang') && settings.lang !== lang) {
+                            // currency = get_origin_currency(result.country_name);
+                            // origin_iata = result.iata;
+                            // origin_name = ro_city_name(result.iata, cities_data, lang);
+                            console.log("settings.hasOwnProperty('lang')");
+                            let originCity = im_city_name(origin_iata, cities_data, lang);
+                            let origCityObj = new Object(null);
+                            origCityObj[origin_iata] = originCity;
+                            settings.originCity = origCityObj;
+                            settings.lang = lang;
+                            console.log(settings);
+                            chrome.storage.sync.set({settings});
                         }
                     } else {
                         origin_iata = result.iata;
-                        origin_name = ro_city_name(result.iata, cities_data);
+                        origin_name = ro_city_name(result.iata, cities_data, lang);
                     }
+
                 } else {
                     currency = get_origin_currency(result.country_name);
                     origin_iata = result.iata;
-                    origin_name = ro_city_name(result.iata, cities_data);
+                    origin_name = ro_city_name(result.iata, cities_data, lang);
+                    let originCity = im_city_name(result.iata, cities_data, lang);
+
+                    settings = {};
+                    let origCityObj = new Object(null);
+                    origCityObj[origin_iata] = originCity;
+
+                    settings.currency = currency;
+
+                    settings.originCity = origCityObj;
+                    settings.lang = lang;
+                    settings.showTags = true;
+                    settings.showComments = true;
+                    console.log(settings);
+                    chrome.storage.sync.set({settings});
                 }
-                chrome.storage.local.set({
-                    currency: currency, origin_city: im_city_name(result.iata, cities_data),
-                    lang: 'ru'
-                });
+
+                // chrome.storage.local.set({
+                //     currency: currency, origin_city: originCity, lang: settings.lang || 'ru'
+                // });
                 callback(result, origin_iata, origin_name, currency[0]);
             });
         }
@@ -234,11 +240,20 @@ var eachAsync = function (arr, func, cb) {
     });
 }
 
-var im_country_name = function (iata, city_data) {
+// var im_city_names = cities_data[iata].names,
+//     im_city_name;
+//
+// if (lang === 'ru' && im_city_names.ru && im_city_names.ru.name) {
+//     im_city_name = im_city_names.ru.name;
+// } else {
+//     im_city_name = im_city_names.en.name;
+// }
+// return im_city_name;
+var im_country_name = function (iata, city_data, lang) {
     var im_country_names = cities_data[iata].country.names,
         im_country_name;
 
-    if (im_country_names.ru && im_country_names.ru.name) {
+    if (lang === 'ru' && im_country_names.ru && im_country_names.ru.name) {
         im_country_name = im_country_names.ru.name;
     } else {
         im_country_name = im_country_names.en.name;
@@ -256,19 +271,22 @@ var updateAllData = function (param, lang) {
             // directions = directions.filter(function(dir) {
             // 	return l.iata !== 'MOW' || flickr_photos[dir.destination]
             // });
+            let cnt = 0;
             eachAsync(directions, function (direction, cb) {
-                if (!cities_data[direction.destination]) {
+                if (!cities_data[direction.destination] || !iata_codes.includes(direction.destination)) {
                     console.log('Направление ' + direction.destination + ' отсутствует в словаре');
                     cb(null);
                     return;
                 }
-                debugger;
+
+                console.log('->destinationPhotos: ' + cnt);
+                cnt += 1;
                 destinationPhotos(direction.destination, function (photo) {
                     // var random_photo = photo_urls[Math.floor(Math.random() * photo_urls.length)];
                     var deal = {
                         image_url: photo.image_url,
                         price: direction.price,
-                        destination_name: im_city_name(direction.destination, cities_data) + ', ' + im_country_name(direction.destination, cities_data),
+                        destination_name: im_city_name(direction.destination, cities_data, lang) + ', ' + im_country_name(direction.destination, cities_data, lang),
                         tags: (booking_reviews[direction.destination] || {}).tags,
                         review: (booking_reviews[direction.destination] || {}).review,
                         origin_name: origin_name,
@@ -300,6 +318,8 @@ var updateAllData = function (param, lang) {
                 }
 
                 chrome.storage.local.remove(keys_to_delete, function () {
+                    // console.log(deals_obj);
+
                     chrome.storage.local.set(deals_obj, function () {
                         preload(deals_obj, param);
                     });
@@ -310,55 +330,56 @@ var updateAllData = function (param, lang) {
 };
 
 var updateDataSoftly = function (callback) {
-    where_am_i('en', function (l, origin_iata, origin_name, currency) {
-        fetchDirections(origin_iata, currency, function (directions) {
-            eachAsync(directions, function (direction, cb) {
-                if (!cities_data[direction.destination]) {
-                    console.log('Направление ' + direction.destination + ' отсутствует в словаре');
-                    cb(null);
-                    return;
-                }
+    chrome.storage.sync.get('settings', (r) => {
+        let lang = r.settings.lang;
+        console.log(lang);
+        where_am_i(lang, function (l, origin_iata, origin_name, currency) {
+            fetchDirections(origin_iata, currency, function (directions) {
+                eachAsync(directions, function (direction, cb) {
+                    if (!cities_data[direction.destination] || !iata_codes.includes(direction.destination)) {
+                        console.log('Направление ' + direction.destination + ' отсутствует в словаре');
+                        cb(null);
+                        return;
+                    }
 
-                debugger;
+                    destinationPhotos(direction.destination, function (photo) {
+                        var deal = {
+                            image_url: photo.image_url,
+                            price: direction.price,
+                            destination_name: im_city_name(direction.destination, cities_data, lang) + ', ' + im_country_name(direction.destination, cities_data, lang),
+                            tags: (booking_reviews[direction.destination] || {}).tags,
+                            review: (booking_reviews[direction.destination] || {}).review,
+                            origin_name: origin_name,
+                            origin_iata: origin_iata,
+                            destination_iata: direction.destination,
+                            depart_date: direction.depart_date,
+                            return_date: direction.return_date
+                        };
 
+                        cb(deal);
+                    });
+                }, function (deals) {
 
-                destinationPhotos(direction.destination, function (photo) {
-                    var deal = {
-                        image_url: photo.image_url,
-                        price: direction.price,
-                        destination_name: im_city_name(direction.destination, cities_data) + ', ' + im_country_name(direction.destination, cities_data),
-                        tags: (booking_reviews[direction.destination] || {}).tags,
-                        review: (booking_reviews[direction.destination] || {}).review,
-                        origin_name: origin_name,
-                        origin_iata: origin_iata,
-                        destination_iata: direction.destination,
-                        depart_date: direction.depart_date,
-                        return_date: direction.return_date
+                    var deals_obj = {
+                        last_update: Date.now(),
+                        deals_length: deals.length,
                     };
 
-                    cb(deal);
+                    for (var i = 0; i < Math.ceil(deals.length / items_per_key); i++) {
+                        var key_name = "deals_" + i.toString();
+                        deals_obj[key_name] = deals.slice(i * items_per_key, (i + 1) * items_per_key);
+                    }
+
+                    var keys_to_delete = [];
+
+                    for (var i = 0; i < 200; i++) {
+                        keys_to_delete.push("deals_" + i.toString());
+                    }
+
+                    callback(deals_obj, keys_to_delete);
                 });
-            }, function (deals) {
-
-                var deals_obj = {
-                    last_update: Date.now(),
-                    deals_length: deals.length,
-                };
-
-                for (var i = 0; i < Math.ceil(deals.length / items_per_key); i++) {
-                    var key_name = "deals_" + i.toString();
-                    deals_obj[key_name] = deals.slice(i * items_per_key, (i + 1) * items_per_key);
-                }
-
-                var keys_to_delete = [];
-
-                for (var i = 0; i < 200; i++) {
-                    keys_to_delete.push("deals_" + i.toString());
-                }
-
-                callback(deals_obj, keys_to_delete);
             });
-        });
+        })
     });
 }
 
@@ -399,6 +420,12 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
     if (areaName === 'local' && changes.next_deal_index) {
         preload_next(changes.next_deal_index.newValue);
     }
+    if (areaName === 'sync') {
+        console.log("areaName === 'sync'");
+        if (changes.lang) {
+            chrome.runtime.sendMessage({message: 'processed'})
+        }
+    }
 
     function preload_next(deal_index) {
         storage.get_deal_by_index(deal_index, function (deal) {
@@ -414,19 +441,6 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
         });
     }
 });
-
-// function storageOnChangeListener(changes, areaName) {		
-// 	if (areaName === 'local' && changes.next_deal_index) {
-// 		if(changes.next_deal_index.newValue == 0) {
-// 			chrome.storage.local.get('alternate_images', function(res){
-// 				res.alternate_images = !res.alternate_images;
-// 				chrome.storage.local.set(res, function(){
-// 					console.log('saved');
-// 				});
-// 			});
-// 		}
-// 	}
-// }
 
 function sendKeenEvent(dest_iata, img_url) {
     var dummy = {
@@ -568,7 +582,7 @@ function preload(data, isLoaderActive, callback) {
                     }
                 }
 
-                sendKeenEvent(elem.destination_iata, img.src);
+                // sendKeenEvent(elem.destination_iata, img.src); // TODO: uncomment for production
             };
 
             img.src = elem.image_url;
@@ -579,9 +593,18 @@ function preload(data, isLoaderActive, callback) {
 function init_storage() {
     chrome.storage.local.get('last_update', function (res) {
         if (typeof (res.last_update) == 'undefined') {
-            updateAllData();
+            chrome.storage.sync.get('settings', res => {
+                let lang;
+                if (!res.settings) {
+                    lang = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
+                } else {
+                    lang = res.settings.lang;
+                }
+                updateAllData(false, lang);
+            });
+
         } else {
-            console.log(Date.now() - res.last_update)
+            console.log(Date.now() - res.last_update);
             if (Date.now() - res.last_update >= 3600000) {
                 console.log('We need update data!');
 

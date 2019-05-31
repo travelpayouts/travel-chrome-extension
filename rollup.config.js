@@ -2,12 +2,14 @@ import resolve from 'rollup-plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss'
 import copy from 'rollup-plugin-copy'
 import commonjs from 'rollup-plugin-commonjs';
-import symbol from 'rollup-plugin-lit-html-svg';
+// import symbol from 'rollup-plugin-lit-html-svg';
+// import image from 'rollup-plugin-img';
 
 export default {
     input: [
         'js/index.js',
     ],
+    treeshake: false,
 
     manualChunks(id) {
         if (id.includes('node_modules')) {
@@ -32,7 +34,7 @@ export default {
             minimize: false,
             extract: 'build/style.css'
         }),
-        symbol(),
+        // image(),
         copy({
             targets: [
                 'manifest.json',
@@ -45,6 +47,7 @@ export default {
                 'js/storage.js',
                 'node_modules/keen-tracking/dist/keen-tracking.min.js',
                 'js/initKeen.js',
+                'js/iata_codes.js',
                 'js/background.js',
                 'scss/fonts',
                 './node_modules/awesomplete/awesomplete.css'

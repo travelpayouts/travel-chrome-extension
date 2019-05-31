@@ -13,7 +13,8 @@
     "other_directions": "Other directions",
     "enter_city_name": "Enter city name",
     "from": "from",
-    "from_city": "departure"
+    "from_city": "departure",
+    "nights": "nights"
   },
   "auto_generated": {
     "currency": {
@@ -174,18 +175,8 @@
         "xof",
         "zar",
         "zmw"
-      ],
-      "signs": {
-        "rub": "\u20BD",
-        "eur": "€",
-        "usd": "$",
-        "cny": "¥",
-        "uah": "₴",
-        "kzt": "₸",
-        "azn": "\u20BC",
-        "byn": "Br",
-        "thb": "฿"
-      }
+      ]
+
     },
     "currency_abbreviation": {
       "amd": {

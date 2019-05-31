@@ -709,3 +709,8 @@ body {
 
 .awesomplete {
   width: 100%; }
+
+#currency_dropdown li {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }

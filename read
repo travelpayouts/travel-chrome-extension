@@ -1,0 +1,146 @@
+==
+chrome.storage.sync.get(function(result){console.log(result)}):
+
+    'settings'
+
+    currency: ["EUR", "€"]
+    hideCities: {}
+    lang: "ru"
+    originCity: {IEV: "Киев"}
+    showComments: true
+    showTags: true
+
+==
+chrome.storage.local.get(function(result){console.log(result)}):
+
+    currency: ["USD", "$"]
+    deals_0: [{depart_date: "2019-09-27"
+               destination_iata: "WAS"
+               destination_name: "Вашингтон, США"
+               image_url: "https://mphoto.hotellook.com/static/cities/480x320/WAS.auto"
+               origin_iata: "IEV"
+               origin_name: "Киева"
+               price: 509.53495737057483
+               return_date: "2019-10-17"}]
+    deals_length: 998
+    lang: "ru"
+    last_update: 1558608219590
+    next_deal_index: 7
+    origin_city: "Киев"
+
+==
+После уcтановки смены языка на en:
+
+deals_0: [{depart_date: "2019-09-27"
+           destination_iata: "WAS"
+           destination_name: "Washington, United States"
+           image_url: "https://mphoto.hotellook.com/static/cities/480x320/WAS.auto"
+           origin_iata: "IEV"
+           origin_name: "Kiev"
+           price: 509.53495737057483
+           return_date: "2019-10-17"}
+           ...
+           ]
+
+
+==
+При вводе символов города отправления идут запросы по мере ввода:
+https://places.aviasales.ru/v2/places.json?term=%D0%9A%D0%B8%D0%B5%D0%B2&locale=ru&types%5B%5D=city
+TODO: locale=ru сейчас отправляется и когда англ
+При появлении выпадающей подсказки с город при клике по ней отправляется запрос на
+http://www.travelpayouts.com/whereami?locale=undefined который возвращает:
+{"iata":"IEV",
+"name":"Kiev",
+"country_name":"Ukraine",
+"coordinates":"30.5:50.45"}
+
+Далее идет запрос
+https://lyssa.aviasales.ru/map?min_trip_duration=2&max_trip_duration=30&affiliate=false&
+one_way=false&only_direct=false&origin_iata=IEV&currency_code=USD&depart_months[]=2019-05-01&
+depart_months[]=2019-06-01&depart_months[]=2019-07-01&depart_months[]=2019-08-01&depart_months[]=2019-09-01&
+depart_months[]=2019-10-01&depart_months[]=2019-11-01&depart_months[]=2019-12-01&depart_months[]=2020-01-01&
+depart_months[]=2020-02-01&depart_months[]=2020-03-01&depart_months[]=2020-04-01
+Который возвращает массив из 999 элементов:
+[{
+		"value": 509.53495737057483,
+		"ttl": 1557652764,
+		"trip_class": 0,
+		"show_to_affiliates": false,
+		"return_date": "2019-10-17",
+		"origin": "IEV",
+		"number_of_changes": 1,
+		"gate": "Trip.ru",
+		"found_at": "2019-05-10T09:19:24",
+		"distance": 0,
+		"destination": "WAS",
+		"depart_date": "2019-09-27",
+		"created_at": 1557479964,
+		"actual": true
+	}
+	...]
+
+Далее идут запросы проверки наличия фото:
+https://mphoto.hotellook.com/static/cities/480x320/SPU.auto
+...
+Возвращают 304 или 404
+
+==
+При изменение языка на en:
+http://www.travelpayouts.com/whereami?locale=en
+{"iata":"IEV","name":"Kiev","country_name":"Ukraine","coordinates":"30.5:50.45"}
+
+https://lyssa.aviasales.ru/map?min_trip_duration=2&max_trip_duration=30&affiliate=false&one_way=false&
+only_direct=false&origin_iata=IEV&currency_code=USD&depart_months[]=2019-05-01&depart_months[]=2019-06-01&
+depart_months[]=2019-07-01&depart_months[]=2019-08-01&depart_months[]=2019-09-01&depart_months[]=2019-10-01&
+depart_months[]=2019-11-01&depart_months[]=2019-12-01&depart_months[]=2020-01-01&depart_months[]=2020-02-01&
+depart_months[]=2020-03-01&depart_months[]=2020-04-01
+
+Запросы вида:
+https://mphoto.hotellook.com/static/cities/480x320/WAS.auto
+...
+Возращают 304 или 404
+
+==
+При вводе в поле Не показывать города
+https://places.aviasales.ru/v2/places.json?term=krakow&locale=ru&types%5B%5D=city
+TODO: locale=ru сейчас отправляется и когда англ
+
+==
+При нажатии Следующее направление
+https://lyssa.aviasales.ru/v2/widget/year?origin_iata=IEV&destination_iata=SPU&one_way=false&
+min_trip_duration=1&max_trip_duration=10
+Возвращает:
+"year": {
+		"2020-04-01": {
+			"value": 19412,
+			"trip_duration": null,
+			"search_id": "7897dc2b-efb0-4f6d-9c90-d98fa70f0762",
+			"return_date": "2020-04-27",
+			"number_of_changes": 1,
+			"gate": "Onetwotrip.ua",
+			"found_at": "2019-05-22T07:23:02",
+			"duration": 640,
+			"depart_date": "2020-04-20",
+			"airline": "OS"
+		},
+		...
+    "currency": {
+    		"AUD": {
+    			"thousands_separator": ",",
+    			"symbol_first": true,
+    			"symbol": "$",
+    			"rate": 0.022531504676413794,
+    			"exponent": 0,
+    			"decimal_mark": "."
+    		},
+        ...
+
+
+On update_deals or update_all request.cmd:
+
+updateAllData
+    where_am_i
+        fetchDirections
+                directionsUrl() возвращает 'https://lyssa.aviasales.ru/map?min_trip_duration...'
+            eachAsync
+                destinationPhotos
