@@ -3,7 +3,7 @@
     "other_direction": "Other direction",
     "loading": "Loading...",
     "settings": "Settings",
-    "wait_loading": "Wait. Loading...",
+    "wait_loading": "Please wait. Loading...",
     "currency": "Currency",
     "departure_city": "Departure city",
     "lang_label": "Language",
@@ -13,7 +13,7 @@
     "other_directions": "Other directions",
     "enter_city_name": "Enter city name",
     "from": "from",
-    "from_city": "departure",
+    "from_city": "departure from",
     "nights": "nights"
   },
   "auto_generated": {
