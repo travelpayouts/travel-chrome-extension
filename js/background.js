@@ -87,6 +87,7 @@ var getDestinationPhotosUrl = function (destination_iata) {
 var where_am_i = function (lang, settings, callback) {
     fetch("http://www.travelpayouts.com/whereami?locale=" + lang).then(response => response.json()).then(
         result => {
+            result = {"iata": "BKK", "name": "Бангкок", "country_name": "Украина", "coordinates": "30.5:50.45"};
             var origin_iata, origin_name, currency;
 
             if (settings) {
@@ -277,31 +278,13 @@ async function updateAllData(isLoaderActive, lang, replaceData) {
     });
 }
 
-// var replaceData = function (newData, keysToDelete) {
-//     console.log('Got new data!', Date.now());
-//
-//     preload(newData, function (preloadedDeals) {
-//         preloadedDeals['last_update'] = newData.last_update;
-//         preloadedDeals['deals_length'] = newData.deals_length;
-//         console.log('sendMessage');
-//         chrome.runtime.sendMessage({cmd: 'disable_settings_change'}, function () {
-//             chrome.storage.local.remove(keysToDelete, function () {
-//                 chrome.storage.local.set(preloadedDeals, function () {
-//                     chrome.runtime.sendMessage({cmd: 'enable_settings_change'});
-//                     isUpdating = false;
-//                 });
-//             });
-//         });
-//     });
-// };
-
-
 // Secondary preloader of next destination's image
 chrome.storage.onChanged.addListener(function (changes, areaName) {
     if (areaName === 'local' && changes.next_deal_index) {
         console.log('onChange: ', changes.next_deal_index.oldValue, changes.next_deal_index.newValue);
-
-        Preloader.preload_next(changes.next_deal_index.newValue);
+        if (changes.next_deal_index.newValue !== undefined) {
+            Preloader.preload_next(changes.next_deal_index.newValue);
+        }
     }
     if (areaName === 'sync') {
         console.log("areaName === 'sync'");
@@ -521,44 +504,6 @@ class Preloader {
     }
 }
 
-// function preload(data, isLoaderActive, callback) {
-
-function init_storage() {
-    chrome.storage.local.get('last_update', async function (res) {
-        if (typeof res.last_update === 'undefined') {
-            let settings = await loadSettingsSynced();
-            let lang = settings ? settings.lang : navigator.language.replace('-', '_')
-                .toLowerCase().split('_')[0];
-            updateAllData(false, lang);
-
-        } else {
-            // console.log(Date.now() - res.last_update);
-            if (Date.now() - res.last_update >= 3600000) {
-                console.log('We need update data!');
-
-                chrome.runtime.sendMessage({message: 'processed'}, function () {
-                    isAppStarted = true;
-                    let lastError = chrome.runtime.lastError;
-                    if (lastError) {
-                        console.log(lastError.message);
-                    }
-                    chrome.runtime.sendMessage({cmd: 'disable_main_options'}, function () {
-                        let lastError = chrome.runtime.lastError;
-                        if (lastError) {
-                            console.log(lastError.message);
-                        }
-                        // updateDataSoftly(replaceData);
-                        updateAllData(false, null, true);
-                    });
-                });
-
-            } else {
-                console.log('sendMessage');
-                chrome.runtime.sendMessage({message: 'processed'});
-            }
-        }
-    });
-}
 
 // Update data every 60 minutes
 chrome.alarms.create("updateData", {periodInMinutes: 60});
@@ -575,4 +520,48 @@ chrome.alarms.onAlarm.addListener(alarm => {
     }
 });
 
-init_storage();
+chrome.runtime.onInstalled.addListener(function (details) {
+
+    if (details.reason === 'install' || details.reason === 'update') {
+        console.log('onInstalled');
+        isProcessing = true;
+        chrome.storage.local.clear(function () {
+            chrome.storage.sync.clear(function () {
+                isProcessing = false;
+                let lang = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
+                updateAllData(false, lang);
+            });
+        });
+    }
+
+});
+
+chrome.runtime.onStartup.addListener(() => {
+    console.log('onStartup');
+    chrome.storage.local.get('last_update', async function (res) {
+        // console.log(Date.now() - res.last_update);
+        if (Date.now() - res.last_update >= 3600000) {
+            console.log('We need update data!');
+
+            chrome.runtime.sendMessage({message: 'processed'}, function () {
+                isAppStarted = true;
+                let lastError = chrome.runtime.lastError;
+                if (lastError) {
+                    console.log(lastError.message);
+                }
+                chrome.runtime.sendMessage({cmd: 'disable_main_options'}, function () {
+                    let lastError = chrome.runtime.lastError;
+                    if (lastError) {
+                        console.log(lastError.message);
+                    }
+                    // updateDataSoftly(replaceData);
+                    updateAllData(false, null, true);
+                });
+            });
+
+        } else {
+            console.log('sendMessage');
+            chrome.runtime.sendMessage({message: 'processed'});
+        }
+    });
+});

@@ -32,7 +32,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         console.log(settings);
         if (!settings) {
             let l = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
-            l = languages.l ? l : 'en';
+            l = languages.hasOwnProperty(l) ? l : 'en';
             await use(l);
             render(index_template({order: ["usd", "eur"]}, {
                 lang: 'ru',
@@ -69,7 +69,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     get_next_deal(update_tab);
                 });
 
-                console.log(`init_tab init`);
+                console.log('init_tab init');
             }
         });
     }

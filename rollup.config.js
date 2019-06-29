@@ -11,9 +11,6 @@ export default {
 
     manualChunks(id) {
         if (id.includes('node_modules')) {
-            // if (id.includes('chromep')) {
-            //     return 'chromep';
-            // }
             return 'vendor';
         }
     },
@@ -35,7 +32,6 @@ export default {
             minimize: false,
             extract: 'build/style.css'
         }),
-        // image(),
         copy({
             targets: [
                 'manifest.json',
