@@ -87,7 +87,6 @@ var getDestinationPhotosUrl = function (destination_iata) {
 var where_am_i = function (lang, settings, callback) {
     fetch("http://www.travelpayouts.com/whereami?locale=" + lang).then(response => response.json()).then(
         result => {
-            result = {"iata": "BKK", "name": "Бангкок", "country_name": "Украина", "coordinates": "30.5:50.45"};
             var origin_iata, origin_name, currency;
 
             if (settings) {
