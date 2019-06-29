@@ -166,6 +166,10 @@
   }
 }
 
+.comments, .tags {
+  z-index: -2;
+}
+
 .wrapper-select-dropdown,
 .input-text,
 .control-checkbox__indicator {
@@ -462,6 +466,7 @@
       top: 50%;
       right: -4px;
       transform: translateY(-50%);
+      height: 16px;
     }
   }
 
@@ -670,6 +675,10 @@
 
 .awesomplete {
   width: 100%;
+}
+
+#currency_dropdown {
+  overflow: auto;
 }
 
 #currency_dropdown li {

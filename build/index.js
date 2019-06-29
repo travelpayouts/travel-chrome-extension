@@ -1,4 +1,5 @@
-import { a as html, b as translate, c as repeat, d as $$1, e as registerTranslateConfig, f as chromep, g as use, h as translateConfig, i as render, j as get } from './vendor.js';
+import { a as html, b as translate, c as repeat, d as $$1, e as registerTranslateConfig, f as chromep, g as use, h as render, i as translateConfig, j as get } from './vendor.js';
+import config from './config.js';
 
 var default_deals = [
     {
@@ -39,30 +40,26 @@ var default_deals = [
     }
 ];
 
-var items_per_key = 10;
+const ITEMS_PER_KEY = 10;
 
-var get_chunk_info = function(global_index) {
-    var chunk_number = Math.floor(global_index / items_per_key);
+function _get_chunk_info(global_index) {
+    var chunk_number = Math.floor(global_index / ITEMS_PER_KEY);
     return {
         number: chunk_number,
-        index: global_index - chunk_number * items_per_key
+        index: global_index - chunk_number * ITEMS_PER_KEY
     }
-};
+}
 
-var get_deal_by_index = function(global_index, callback){
-    var chunk_data = get_chunk_info(global_index);
+function get_deal_by_index(global_index, callback) {
+    var chunk_data = _get_chunk_info(global_index);
     var chunk_name = 'deals_' + chunk_data.number.toString();
-    chrome.storage.local.get(chunk_name, function(s_data) {
+    chrome.storage.local.get(chunk_name, function (s_data) {
         var deals = s_data[chunk_name];
         callback(deals[chunk_data.index]);
     });
-};
+}
 
-var storage = {
-    get_chunk_info: get_chunk_info,
-    get_deal_by_index: get_deal_by_index,
-    items_per_key: items_per_key
-};
+var storage = {get_deal_by_index, ITEMS_PER_KEY};
 
 function DropDown(el) {
     this.dd = el;
@@ -111,7 +108,7 @@ DropDown.prototype = {
                     window.dispatchEvent(event);
 
                     chrome.runtime.sendMessage({
-                        cmd: 'update_deals',
+                        cmd: 'update_all',
                         lang: settings.lang,
                         current_origin: origin,
                         current_destination: destination
@@ -140,7 +137,7 @@ DropDown.prototype = {
                         document.querySelector('#input_origin_city').value = response.originSettings;
                     });
                     chrome.runtime.sendMessage({
-                        cmd: 'update_deals',
+                        cmd: 'update_all',
                         lang: settings.lang
                     });
                 }
@@ -166,16 +163,16 @@ function SelectionBox($el) {
 }
 
 SelectionBox.prototype = {
-    initEvents : function() {
+    initEvents: function () {
         var obj = this;
 
-        obj.box.on('click', '.'+obj.boxItemClassName, function(){
+        obj.box.on('click', '.' + obj.boxItemClassName, function () {
             var boxItem = $(this);
             boxItem.remove();
 
-            chrome.storage.sync.get('settings', function(data){
+            chrome.storage.sync.get('settings', function (data) {
                 delete data.settings.hideCities[boxItem.data('iata')];
-                chrome.storage.sync.set(data, function(){
+                chrome.storage.sync.set(data, function () {
                     var event = new Event('update_settings');
                     window.dispatchEvent(event);
                 });
@@ -184,59 +181,279 @@ SelectionBox.prototype = {
     },
 };
 
-function InputDropdown(el, selectionBox) {
-    this.dd = el;
-    this.input = this.dd.children('input');
-    this.list = this.dd.children('.dropdown');
-    this.listItems = this.list.children();
-    this.selectType = this.dd.data('select-type');
-    this.selectionBox = selectionBox || '';
-    this.initEvents();
-}
+const signs = {
+    "aud": "$",
+    "czk": "Kč",
+    "idr": "Rp",
+    "vef": "Bs",
+    "uah": "₴",
+    "kmf": "Fr",
+    "ngn": "₦",
+    "nad": "$",
+    "awg": "ƒ",
+    "shp": "£",
+    "huf": "Ft",
+    "inr": "₹",
+    "gyd": "$",
+    "dkk": "kr.",
+    "lsl": "L",
+    "jmd": "$",
+    "nok": "kr",
+    "cve": "$",
+    "bdt": "৳",
+    "lak": "₭",
+    "khr": "៛",
+    "srd": "$",
+    "pgk": "K",
+    "mad": "د.م.",
+    "pyg": "₲",
+    "qar": "ر.ق",
+    "mop": "P",
+    "bob": "Bs.",
+    "php": "₱",
+    "sdg": "£",
+    "sek": "kr",
+    "kzt": "₸",
+    "ang": "ƒ",
+    "clf": "UF",
+    "tmt": "T",
+    "tjs": "ЅМ",
+    "cuc": "$",
+    "brl": "R$",
+    "pab": "B/.",
+    "aoa": "Kz",
+    "ugx": "USh",
+    "npr": "₨",
+    "mro": "UM",
+    "mxn": "$",
+    "kwd": "د.ك",
+    "sar": "ر.س",
+    "pen": "S/.",
+    "pkr": "₨",
+    "rub": "₽",
+    "amd": "դր.",
+    "mdl": "L",
+    "btc": "₿",
+    "mzn": "MTn",
+    "xof": "Fr",
+    "krw": "₩",
+    "cdf": "Fr",
+    "vnd": "₫",
+    "djf": "Fdj",
+    "fkp": "£",
+    "bif": "Fr",
+    "fjd": "$",
+    "myr": "RM",
+    "bbd": "$",
+    "cny": "¥",
+    "gmd": "D",
+    "sgd": "$",
+    "zmw": "ZK",
+    "mwk": "MK",
+    "bgn": "лв.",
+    "gel": "ლ",
+    "ttd": "$",
+    "lvl": "Ls",
+    "xcd": "$",
+    "eur": "€",
+    "uyu": "$",
+    "gip": "£",
+    "clp": "$",
+    "twd": "$",
+    "sbd": "$",
+    "szl": "E",
+    "irr": "﷼",
+    "lrd": "$",
+    "crc": "₡",
+    "xdr": "SDR",
+    "syp": "£S",
+    "dop": "$",
+    "bwp": "P",
+    "kpw": "₩",
+    "zmk": "ZK",
+    "bzd": "$",
+    "try": "₺",
+    "kes": "KSh",
+    "all": "L",
+    "jod": "د.ا",
+    "htg": "G",
+    "tnd": "د.ت",
+    "zar": "R",
+    "xpd": "oz t",
+    "sll": "Le",
+    "bmd": "$",
+    "chf": "CHF",
+    "sos": "Sh",
+    "kgs": "som",
+    "ltl": "Lt",
+    "ern": "Nfk",
+    "bam": "КМ",
+    "ars": "$",
+    "std": "Db",
+    "rwf": "FRw",
+    "byr": "Br",
+    "rsd": "РСД",
+    "zwl": "$",
+    "gbp": "£",
+    "btn": "Nu.",
+    "uzs": "",
+    "mmk": "K",
+    "bsd": "$",
+    "jpy": "¥",
+    "egp": "ج.م",
+    "xag": "oz t",
+    "lyd": "ل.د",
+    "xau": "oz t",
+    "usd": "$",
+    "bnd": "$",
+    "xpt": "oz t",
+    "pln": "zł",
+    "ssp": "£",
+    "dzd": "د.ج",
+    "afn": "؋",
+    "iqd": "ع.د",
+    "ghs": "₵",
+    "top": "T$",
+    "mkd": "ден",
+    "gnf": "Fr",
+    "thb": "฿",
+    "cnh": "¥",
+    "tzs": "Sh",
+    "xpf": "Fr",
+    "jep": "£",
+    "aed": "د.إ",
+    "svc": "₡",
+    "ron": "Lei",
+    "cup": "$",
+    "lbp": "ل.ل",
+    "bhd": "ب.د",
+    "ggp": "£",
+    "vuv": "Vt",
+    "mga": "Ar",
+    "isk": "kr",
+    "cop": "$",
+    "byn": "Br",
+    "scr": "₨",
+    "ils": "₪",
+    "etb": "Br",
+    "cad": "$",
+    "azn": "₼",
+    "nio": "C$",
+    "kyd": "$",
+    "mnt": "₮",
+    "hnl": "L",
+    "wst": "T",
+    "yer": "﷼",
+    "hkd": "$",
+    "imp": "£",
+    "nzd": "$",
+    "gtq": "Q",
+    "hrk": "kn",
+    "omr": "ر.ع.",
+    "mur": "₨",
+    "mvr": "MVR",
+    "lkr": "₨",
+    "xaf": "Fr"
+};
 
-InputDropdown.prototype = {
-    initEvents : function() {
-        var obj = this;
+// export const countries_currencies = {
+//     "United Arab Emirates Dirham": "AED",
+//     "Albanian Lek": "ALL",
+//     "Armenian Dram": "AMD",
+//     "Argentine Peso": "ARS",
+//     "Australian Dollar": "AUD",
+//     "Azerbaijani Manat": "AZN",
+//     "Bosnia-Herzegovina Convertible Mark": "BAM",
+//     "Bangladeshi Taka": "BDT",
+//     "Bulgarian Lev": "BGN",
+//     "Bahraini Dinar": "BHD",
+//     "Brazilian Real": "BRL",
+//     "Belarusian Ruble": "BYN",
+//     "Canadian Dollar": "CAD",
+//     "Swiss Franc": "CHF",
+//     "Chilean Peso": "CLP",
+//     "Chinese Yuan": "CNY",
+//     "Colombian Peso": "COP",
+//     "Czech Republic Koruna": "CZK",
+//     "Danish Krone": "DKK",
+//     "Algerian Dinar": "DZD",
+//     "Egyptian Pound": "EGP",
+//     "Euro": "EUR",
+//     "British Pound": "GBP",
+//     "Georgian Lari": "GEL",
+//     "Ghanaian Cedi": "GHS",
+//     "Hong Kong Dollar": "HKD",
+//     "Croatian Kuna": "HRK",
+//     "Haitian Gourde": "HTG",
+//     "Hungarian Forint": "HUF",
+//     "Indonesian Rupiah": "IDR",
+//     "Israeli New Sheqel": "ILS",
+//     "Indian Rupee": "INR",
+//     "Iraqi Dinar": "IQD",
+//     "Iranian Rial": "IRR",
+//     "Icelandic Króna": "ISK",
+//     "Jordanian Dinar": "JOD",
+//     "Japanese Yen": "JPY",
+//     "Kenyan Shilling": "KES",
+//     "Kyrgystani Som": "KGS",
+//     "South Korean Won": "KRW",
+//     "Kuwaiti Dinar": "KWD",
+//     "Kazakhstani Tenge": "KZT",
+//     "Sri Lankan Rupee": "LKR",
+//     "Libyan Dinar": "LYD",
+//     "Mongolian Tugrik": "MNT",
+//     "Mauritian Rupee": "MUR",
+//     "Mexican Peso": "MXN",
+//     "Malaysian Ringgit": "MYR",
+//     "Mozambican Metical": "MZN",
+//     "Nigerian Naira": "NGN",
+//     "Norwegian Krone": "NOK",
+//     "Nepalese Rupee": "NPR",
+//     "New Zealand Dollar": "NZD",
+//     "Omani Rial": "OMR",
+//     "Peruvian Nuevo Sol": "PEN",
+//     "Philippine Peso": "PHP",
+//     "Pakistani Rupee": "PKR",
+//     "Polish Zloty": "PLN",
+//     "Qatari Rial": "QAR",
+//     "Romanian Leu": "RON",
+//     "Serbian Dinar": "RSD",
+//     "Russian Ruble": "RUB",
+//     "Saudi Riyal": "SAR",
+//     "Swedish Krona": "SEK",
+//     "Singapore Dollar": "SGD",
+//     "Thai Baht": "THB",
+//     "Tajikistani Somoni": "TJS",
+//     "Tunisian Dinar": "TND",
+//     "Turkish Lira": "TRY",
+//     "New Taiwan Dollar": "TWD",
+//     "Ukrainian Hryvnia": "UAH",
+//     "US Dollar": "USD",
+//     "Uzbekistani Som": "UZS",
+//     "Vietnamese Dong": "VND",
+//     "West African CFA Franc": "XOF",
+//     "South African Rand": "ZAR",
+//     "Zambian Kwacha": "ZMW"
+// };
 
-        obj.input.on('focus', function(){
-            obj.dd.addClass('active');
-        });
+// TODO: дополнить список
+const countries_currencies = {
+    Russia: 'RUB',
+    Ukraine: 'UAH',
+    China: 'CNY',
+    Belarus: 'BYN',
+    Thailand: 'THB',
+    Kazakhstan: 'KZT',
+    Azerbaijan: 'AZN',
+    'United States': 'USD'
+};
 
-        obj.dd.click(function(e){
-            e.stopPropagation();
-
-        });
-
-        obj.listItems.click(function(){
-            var value = $(this).text();
-            var parsedValue = value.substring(0, value.indexOf(',')).trim();
-            if(obj.selectType === 'internal') {
-                obj.input.val(parsedValue);
-            } else if(obj.selectType === 'external') {
-                var span = '<span class="hidden-cities__item">' + parsedValue + ' ' +
-                           '<img class="hidden-cities__item-icon" src="img/close_8px_b0bec6.png" alt="">'+
-                           '<img class="hidden-cities__item-icon--hover" src="img/close_8px_263239.png" alt="">'+
-                           '</span>';
-                obj.selectionBox.box.append(span);
-            }
-            obj.dd.removeClass('active');            
-        });
-    }
+function get_origin_currency (origin_country) {
+    let cc = countries_currencies[origin_country] || countries_currencies['Russia'];
+    return [cc, signs[cc.toLowerCase()]];
 };
 
 const languages = {"en": "English", "ru": "Русский"};
-
-const signs = {
-    "rub": "\u20BD",
-    "eur": "€",
-    "usd": "$",
-    "cny": "¥",
-    "uah": "₴",
-    "kzt": "₸",
-    "azn": "\u20BC",
-    "byn": "Br",
-    "thb": "฿"
-};
 
 // currency: (2) ["EUR", "€"]
 // lang: "ru"
@@ -245,7 +462,6 @@ const signs = {
 // __proto__: Object
 // showComments: true
 // showTags: true
-
 
 let index_template = (currencies, settings) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
     <img class="logo-aviasales" src="../img/logo.png" alt="">
@@ -328,15 +544,15 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     </div>
                     <div class="hidden-cities" id="exclude_cities"></div>
                 </div>
-
-                <div class="button-menu__paragraph">
+                
+                <div class="button-menu__paragraph comments">
                     <label class="control-checkbox">${translate('titles.hide_comments')}
                         <input type="checkbox" id="toggle_comments">
                         <div class="control-checkbox__indicator"></div>
                     </label>
                 </div>
 
-                <div class="button-menu__paragraph">
+                <div class="button-menu__paragraph tags">
                     <label class="control-checkbox">${translate('titles.hide_tags')}
                         <input type="checkbox" id="toggle_tags">
                         <div class="control-checkbox__indicator"></div>
@@ -386,7 +602,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     <div class="review-title"></div>
                     <div class="review-text"></div>
                     <div class="review-author"></div>
-                    <div class="review-date"></div>
+                    <!--<div class="review-date"></div>-->
                 </div>
             </div>
         </div>
@@ -885,22 +1101,8 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
     </div>
 </div>`;
 
-var config = {
-    marker: 74230,
-    host: "search.aviasales.ru",
-    host_logo: "aviasales.ru"
-};
-
-// TODO:
-
 window.$ = $$1;
 window.jQuery = $$1;
-
-
-registerTranslateConfig({
-    loader: lang => fetch(`/locales/${lang}.json`).then(res => res.json())
-        .then(res => res)
-});
 
 const q = (selector, el = document) => el.querySelector(selector);
 const qq = (selector, el = document) => el.querySelectorAll(selector);
@@ -908,44 +1110,78 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 (() => {
 
     var settings = {};
-
-    get_settings(apply_settings);
-
     let settingsPanel;
+    init_tab();
 
-    async function get_settings(callback) {
-        console.log('get_settings');
+    async function init_template(callback) {
+        registerTranslateConfig({
+            loader: lang => fetch(`/locales/${lang}.json`).then(res => res.json()).then(res => res)
+        });
         settings = await chromep.storage.sync.get('settings').then(res => res.settings);
-        // console.log(settings);
-        // if (!settings || !settings.hasOwnProperty('lang')) {
-        //     settings = await chromep.storage.local.get(['lang', 'currency', 'originCity']);
-        //     console.log(settings);
-        //     if (!settings.hasOwnProperty('lang')) {
-        //         settings = {lang: 'ru', currency: ['RUB', 'sign'], originCity: {'MOW': 'Москва'}};
-        //     }
-        // }
-
+        console.log(settings);
+        if (!settings) {
+            let l = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
+            l = languages.l ? l : 'en';
+            await use(l);
+            render(index_template({order: ["usd", "eur"]}, {
+                lang: 'ru',
+                currency: ['RUB', 'sign'],
+                originCity: {'MOW': 'Москва'}
+            }), document.body);
+            return;
+        }
         await use(settings.lang);
         let currencies = translateConfig.strings.auto_generated.currency;
         render(index_template(currencies, settings), document.body);
         new SelectionBox($$1('#exclude_cities'));
-        init_tab();
-
         if (callback) {
             settingsPanel = addEventListeners();
             callback(settings);
         }
-        // } else {
-        //     console.log('get_settings else > get_auto_settings');
-        //     get_auto_settings(['lang', 'currency', 'origin_city'], apply_auto_settings);
-        // }
+        return;
+    }
+
+    async function init_tab() {
+        // check_background
+        chrome.runtime.sendMessage({cmd: 'isProcessing'}, function (response) {
+            console.log('init_tab ' + response);
+            console.log(response);
+
+            if (typeof (response) == 'undefined' || response.message == 'true') {
+                init_template().then(() => {
+                    document.getElementById('overlay').classList.remove('is-hidden');
+                    chrome.runtime.onMessage.addListener(background_process_listener);
+                });
+            } else {
+                init_template(apply_settings).then(() => {
+                    console.log('init_template then');
+                    get_next_deal(update_tab);
+                });
+
+                console.log(`init_tab init`);
+            }
+        });
+    }
+
+    function background_process_listener(request, sender, sendResponse) {
+        if (request.message === 'processed') {
+            console.log('processed');
+
+            chrome.runtime.onMessage.removeListener(background_process_listener);
+
+            init_template(apply_settings).then(() => {
+                get_next_deal(update_tab, function () {
+                    document.getElementById('overlay').classList.add('is-hidden');
+                });
+            });
+        }
     }
 
     function apply_settings(settings) {
-        for (var key in settings) {
+        for (let key in settings) {
             switch (key) {
                 case 'hideCities':
-                    for (var k in settings.hideCities) {
+                    for (let k in settings.hideCities) {
                         settingsPanel.create_hidden_city(settings.hideCities[k], k);
                     }
                     break;
@@ -1034,8 +1270,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         input_origin_city.value = value;
     }
 
-    // LISTENERSSSSSSSSSSSSSSSSSSSSSSS
-
     //  'index.js';
     var isPrevDealLoaded = false;
 
@@ -1068,8 +1302,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                         return;
                     }
 
-                    if (deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')
-                        && deal.origin_iata == document.getElementById('origin').getAttribute('data-iata')) {
+                    if (deal.destination_iata === document.getElementById('destination').getAttribute('data-iata')
+                        && deal.origin_iata === document.getElementById('origin').getAttribute('data-iata')) {
                         if (!func) get_next_deal(update_tab);
                         else get_next_deal(update_tab, func);
                         return;
@@ -1219,15 +1453,15 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             review_content = review.querySelector('.review-content'),
             title = review_content.querySelector('.review-title'),
             text = review_content.querySelector('.review-text'),
-            author = review_content.querySelector('.review-author'),
-            date = review_content.querySelector('.review-date');
+            author = review_content.querySelector('.review-author');
+        // date = review_content.querySelector('.review-date');
 
         hide(review);
         if (deal.review) {
             title.innerText = deal.review.title;
             text.innerText = deal.review.text;
             author.innerText = deal.review.author;
-            date.innerText = deal.review.date;
+            // date.innerText = deal.review.date;
             show(review);
         }
     };
@@ -1366,7 +1600,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             currency = 'currency=' + settings.currency[0];
         let h = config.host.endsWith('/') ? config.host : config.host + '/';
         return 'https://' + h + origin_iata + dp[2] + dp[1] + destination_iata + rt[2] + rt[1] + passengers_count + '?' +
-            currency + '&' + utm + '&' + utm_medium + '&' + utm_campaign;
+            currency + '&' + utm + '&' + utm_medium + '&' + utm_campaign + '&marker=' + config.marker;
     };
 
     var fill_price_tooltip = function (deal) {
@@ -1489,10 +1723,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         });
     };
 
-    var init = function () {
-        get_next_deal(update_tab);
-    };
-
     var clear_btn_price = function () {
         $$1('.btn-price').addClass('isLoading').append(generate_preloader());
     };
@@ -1563,38 +1793,9 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
     var fill_btn_price = function (value, currency_symbol, callback) {
         q('.btn-price-value').innerText = value.toLocaleString('ru-RU', {maximumFractionDigits: 0});
-        ;
         q('.currency-symbol').innerText = currency_symbol;
         callback();
     };
-
-    function check_background(callback) {
-        chrome.runtime.sendMessage({cmd: 'isProcessing'}, function (response) {
-            callback(response);
-        });
-    }
-
-    function background_process_listener(request, sender, sendResponse) {
-        if (request.message == 'processed') {
-            chrome.runtime.onMessage.removeListener(background_process_listener);
-            get_next_deal(update_tab, function () {
-                document.getElementById('overlay').classList.add('is-hidden');
-            });
-        }
-    }
-
-    function init_tab() {
-        check_background(function (result) {
-            console.log('init_tab ' + result);
-            if (typeof (result) == 'undefined' || result.message == 'true') {
-                document.getElementById('overlay').classList.remove('is-hidden');
-                chrome.runtime.onMessage.addListener(background_process_listener);
-            } else {
-                console.log(`init_tab init`);
-                init();
-            }
-        });
-    }
 
 //==============================================================================
 // EVENTS LISTENERS
@@ -1604,7 +1805,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         let input_origin_city = q('#input_origin_city');
 
         window.addEventListener('update_settings', function () {
-            get_settings();
+            init_tab();
         }, false);
 
         $$1(document).click(function (e) {
@@ -1809,18 +2010,29 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
 
         function showComments(state) {
-            if (settings.lang === 'ru' && state) {
-                $comments_container.removeClass('review-container--hidden');
+            console.log(settings.lang);
+            let c = $$1('#toggle_comments').closest('div');
+            if (settings.lang === 'ru') {
+                c.show();
+                if (state) {
+                    $comments_container.removeClass('review-container--hidden');
+                }
             } else {
+                c.hide();
                 $comments_container.addClass('review-container--hidden');
             }
         }
 
         function showTags(state) {
             console.log('showTags');
-            if (settings.lang === 'ru' && state) {
-                $tags_container.removeClass('tags-container--hidden');
+            let c = $$1('#toggle_tags').closest('div');
+            if (settings.lang === 'ru') {
+                c.show();
+                if (state) {
+                    $tags_container.removeClass('tags-container--hidden');
+                }
             } else {
+                c.hide();
                 $tags_container.addClass('tags-container--hidden');
             }
         }

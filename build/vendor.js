@@ -13146,4 +13146,4 @@ const chromeP = {};
     });
 })();
 
-export { html as a, translate as b, repeat as c, jquery as d, registerTranslateConfig as e, chromeP as f, use as g, translateConfig as h, render as i, get as j };
+export { html as a, translate as b, repeat as c, jquery as d, registerTranslateConfig as e, chromeP as f, use as g, render as h, translateConfig as i, get as j };

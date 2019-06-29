@@ -6,16 +6,16 @@ export default function SelectionBox($el) {
 }
 
 SelectionBox.prototype = {
-    initEvents : function() {
+    initEvents: function () {
         var obj = this;
 
-        obj.box.on('click', '.'+obj.boxItemClassName, function(){
+        obj.box.on('click', '.' + obj.boxItemClassName, function () {
             var boxItem = $(this);
             boxItem.remove();
 
-            chrome.storage.sync.get('settings', function(data){
+            chrome.storage.sync.get('settings', function (data) {
                 delete data.settings.hideCities[boxItem.data('iata')];
-                chrome.storage.sync.set(data, function(){
+                chrome.storage.sync.set(data, function () {
                     var event = new Event('update_settings');
                     window.dispatchEvent(event);
                 });

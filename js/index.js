@@ -1,6 +1,3 @@
-// TODO:
-// - город вылета отображается на русском
-
 import '../scss/style.scss';
 import {default as $, default as jQuery} from 'jquery';
 
@@ -9,22 +6,14 @@ window.jQuery = jQuery;
 
 import default_deals from './default_deals.js';
 import storage from './storage.js';
-
 import * as awesomplete from 'awesomplete';
 import DropDown from './select-dropdown.js';
 import SelectionBox from './selectionBox.js';
-import InputDropdown from './input-dropdown.js';
-import {html, render} from '../node_modules/lit-html/lit-html.js';
+import {html, render} from 'lit-html';
 import {registerTranslateConfig, use, get, translateConfig} from '@appnest/lit-translate';
-import index_template from './index.template.js';
+import index_template, {languages} from './index.template.js';
 import chromep from 'chromep';
 import config from './config.js';
-
-
-registerTranslateConfig({
-    loader: lang => fetch(`/locales/${lang}.json`).then(res => res.json())
-        .then(res => res)
-});
 
 const q = (selector, el = document) => el.querySelector(selector);
 const qq = (selector, el = document) => el.querySelectorAll(selector);
@@ -32,44 +21,78 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 (() => {
 
     var settings = {};
-
-    get_settings(apply_settings);
-
     let settingsPanel;
+    init_tab();
 
-    async function get_settings(callback) {
-        console.log('get_settings');
+    async function init_template(callback) {
+        registerTranslateConfig({
+            loader: lang => fetch(`/locales/${lang}.json`).then(res => res.json()).then(res => res)
+        });
         settings = await chromep.storage.sync.get('settings').then(res => res.settings);
-        // console.log(settings);
-        // if (!settings || !settings.hasOwnProperty('lang')) {
-        //     settings = await chromep.storage.local.get(['lang', 'currency', 'originCity']);
-        //     console.log(settings);
-        //     if (!settings.hasOwnProperty('lang')) {
-        //         settings = {lang: 'ru', currency: ['RUB', 'sign'], originCity: {'MOW': 'Москва'}};
-        //     }
-        // }
-
+        console.log(settings);
+        if (!settings) {
+            let l = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
+            l = languages.l ? l : 'en';
+            await use(l);
+            render(index_template({order: ["usd", "eur"]}, {
+                lang: 'ru',
+                currency: ['RUB', 'sign'],
+                originCity: {'MOW': 'Москва'}
+            }), document.body);
+            return;
+        }
         await use(settings.lang);
         let currencies = translateConfig.strings.auto_generated.currency;
         render(index_template(currencies, settings), document.body);
         new SelectionBox($('#exclude_cities'));
-        init_tab();
-
         if (callback) {
             settingsPanel = addEventListeners();
             callback(settings);
         }
-        // } else {
-        //     console.log('get_settings else > get_auto_settings');
-        //     get_auto_settings(['lang', 'currency', 'origin_city'], apply_auto_settings);
-        // }
+        return;
+    }
+
+    async function init_tab() {
+        // check_background
+        chrome.runtime.sendMessage({cmd: 'isProcessing'}, function (response) {
+            console.log('init_tab ' + response);
+            console.log(response);
+
+            if (typeof (response) == 'undefined' || response.message == 'true') {
+                init_template().then(() => {
+                    document.getElementById('overlay').classList.remove('is-hidden');
+                    chrome.runtime.onMessage.addListener(background_process_listener);
+                });
+            } else {
+                init_template(apply_settings).then(() => {
+                    console.log('init_template then');
+                    get_next_deal(update_tab);
+                });
+
+                console.log(`init_tab init`);
+            }
+        });
+    }
+
+    function background_process_listener(request, sender, sendResponse) {
+        if (request.message === 'processed') {
+            console.log('processed');
+
+            chrome.runtime.onMessage.removeListener(background_process_listener);
+
+            init_template(apply_settings).then(() => {
+                get_next_deal(update_tab, function () {
+                    document.getElementById('overlay').classList.add('is-hidden');
+                });
+            });
+        }
     }
 
     function apply_settings(settings) {
-        for (var key in settings) {
+        for (let key in settings) {
             switch (key) {
                 case 'hideCities':
-                    for (var k in settings.hideCities) {
+                    for (let k in settings.hideCities) {
                         settingsPanel.create_hidden_city(settings.hideCities[k], k);
                     }
                     break;
@@ -158,8 +181,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         input_origin_city.value = value;
     }
 
-    // LISTENERSSSSSSSSSSSSSSSSSSSSSSS
-
     //  'index.js';
     var isPrevDealLoaded = false;
 
@@ -192,8 +213,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                         return;
                     }
 
-                    if (deal.destination_iata == document.getElementById('destination').getAttribute('data-iata')
-                        && deal.origin_iata == document.getElementById('origin').getAttribute('data-iata')) {
+                    if (deal.destination_iata === document.getElementById('destination').getAttribute('data-iata')
+                        && deal.origin_iata === document.getElementById('origin').getAttribute('data-iata')) {
                         if (!func) get_next_deal(update_tab);
                         else get_next_deal(update_tab, func);
                         return;
@@ -343,15 +364,15 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             review_content = review.querySelector('.review-content'),
             title = review_content.querySelector('.review-title'),
             text = review_content.querySelector('.review-text'),
-            author = review_content.querySelector('.review-author'),
-            date = review_content.querySelector('.review-date');
+            author = review_content.querySelector('.review-author')
+        // date = review_content.querySelector('.review-date');
 
         hide(review);
         if (deal.review) {
             title.innerText = deal.review.title;
             text.innerText = deal.review.text;
             author.innerText = deal.review.author;
-            date.innerText = deal.review.date;
+            // date.innerText = deal.review.date;
             show(review);
         }
     }
@@ -490,7 +511,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             currency = 'currency=' + settings.currency[0];
         let h = config.host.endsWith('/') ? config.host : config.host + '/';
         return 'https://' + h + origin_iata + dp[2] + dp[1] + destination_iata + rt[2] + rt[1] + passengers_count + '?' +
-            currency + '&' + utm + '&' + utm_medium + '&' + utm_campaign;
+            currency + '&' + utm + '&' + utm_medium + '&' + utm_campaign + '&marker=' + config.marker;
     }
 
     var fill_price_tooltip = function (deal) {
@@ -613,10 +634,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         });
     }
 
-    var init = function () {
-        get_next_deal(update_tab);
-    }
-
     var clear_btn_price = function () {
         $('.btn-price').addClass('isLoading').append(generate_preloader());
     };
@@ -687,38 +704,9 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
     var fill_btn_price = function (value, currency_symbol, callback) {
         q('.btn-price-value').innerText = value.toLocaleString('ru-RU', {maximumFractionDigits: 0});
-        ;
         q('.currency-symbol').innerText = currency_symbol;
         callback();
     };
-
-    function check_background(callback) {
-        chrome.runtime.sendMessage({cmd: 'isProcessing'}, function (response) {
-            callback(response);
-        });
-    }
-
-    function background_process_listener(request, sender, sendResponse) {
-        if (request.message == 'processed') {
-            chrome.runtime.onMessage.removeListener(background_process_listener);
-            get_next_deal(update_tab, function () {
-                document.getElementById('overlay').classList.add('is-hidden');
-            });
-        }
-    }
-
-    function init_tab() {
-        check_background(function (result) {
-            console.log('init_tab ' + result);
-            if (typeof (result) == 'undefined' || result.message == 'true') {
-                document.getElementById('overlay').classList.remove('is-hidden');
-                chrome.runtime.onMessage.addListener(background_process_listener);
-            } else {
-                console.log(`init_tab init`);
-                init();
-            }
-        });
-    }
 
 //==============================================================================
 // EVENTS LISTENERS
@@ -728,7 +716,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         let input_origin_city = q('#input_origin_city');
 
         window.addEventListener('update_settings', function () {
-            get_settings();
+            init_tab();
         }, false);
 
         $(document).click(function (e) {
@@ -933,18 +921,29 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
 
         function showComments(state) {
-            if (settings.lang === 'ru' && state) {
-                $comments_container.removeClass('review-container--hidden');
+            console.log(settings.lang);
+            let c = $('#toggle_comments').closest('div');
+            if (settings.lang === 'ru') {
+                c.show();
+                if (state) {
+                    $comments_container.removeClass('review-container--hidden');
+                }
             } else {
+                c.hide();
                 $comments_container.addClass('review-container--hidden');
             }
         }
 
         function showTags(state) {
             console.log('showTags');
-            if (settings.lang === 'ru' && state) {
-                $tags_container.removeClass('tags-container--hidden');
+            let c = $('#toggle_tags').closest('div');
+            if (settings.lang === 'ru') {
+                c.show();
+                if (state) {
+                    $tags_container.removeClass('tags-container--hidden');
+                }
             } else {
+                c.hide();
                 $tags_container.addClass('tags-container--hidden');
             }
         }

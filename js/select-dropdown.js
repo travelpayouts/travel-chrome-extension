@@ -47,7 +47,7 @@ DropDown.prototype = {
                     window.dispatchEvent(event);
 
                     chrome.runtime.sendMessage({
-                        cmd: 'update_deals',
+                        cmd: 'update_all',
                         lang: settings.lang,
                         current_origin: origin,
                         current_destination: destination
@@ -76,7 +76,7 @@ DropDown.prototype = {
                         document.querySelector('#input_origin_city').value = response.originSettings;
                     });
                     chrome.runtime.sendMessage({
-                        cmd: 'update_deals',
+                        cmd: 'update_all',
                         lang: settings.lang
                     });
                 }

@@ -405,6 +405,9 @@ body {
         position: relative;
         z-index: -2; }
 
+.comments, .tags {
+  z-index: -2; }
+
 .wrapper-select-dropdown:hover,
 .input-text:hover,
 .control-checkbox__indicator:hover {
@@ -607,7 +610,8 @@ body {
       position: absolute;
       top: 50%;
       right: -4px;
-      transform: translateY(-50%); }
+      transform: translateY(-50%);
+      height: 16px; }
   .button-tooltip--top {
     top: -8px;
     left: 50%;
@@ -709,6 +713,9 @@ body {
 
 .awesomplete {
   width: 100%; }
+
+#currency_dropdown {
+  overflow: auto; }
 
 #currency_dropdown li {
   text-overflow: ellipsis;

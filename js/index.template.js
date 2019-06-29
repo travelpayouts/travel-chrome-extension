@@ -1,20 +1,9 @@
 import {html} from 'lit-html';
 import {repeat} from 'lit-html/directives/repeat';
 import {translate} from "@appnest/lit-translate";
+import {signs, countries_currencies} from "./currencies";
 
-const languages = {"en": "English", "ru": "Русский"};
-
-const signs = {
-    "rub": "\u20BD",
-    "eur": "€",
-    "usd": "$",
-    "cny": "¥",
-    "uah": "₴",
-    "kzt": "₸",
-    "azn": "\u20BC",
-    "byn": "Br",
-    "thb": "฿"
-};
+export const languages = {"en": "English", "ru": "Русский"};
 
 // currency: (2) ["EUR", "€"]
 // lang: "ru"
@@ -23,7 +12,6 @@ const signs = {
 // __proto__: Object
 // showComments: true
 // showTags: true
-
 
 let index_template = (currencies, settings) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
     <img class="logo-aviasales" src="../img/logo.png" alt="">
@@ -106,15 +94,15 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     </div>
                     <div class="hidden-cities" id="exclude_cities"></div>
                 </div>
-
-                <div class="button-menu__paragraph">
+                
+                <div class="button-menu__paragraph comments">
                     <label class="control-checkbox">${translate('titles.hide_comments')}
                         <input type="checkbox" id="toggle_comments">
                         <div class="control-checkbox__indicator"></div>
                     </label>
                 </div>
 
-                <div class="button-menu__paragraph">
+                <div class="button-menu__paragraph tags">
                     <label class="control-checkbox">${translate('titles.hide_tags')}
                         <input type="checkbox" id="toggle_tags">
                         <div class="control-checkbox__indicator"></div>
@@ -164,7 +152,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     <div class="review-title"></div>
                     <div class="review-text"></div>
                     <div class="review-author"></div>
-                    <div class="review-date"></div>
+                    <!--<div class="review-date"></div>-->
                 </div>
             </div>
         </div>

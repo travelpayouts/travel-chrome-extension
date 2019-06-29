@@ -42,11 +42,10 @@ deals_0: [{depart_date: "2019-09-27"
            ...
            ]
 
-
 ==
 При вводе символов города отправления идут запросы по мере ввода:
 https://places.aviasales.ru/v2/places.json?term=%D0%9A%D0%B8%D0%B5%D0%B2&locale=ru&types%5B%5D=city
-TODO: locale=ru сейчас отправляется и когда англ
+
 При появлении выпадающей подсказки с город при клике по ней отправляется запрос на
 http://www.travelpayouts.com/whereami?locale=undefined который возвращает:
 {"iata":"IEV",
@@ -103,7 +102,6 @@ https://mphoto.hotellook.com/static/cities/480x320/WAS.auto
 ==
 При вводе в поле Не показывать города
 https://places.aviasales.ru/v2/places.json?term=krakow&locale=ru&types%5B%5D=city
-TODO: locale=ru сейчас отправляется и когда англ
 
 ==
 При нажатии Следующее направление
@@ -144,3 +142,19 @@ updateAllData
                 directionsUrl() возвращает 'https://lyssa.aviasales.ru/map?min_trip_duration...'
             eachAsync
                 destinationPhotos
+
+==
+При установке - первый запуск:
+chrome.storage.local.get('last_update')
+if last_update undefined
+    if !settings
+        lang = navigator.language
+    updateAllData(false, lang)
+
+else if с момента обновления прошло более 60 мин
+    sendMessage 'processed' ->
+        isAppStarted = true;
+        sendMessage 'disable_main_options' ->
+            isUpdating = true
+            updateAllData(null, null, replaceData) // updateDataSoftly
+

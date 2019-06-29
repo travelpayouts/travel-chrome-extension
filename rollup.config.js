@@ -2,8 +2,6 @@ import resolve from 'rollup-plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss'
 import copy from 'rollup-plugin-copy'
 import commonjs from 'rollup-plugin-commonjs';
-// import symbol from 'rollup-plugin-lit-html-svg';
-// import image from 'rollup-plugin-img';
 
 export default {
     input: [
@@ -13,6 +11,9 @@ export default {
 
     manualChunks(id) {
         if (id.includes('node_modules')) {
+            // if (id.includes('chromep')) {
+            //     return 'chromep';
+            // }
             return 'vendor';
         }
     },
@@ -49,10 +50,13 @@ export default {
                 'js/initKeen.js',
                 'js/iata_codes.js',
                 'js/background.js',
+                'js/config.js',
+                'js/currencies.js',
                 'scss/fonts',
-                './node_modules/awesomplete/awesomplete.css'
+                './scss/awesomplete.css'
             ],
             outputFolder: 'build'
         })
-    ]
+    ],
+    external: ['./config.js']
 };

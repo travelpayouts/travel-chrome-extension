@@ -18,85 +18,87 @@
   "auto_generated": {
     "currency": {
       "translations": {
-        "aed": "United Arab Emirates Dirham",
-        "all": "Albanian Lek",
-        "amd": "Armenian Dram",
-        "ars": "Argentine Peso",
-        "aud": "Australian Dollar",
-        "azn": "Azerbaijani Manat",
-        "bam": "Bosnia-Herzegovina Convertible Mark",
-        "bdt": "Bangladeshi Taka",
-        "bgn": "Bulgarian Lev",
-        "bhd": "Bahraini Dinar",
-        "brl": "Brazilian Real",
-        "byn": "Belarusian Ruble",
-        "cad": "Canadian Dollar",
-        "chf": "Swiss Franc",
-        "clp": "Chilean Peso",
-        "cny": "Chinese Yuan",
-        "cop": "Colombian Peso",
-        "czk": "Czech Republic Koruna",
-        "dkk": "Danish Krone",
-        "dzd": "Algerian Dinar",
-        "egp": "Egyptian Pound",
+        "aed": "Дирхам ОАЭ",
+        "all": "Албанский лек",
+        "amd": "Армянский драм",
+        "ars": "Аргентинское песо",
+        "aud": "Австралийский доллар",
+        "azn": "Азербайджанский манат",
+        "bam": "Конвертируемая марка Боснии и Герцеговины",
+        "bdt": "Бангладешская така",
+        "bgn": "Болгарский лев",
+        "bhd": "Бахрейнский динар",
+        "brl": "Бразильский реал",
+        "byn": "Белорусский рубль",
+        "cad": "Канадский доллар",
+        "chf": "Швейцарский франк",
+        "clp": "Чилийское песо",
+        "cny": "Китайский юань",
+        "cop": "Колумбийское песо",
+        "czk": "Чешская крона",
+        "dkk": "Датская крона",
+        "dzd": "Алжирский динар",
+        "egp": "Египетский фунт",
         "eur": "Евро",
-        "gbp": "British Pound",
-        "gel": "Georgian Lari",
-        "ghs": "Ghanaian Cedi",
-        "hkd": "Hong Kong Dollar",
-        "hrk": "Croatian Kuna",
-        "htg": "Haitian Gourde",
-        "huf": "Hungarian Forint",
-        "idr": "Indonesian Rupiah",
-        "ils": "Israeli New Sheqel",
-        "inr": "Indian Rupee",
-        "iqd": "Iraqi Dinar",
-        "irr": "Iranian Rial",
-        "isk": "Icelandic Króna",
-        "jod": "Jordanian Dinar",
-        "jpy": "Japanese Yen",
-        "kes": "Kenyan Shilling",
-        "kgs": "Kyrgystani Som",
-        "krw": "South Korean Won",
-        "kwd": "Kuwaiti Dinar",
-        "kzt": "Kazakhstani Tenge",
-        "lkr": "Sri Lankan Rupee",
-        "lyd": "Libyan Dinar",
-        "mnt": "Mongolian Tugrik",
-        "mur": "Mauritian Rupee",
-        "mxn": "Mexican Peso",
-        "myr": "Malaysian Ringgit",
-        "mzn": "Mozambican Metical",
-        "ngn": "Nigerian Naira",
-        "nok": "Norwegian Krone",
-        "npr": "Nepalese Rupee",
-        "nzd": "New Zealand Dollar",
-        "omr": "Omani Rial",
-        "pen": "Peruvian Nuevo Sol",
-        "php": "Philippine Peso",
-        "pkr": "Pakistani Rupee",
-        "pln": "Polish Zloty",
-        "qar": "Qatari Rial",
-        "ron": "Romanian Leu",
-        "rsd": "Serbian Dinar",
-        "rub": "Российский Рубль",
-        "sar": "Saudi Riyal",
-        "sek": "Swedish Krona",
-        "sgd": "Singapore Dollar",
-        "thb": "Thai Baht",
-        "tjs": "Tajikistani Somoni",
-        "tnd": "Tunisian Dinar",
-        "try": "Turkish Lira",
-        "twd": "New Taiwan Dollar",
-        "uah": "Ukrainian Hryvnia",
-        "usd": "US Доллар",
-        "uzs": "Uzbekistani Som",
-        "vnd": "Vietnamese Dong",
-        "xof": "West African CFA Franc",
-        "zar": "South African Rand",
-        "zmw": "Zambian Kwacha"
+        "gbp": "Английский фунт стерлингов",
+        "gel": "Грузинский лари",
+        "ghs": "Ганский седи",
+        "hkd": "Гонконгский доллар",
+        "hrk": "Хорватская куна",
+        "htg": "Гаитянский гурд",
+        "huf": "Венгерский форинт",
+        "idr": "Индонезийская рупия",
+        "ils": "Новый израильский шекель",
+        "inr": "Индийская рупия",
+        "iqd": "Иракский динар",
+        "irr": "Иранский риал",
+        "isk": "Исландская крона",
+        "jod": "Иорданский динар",
+        "jpy": "Японская иена",
+        "kes": "Кенийский шиллинг",
+        "kgs": "Киргизский сом",
+        "krw": "Южнокорейская вона",
+        "kwd": "Кувейтский динар",
+        "kzt": "Казахский тенге",
+        "lkr": "Шри-Ланкийская рупия",
+        "lyd": "Ливийский динар",
+        "mnt": "Монгольский тугрик",
+        "mur": "Маврикийская рупия",
+        "mxn": "Мексиканское песо",
+        "myr": "Малайзийский ринггит",
+        "mzn": "Мозамбикский метикал",
+        "ngn": "Нигерийская найра",
+        "nok": "Норвежская крона",
+        "npr": "Непальская рупия",
+        "nzd": "Новозеландский доллар",
+        "omr": "Оманский риал",
+        "pen": "Перуанский новый соль",
+        "php": "Филиппинское песо",
+        "pkr": "Пакистанская рупия",
+        "pln": "Польский злотый",
+        "qar": "Катарский риал",
+        "ron": "Румынский лей",
+        "rsd": "Сербский динар",
+        "rub": "Российский рубль",
+        "sar": "Саудовский риал",
+        "sek": "Шведская крона",
+        "sgd": "Сингапурский доллар",
+        "thb": "Таиландский бат",
+        "tjs": "Таджикский сомони",
+        "tnd": "Тунисский динар",
+        "try": "Турецкая лира",
+        "twd": "Новый тайваньский доллар",
+        "uah": "Украинская гривна",
+        "usd": "Доллар США",
+        "uzs": "Узбекский сум",
+        "vef": "Венесуэльский боливар",
+        "vnd": "Вьетнамский донг",
+        "xof": "Франк КФА ВСЕАО",
+        "zar": "Южноафриканский рэнд",
+        "zmw": "Замбийская квача"
       },
       "order": [
+        "rub",
         "usd",
         "eur",
         "aed",
@@ -159,7 +161,6 @@
         "qar",
         "ron",
         "rsd",
-        "rub",
         "sar",
         "sek",
         "sgd",
@@ -170,680 +171,12 @@
         "twd",
         "uah",
         "uzs",
+        "vef",
         "vnd",
         "xof",
         "zar",
         "zmw"
       ]
-    },
-    "currency_abbreviation": {
-      "amd": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "bif": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "cdf": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "clp": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "cop": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "crc": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "gnf": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "idr": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "iqd": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "irr": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "khr": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "kmf": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "kpw": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "krw": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "kzt": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "lak": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "lbp": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "mga": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "mmk": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "mnt": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "mro": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "mwk": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "ngn": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "pyg": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "rwf": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "sll": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "sos": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "std": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "syp": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "tzs": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "ugx": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "uzs": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "vnd": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "xaf": {
-        "divider": 1000,
-        "fraction_digits": 0
-      },
-      "xof": {
-        "divider": 1000,
-        "fraction_digits": 0
-      }
-    },
-    "locales_fallback": {
-      "be": "ru",
-      "bs": "hr",
-      "ca": "es",
-      "ce": "ru",
-      "iw": "he",
-      "iw-il": "he",
-      "kk": "ru",
-      "me": "sr_cs",
-      "tg": "ru",
-      "uz": "ru"
-    },
-    "markets": [
-      {
-        "code": "AL",
-        "name": "Albania"
-      },
-      {
-        "code": "DZ",
-        "name": "Algeria"
-      },
-      {
-        "code": "AR",
-        "name": "Argentina"
-      },
-      {
-        "code": "AM",
-        "name": "Armenia"
-      },
-      {
-        "code": "AU",
-        "name": "Australia"
-      },
-      {
-        "code": "AT",
-        "name": "Austria"
-      },
-      {
-        "code": "AZ",
-        "name": "Azerbaijan"
-      },
-      {
-        "code": "BS",
-        "name": "Bahamas"
-      },
-      {
-        "code": "BH",
-        "name": "Bahrain"
-      },
-      {
-        "code": "BD",
-        "name": "Bangladesh"
-      },
-      {
-        "code": "BY",
-        "name": "Belarus"
-      },
-      {
-        "code": "BE",
-        "name": "Belgium"
-      },
-      {
-        "code": "BO",
-        "name": "Bolivia"
-      },
-      {
-        "code": "BA",
-        "name": "Bosnia And Herzegovina"
-      },
-      {
-        "code": "BR",
-        "name": "Brazil"
-      },
-      {
-        "code": "BN",
-        "name": "Brunei"
-      },
-      {
-        "code": "BG",
-        "name": "Bulgaria"
-      },
-      {
-        "code": "KH",
-        "name": "Cambodia"
-      },
-      {
-        "code": "CM",
-        "name": "Cameroon"
-      },
-      {
-        "code": "CA",
-        "name": "Canada"
-      },
-      {
-        "code": "CL",
-        "name": "Chile"
-      },
-      {
-        "code": "CN",
-        "name": "China"
-      },
-      {
-        "code": "CO",
-        "name": "Colombia"
-      },
-      {
-        "code": "CR",
-        "name": "Costa Rica"
-      },
-      {
-        "code": "HR",
-        "name": "Croatia"
-      },
-      {
-        "code": "CU",
-        "name": "Cuba"
-      },
-      {
-        "code": "CY",
-        "name": "Cyprus"
-      },
-      {
-        "code": "CZ",
-        "name": "Czech Republic"
-      },
-      {
-        "code": "DK",
-        "name": "Denmark"
-      },
-      {
-        "code": "DO",
-        "name": "Dominican Republic"
-      },
-      {
-        "code": "TL",
-        "name": "East Timor"
-      },
-      {
-        "code": "EC",
-        "name": "Ecuador"
-      },
-      {
-        "code": "EG",
-        "name": "Egypt"
-      },
-      {
-        "code": "EE",
-        "name": "Estonia"
-      },
-      {
-        "code": "ET",
-        "name": "Ethiopia"
-      },
-      {
-        "code": "FI",
-        "name": "Finland"
-      },
-      {
-        "code": "FR",
-        "name": "France"
-      },
-      {
-        "code": "GE",
-        "name": "Georgia"
-      },
-      {
-        "code": "DE",
-        "name": "Germany"
-      },
-      {
-        "code": "GH",
-        "name": "Ghana"
-      },
-      {
-        "code": "GR",
-        "name": "Greece"
-      },
-      {
-        "code": "GP",
-        "name": "Guadeloupe"
-      },
-      {
-        "code": "HT",
-        "name": "Haiti"
-      },
-      {
-        "code": "HN",
-        "name": "Honduras"
-      },
-      {
-        "code": "HK",
-        "name": "Hong Kong"
-      },
-      {
-        "code": "HU",
-        "name": "Hungary"
-      },
-      {
-        "code": "IS",
-        "name": "Iceland"
-      },
-      {
-        "code": "IN",
-        "name": "India"
-      },
-      {
-        "code": "ID",
-        "name": "Indonesia"
-      },
-      {
-        "code": "IR",
-        "name": "Iran"
-      },
-      {
-        "code": "IQ",
-        "name": "Iraq"
-      },
-      {
-        "code": "IE",
-        "name": "Ireland"
-      },
-      {
-        "code": "IL",
-        "name": "Israel"
-      },
-      {
-        "code": "IT",
-        "name": "Italy"
-      },
-      {
-        "code": "CI",
-        "name": "Ivory Coast"
-      },
-      {
-        "code": "JM",
-        "name": "Jamaica"
-      },
-      {
-        "code": "JP",
-        "name": "Japan"
-      },
-      {
-        "code": "JO",
-        "name": "Jordan"
-      },
-      {
-        "code": "KZ",
-        "name": "Kazakhstan"
-      },
-      {
-        "code": "KE",
-        "name": "Kenya"
-      },
-      {
-        "code": "KW",
-        "name": "Kuwait"
-      },
-      {
-        "code": "KG",
-        "name": "Kyrgyzstan"
-      },
-      {
-        "code": "LA",
-        "name": "Laos"
-      },
-      {
-        "code": "LV",
-        "name": "Latvia"
-      },
-      {
-        "code": "LB",
-        "name": "Lebanon"
-      },
-      {
-        "code": "LT",
-        "name": "Lithuania"
-      },
-      {
-        "code": "LU",
-        "name": "Luxembourg"
-      },
-      {
-        "code": "MO",
-        "name": "Macau"
-      },
-      {
-        "code": "MK",
-        "name": "Macedonia"
-      },
-      {
-        "code": "MY",
-        "name": "Malaysia"
-      },
-      {
-        "code": "MV",
-        "name": "Maldives"
-      },
-      {
-        "code": "MQ",
-        "name": "Martinique"
-      },
-      {
-        "code": "MR",
-        "name": "Mauritania"
-      },
-      {
-        "code": "MU",
-        "name": "Mauritius"
-      },
-      {
-        "code": "YT",
-        "name": "Mayotte"
-      },
-      {
-        "code": "MX",
-        "name": "Mexico"
-      },
-      {
-        "code": "MD",
-        "name": "Moldova"
-      },
-      {
-        "code": "ME",
-        "name": "Montenegro"
-      },
-      {
-        "code": "MA",
-        "name": "Morocco"
-      },
-      {
-        "code": "NP",
-        "name": "Nepal"
-      },
-      {
-        "code": "NL",
-        "name": "Netherlands"
-      },
-      {
-        "code": "NZ",
-        "name": "New Zealand"
-      },
-      {
-        "code": "NG",
-        "name": "Nigeria"
-      },
-      {
-        "code": "NO",
-        "name": "Norway"
-      },
-      {
-        "code": "OM",
-        "name": "Oman"
-      },
-      {
-        "code": "PK",
-        "name": "Pakistan"
-      },
-      {
-        "code": "PA",
-        "name": "Panama"
-      },
-      {
-        "code": "PG",
-        "name": "Papua New Guinea"
-      },
-      {
-        "code": "PY",
-        "name": "Paraguay"
-      },
-      {
-        "code": "PE",
-        "name": "Peru"
-      },
-      {
-        "code": "PH",
-        "name": "Philippines"
-      },
-      {
-        "code": "PL",
-        "name": "Poland"
-      },
-      {
-        "code": "PT",
-        "name": "Portugal"
-      },
-      {
-        "code": "PR",
-        "name": "Puerto Rico"
-      },
-      {
-        "code": "QA",
-        "name": "Qatar"
-      },
-      {
-        "code": "MT",
-        "name": "Republic of Malta"
-      },
-      {
-        "code": "RE",
-        "name": "Reunion"
-      },
-      {
-        "code": "RO",
-        "name": "Romania"
-      },
-      {
-        "code": "RU",
-        "name": "Russia"
-      },
-      {
-        "code": "RW",
-        "name": "Rwanda"
-      },
-      {
-        "code": "SA",
-        "name": "Saudi Arabia"
-      },
-      {
-        "code": "RS",
-        "name": "Serbia"
-      },
-      {
-        "code": "SC",
-        "name": "Seychelles"
-      },
-      {
-        "code": "SG",
-        "name": "Singapore"
-      },
-      {
-        "code": "SK",
-        "name": "Slovakia"
-      },
-      {
-        "code": "SI",
-        "name": "Slovenia"
-      },
-      {
-        "code": "ZA",
-        "name": "South Africa"
-      },
-      {
-        "code": "KR",
-        "name": "South Korea"
-      },
-      {
-        "code": "ES",
-        "name": "Spain"
-      },
-      {
-        "code": "LK",
-        "name": "Sri Lanka"
-      },
-      {
-        "code": "SD",
-        "name": "Sudan"
-      },
-      {
-        "code": "SE",
-        "name": "Sweden"
-      },
-      {
-        "code": "CH",
-        "name": "Switzerland"
-      },
-      {
-        "code": "TW",
-        "name": "Taiwan"
-      },
-      {
-        "code": "TZ",
-        "name": "Tanzania"
-      },
-      {
-        "code": "TH",
-        "name": "Thailand"
-      },
-      {
-        "code": "TT",
-        "name": "Trinidad And Tobago"
-      },
-      {
-        "code": "TN",
-        "name": "Tunisia"
-      },
-      {
-        "code": "TR",
-        "name": "Turkey"
-      },
-      {
-        "code": "UG",
-        "name": "Uganda"
-      },
-      {
-        "code": "UA",
-        "name": "Ukraine"
-      },
-      {
-        "code": "AE",
-        "name": "United Arab Emirates"
-      },
-      {
-        "code": "GB",
-        "name": "United Kingdom"
-      },
-      {
-        "code": "US",
-        "name": "United States"
-      },
-      {
-        "code": "UZ",
-        "name": "Uzbekistan"
-      },
-      {
-        "code": "VE",
-        "name": "Venezuela"
-      },
-      {
-        "code": "VN",
-        "name": "Vietnam"
-      }
-    ],
-    "plural_locales_fallback": {
-      "kmr": "ku",
-      "me": "sr",
-      "tg": "fa"
     }
   },
   "dayjs": {
@@ -867,7 +200,7 @@
       "фев",
       "мар",
       "апр",
-      "мая",
+      "май",
       "июн",
       "июл",
       "авг",
@@ -876,34 +209,32 @@
       "ноя",
       "дек"
     ],
-    "one_way": "No return ticket needed",
-    "ordinal": "(function(n) { return n })",
     "weekdays": [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
+      "понедельник",
+      "вторник",
+      "среда",
+      "четверг",
+      "пятница",
+      "суббота",
+      "воскресенье"
     ],
     "weekdaysMin": [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat"
+      "Пн",
+      "Вт",
+      "Ср",
+      "Чт",
+      "Пт",
+      "Сб",
+      "Вс"
     ],
     "weekdaysShort": [
-      "Su",
-      "Mo",
-      "Tu",
-      "We",
-      "Th",
-      "Fr",
-      "Sa"
+      "пн",
+      "вт",
+      "ср",
+      "чт",
+      "пт",
+      "сб",
+      "вс"
     ]
   }
 }
