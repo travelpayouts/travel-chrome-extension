@@ -138,7 +138,10 @@ var where_am_i = function (lang, settings, callback) {
             }
             callback(result, origin_iata, origin_name, currency[0]);
         }
-    );
+    ).catch(error => {
+        console.log(error);
+        isProcessing = false;
+    });
 };
 
 var getDirectionsUrl = function (origin_iata, currency) {
@@ -519,8 +522,7 @@ chrome.alarms.onAlarm.addListener(alarm => {
     }
 });
 
-chrome.runtime.onInstalled.addListener(function (details) {
-
+chrome.runtime.onInstalled.addListener(details => {
     if (details.reason === 'install' || details.reason === 'update') {
         console.log('onInstalled');
         isProcessing = true;
@@ -532,7 +534,6 @@ chrome.runtime.onInstalled.addListener(function (details) {
             });
         });
     }
-
 });
 
 chrome.runtime.onStartup.addListener(() => {
@@ -560,7 +561,12 @@ chrome.runtime.onStartup.addListener(() => {
 
         } else {
             console.log('sendMessage');
-            chrome.runtime.sendMessage({message: 'processed'});
+            chrome.runtime.sendMessage({message: 'processed'}, () => {
+                let lastError = chrome.runtime.lastError;
+                if (lastError) {
+                    console.log(lastError.message);
+                }
+            });
         }
     });
 });

@@ -995,6 +995,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         }, false);
 
         window.addEventListener('lang_changed', async function (e) {
+            console.log('lang_changed');
             settings.lang = e.detail;
             await use(settings.lang);
             showComments(settings.showComments);
