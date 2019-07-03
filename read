@@ -158,3 +158,22 @@ else if с момента обновления прошло более 60 мин
             isUpdating = true
             updateAllData(null, null, replaceData) // updateDataSoftly
 
+
+
+depart_date: "2019-09-27"
+destination: "WAS"
+origin: "IEV"
+price: 32770
+return_date: "2019-10-24"
+
+=
+depart_date: "2019-09-27"
+destination_iata: "WAS"
+destination_name: "Вашингтон, США"
+image_url: "https://mphoto.hotellook.com/static/cities/1680x1050/WAS.auto"
+origin_iata: "IEV"
+origin_name: "Киева"
+price: 32770
+return_date: "2019-10-24"
+review: undefined
+tags: undefined

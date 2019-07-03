@@ -22,4 +22,4 @@ SelectionBox.prototype = {
             });
         });
     },
-}
+};

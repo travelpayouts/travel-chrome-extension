@@ -5,14 +5,6 @@ import {signs, countries_currencies} from "./currencies";
 
 export const languages = {"en": "English", "ru": "Русский"};
 
-// currency: (2) ["EUR", "€"]
-// lang: "ru"
-// originCity:
-//     IEV: "Киев"
-// __proto__: Object
-// showComments: true
-// showTags: true
-
 let index_template = (currencies, settings) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
     <img class="logo-aviasales" src="../img/logo.png" alt="">
 </a>
@@ -82,7 +74,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                 <div class="button-menu__paragraph">
                     <label class="input-label">${translate('titles.departure_city')}</label>
                     <div class="wrapper-input-dropdown">
-                        <input type="text" class="input-text" id="input_origin_city" value="">
+                        <input type="text" class="input-text" id="input_origin_city" value="" @focus=${e => e.target.value = ''}>
                     </div>
                 </div>
 
@@ -90,7 +82,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     <label class="input-label">${translate('titles.exclude_cities')}</label>
                     <div class="wrapper-input-dropdown">
                         <input type="text" class="input-text" placeholder="${translate('titles.enter_city_name')}"
-                               id="hide_cities">
+                               id="hide_cities" @blur="${e => e.target.value = ''}">
                     </div>
                     <div class="hidden-cities" id="exclude_cities"></div>
                 </div>

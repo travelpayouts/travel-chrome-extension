@@ -7,7 +7,7 @@ export default {
     input: [
         'js/index.js',
     ],
-    treeshake: false,
+    treeshake: true,
 
     manualChunks(id) {
         if (id.includes('node_modules')) {

@@ -20,11 +20,12 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
 (() => {
 
-    var settings = {};
+    let settings = {};
     let settingsPanel;
     init_tab();
 
     async function init_template(callback) {
+
         registerTranslateConfig({
             loader: lang => fetch(`/locales/${lang}.json`).then(res => res.json()).then(res => res)
         });
@@ -49,7 +50,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             settingsPanel = addEventListeners();
             callback(settings);
         }
-        return;
     }
 
     async function init_tab() {
@@ -58,9 +58,9 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             console.log('init_tab ' + response);
             console.log(response);
 
-            if (typeof (response) == 'undefined' || response.message == 'true') {
+            if (response.isProcessing) {
                 init_template().then(() => {
-                    document.getElementById('overlay').classList.remove('is-hidden');
+                    showLoading();
                     chrome.runtime.onMessage.addListener(background_process_listener);
                 });
             } else {
@@ -68,7 +68,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     console.log('init_template then');
                     get_next_deal(update_tab);
                 });
-
                 console.log('init_tab init');
             }
         });
@@ -77,19 +76,15 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     function background_process_listener(request, sender, sendResponse) {
         if (request.message === 'processed') {
             console.log('processed');
-
             chrome.runtime.onMessage.removeListener(background_process_listener);
-
             init_template(apply_settings).then(() => {
-                get_next_deal(update_tab, function () {
-                    document.getElementById('overlay').classList.add('is-hidden');
-                });
+                get_next_deal(update_tab, hideLoading);
             });
         }
     }
 
     function apply_settings(settings) {
-        for (let key in settings) {
+        Object.keys(settings).forEach(key => {
             switch (key) {
                 case 'hideCities':
                     for (let k in settings.hideCities) {
@@ -108,7 +103,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     for (let key in settings.originCity) {
                         set_origin_city_value(settings.originCity[key])
                     }
-                    // set_origin_city_value(settings.originCity);
                     break;
                 case 'currency':
                     set_currency_value(settings.currency[0]);
@@ -117,7 +111,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     set_lang_value(settings.lang);
                     break;
             }
-        }
+        });
+
         if (!settings.currency && !settings.originCity) {
             get_auto_settings(['currency', 'origin_city'], apply_auto_settings);
         } else if (!settings.currency) {
@@ -157,11 +152,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     function set_currency_value(value) {
-        var currencyListElem = q('li[data-currency=' + value + ']', q('#currency_dropdown'));
-        // let currency_label = q('#currency_label');
-        // currency_label.innerHTML = currencyListElem.innerHTML;
-        // console.log('set_currency_value: ' + value);
-        // currency_label.lastChild.textContent = get('auto_generated.currency.translations.' + value.toLowerCase());
+        let currencyListElem = q('li[data-currency=' + value + ']', q('#currency_dropdown'));
         currencyListElem.classList.add('checked');
         let currency_selector = new DropDown($('#choose_currency'));
     }
@@ -174,7 +165,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         langListElem.classList.add('checked');
 
         new DropDown($('#choose_lang'));
-
     }
 
     function set_origin_city_value(value) {
@@ -192,7 +182,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var use_default_deals = function (deals_length) {
-        return deals_length == 0 || !navigator.onLine;
+        return false;
+        // return deals_length === 0 || !navigator.onLine;
     }
 
     var get_next_deal = function (callback, func) {
@@ -245,17 +236,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var update_bg = function (deal, callback) {
-        var bg_holder = document.getElementById('bg_img'),
-            img = new Image();
-
-        // if(deal.alt_image_url) {
-        //     chrome.storage.local.get('alternate_images', function(res){
-        //         if(res.alternate_images) {
-        //             img.src = deal.alt_image_url;
-        //         } else img.src = deal.image_url;
-        //     });
-        // } else img.src = deal.image_url;
-
+        let bg_holder = document.getElementById('bg_img'), img = new Image();
         img.src = deal.image_url;
 
         bg_holder.addEventListener('transitionend', fade_out_handler, false);
@@ -277,17 +258,13 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     function show_new_bg(image, cb) {
-        if (isLoaded(image)) {
+        if (image.complete) { // isLoaded
             cb();
         } else {
             image.onload = function () {
                 cb();
             }
         }
-    }
-
-    function isLoaded(image) {
-        return image.complete;
     }
 
     var update_price = function (deal) {
@@ -330,8 +307,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var update_destination = function (deal) {
-        // console.log('update_destination');
-        // console.log(deal);
         var destination = qq('.destination')[0];
         destination.innerText = deal.destination_name;
         destination.setAttribute('data-iata', deal.destination_iata);
@@ -378,8 +353,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var get_year_objs = function () {
-        console.log('get_year_objs');
-        var month_f_names = ['Январь', "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
         var result = [];
         var current_date = new Date();
         current_date.setDate(1);
@@ -390,7 +363,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
             result.push({
                 id: future_date.getFullYear() + '-' + month + '-01',
-                // month_name: month_f_names[future_date.getMonth()]
                 month_name: get('dayjs.months').split(',')[future_date.getMonth()].trim()
             })
         }
@@ -455,7 +427,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     var fill_calendar = function (prices, currency_symbol) {
         var btn_price = document.getElementById('btn_price');
         btn_price.addEventListener('click', function (e) {
-            e.preventDefault;
+            e.preventDefault();
         });
         btn_price.removeAttribute('href');
 
@@ -491,13 +463,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var format_date = function (str_date) {
-        // console.log('format_date');
-        var month_s_names = ['янв', "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
         var date_parts = str_date.split('-');
-        // return date_parts[2] + ' ' + month_s_names[Number(date_parts[1]) - 1];
-        let d = date_parts[2] + ' ' + get('dayjs.monthsShort').split(',')[Number(date_parts[1]) - 1].trim();
-        // console.log(d);
-        return d;
+        return date_parts[2] + ' ' + get('dayjs.monthsShort').split(',')[Number(date_parts[1]) - 1].trim();
     }
 
     var aviasalesUrl = function (origin_iata, destination_iata, depart_date, return_date) {
@@ -583,12 +550,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                             year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
                             year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
                         }
-                        // else {
-                        //     var depart_date = year_obj[i].id + '-01';
-                        //     var return_date = year_obj[i].id + '-08';
-                        // }
-                        // year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
-                        // year_obj[i].search_url = aviasalesUrl(origin_iata, destination_iata, depart_date, return_date);
                     }
                     callback(year_obj, currency[1]);
                 }
@@ -826,13 +787,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             create_hidden_city(cityToHide, iata);
         });
 
-        input_hide_cities.addEventListener('blur', function (e) {
-            if (e.target.value !== '') {
-                e.target.value = '';
-            }
-        });
-
-
         var autoCompleteOrigin = new Awesomplete(input_origin_city, {
             data: function (item, input) {
                 return {
@@ -851,24 +805,15 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
         input_origin_city.addEventListener('awesomplete-selectcomplete', function (e) {
             chrome.storage.sync.get('settings', function (res) {
-                if (res.settings) {
-                    var settings = res.settings;
-                } else {
-                    var settings = {};
-                }
+                let settings = res.settings ? res.settings : {};
                 settings.originCity = {};
                 settings.originCity[e.text.slice(-10, -7)] = e.target.value;
                 // console.log(settings);
                 chrome.storage.sync.set({settings}, function () {
                     input_origin_city.blur();
-                    var event = new Event('update_all');
-                    window.dispatchEvent(event);
+                    chrome.runtime.sendMessage({cmd: 'update_all'});
                 });
             });
-        });
-
-        input_origin_city.addEventListener('focus', function () {
-            input_origin_city.value = '';
         });
 
         input_origin_city.addEventListener('input', function (e) {
@@ -888,12 +833,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                         }
                     }
                 }
-                // else if (res.settings && !res.settings.originCity || !res.settings) {
-                //     get_auto_settings('origin_city', function (data) {
-                //         if (input_origin_city.value !== data.origin_city)
-                //             set_origin_city_value(data.origin_city);
-                //     });
-                // }
             });
         });
 
@@ -918,7 +857,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             };
             req.send();
         }
-
 
         function showComments(state) {
             console.log(settings.lang);
@@ -969,9 +907,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                 '<img class="hidden-cities__item-icon--hover" src="img/close-8px-dark.svg" alt="">' +
                 '</span>';
             $(hidden_cities_box).append(span);
-
         }
-
 
         window.addEventListener('update_prices', function (e) {
             settings.currency = e.detail;
@@ -979,13 +915,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             clear_prices_calendar();
             get_new_prices(settings.currency);
         }, false);
-
-
-        window.addEventListener('update_all', function () {
-            document.getElementById('overlay').classList.remove('is-hidden');
-            chrome.runtime.sendMessage({cmd: 'update_all'});
-        });
-
 
         document.getElementById('btn_change_destination').addEventListener('click', function (e) {
             if (isPrevDealLoaded) {
@@ -1003,9 +932,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
             let months = qq('.prices-calendar-month_name');
             let mnames = get('dayjs.months').split(',');
-            // get('dayjs.months').split(',').forEach((m, index) => {
-            //     months[index].innerText = m;
-            // });
             let cm = qq('.prices-calendar-month');
             for (let m of cm) {
                 let mn = q('.prices-calendar-month_name', m);
@@ -1017,30 +943,28 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     tn.nodeValue = get('titles.from') + ' ';
                 }
             }
-            // for (let m of months) {
-            //     let mindex = Number(m.parentElement.parentElement.id.split('-')[2].trim());
-            //     m.innerText = mnames[mindex - 1];
-            // }
         }, false);
 
         return {showComments: showComments, showTags: showTags, create_hidden_city: create_hidden_city};
     }
 
+    function showLoading() {
+        document.getElementById('overlay').classList.remove('is-hidden');
+    }
+
+    function hideLoading() {
+        document.getElementById('overlay').classList.add('is-hidden');
+    }
+
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        // console.log('onMessage.addListener');
-        // console.log(request);
         switch (request.cmd) {
-            case 'finish_currency_update':
+            case 'finish_origin_change':
+                console.log('finish_origin_change');
                 get_next_deal(update_tab);
                 break;
 
-            case 'finish_origin_change':
-                get_next_deal(update_tab, function () {
-                    document.getElementById('overlay').classList.add('is-hidden');
-                });
-                break;
-
             case 'disable_settings_change':
+                document.getElementById('choose_lang').classList.add('disabled');
                 document.getElementById('btn_change_destination').classList.add('isDisabled');
                 document.getElementById('choose_currency').classList.add('disabled');
                 document.getElementById('input_origin_city').classList.add('disabled');
@@ -1048,21 +972,11 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                 break;
 
             case 'enable_settings_change':
+                document.getElementById('choose_lang').classList.remove('disabled');
                 document.getElementById('btn_change_destination').classList.remove('isDisabled');
                 document.getElementById('choose_currency').classList.remove('disabled');
                 document.getElementById('input_origin_city').classList.remove('disabled');
                 document.getElementById('hide_cities').classList.remove('disabled');
-                break;
-
-            case 'disable_main_options':
-                document.getElementById('btn_change_destination').classList.remove('isDisabled');
-                document.getElementById('choose_currency').classList.add('disabled');
-                document.getElementById('input_origin_city').classList.add('disabled');
-                break;
-
-            case 'enable_main_options':
-                document.getElementById('choose_currency').classList.remove('disabled');
-                document.getElementById('input_origin_city').classList.remove('disabled');
                 break;
         }
     });

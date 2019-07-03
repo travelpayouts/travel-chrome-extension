@@ -31,12 +31,7 @@ DropDown.prototype = {
 
 
             chrome.storage.sync.get('settings', function (data) {
-                let settings;
-                if (data.settings) {
-                    settings = data.settings;
-                } else {
-                    settings = {};
-                }
+                let settings = data.settings ? data.settings : {};
                 var destination = document.getElementById('destination').getAttribute('data-iata');
                 var origin = document.getElementById('origin').getAttribute('data-iata');
 
@@ -46,12 +41,7 @@ DropDown.prototype = {
                     var event = new CustomEvent('update_prices', {'detail': settings.currency});
                     window.dispatchEvent(event);
 
-                    chrome.runtime.sendMessage({
-                        cmd: 'update_all',
-                        lang: settings.lang,
-                        current_origin: origin,
-                        current_destination: destination
-                    });
+                    chrome.runtime.sendMessage({cmd: 'update_all', lang: settings.lang});
                 } else {
                     let lang = opt.data('lang');
                     settings.lang = lang;
@@ -68,17 +58,11 @@ DropDown.prototype = {
                     }, (response) => {
                         console.log('show_translated_destination');
                         console.log(response.destination_name);
-                        // render(html`${response.destination_name}`, document.querySelector('#destination'));
                         document.querySelector('#destination').innerText = response.destination_name;
                         document.querySelector('#origin>span').innerText = response.originFrom;
-                        // console.log(get('titles.from_city'));
-                        // render(html`${response.originFrom}`, document.querySelector('#origin>span'));
                         document.querySelector('#input_origin_city').value = response.originSettings;
                     });
-                    chrome.runtime.sendMessage({
-                        cmd: 'update_all',
-                        lang: settings.lang
-                    });
+                    chrome.runtime.sendMessage({cmd: 'update_all', lang: settings.lang});
                 }
             });
 

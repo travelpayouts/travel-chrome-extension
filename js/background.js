@@ -5,18 +5,16 @@ import iata_codes from './iata_codes.js';
 import getOriginCurrency from "./currencies.js";
 
 var isProcessing = false;
-var isAppStarted = false;
-var isUpdating = false;
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
         if (request.cmd === 'isProcessing') {
-            sendResponse({message: '' + isProcessing});
+            sendResponse({isProcessing: isProcessing});
         }
 
         if (request.cmd === 'update_all') {
-            isAppStarted = false;
-            chrome.runtime.sendMessage({cmd: 'disable_settings_change'});
+            console.log('cmd update_all');
+            chrome.runtime.sendMessage({cmd: 'disable_settings_change'}, () => handleNoTabs());
             let isLoaderActive = !request.hasOwnProperty('lang'); // true if request.lang undefined
             updateAllData(isLoaderActive, request.lang); // isLoaderActive = false - update deals only
         }
@@ -80,8 +78,6 @@ var getDestinationPhotosUrl = function (destination_iata) {
     let w = Math.round(window.screen.width * devicePixelRatio);
     let h = Math.round(window.screen.height * devicePixelRatio);
     return `https://mphoto.hotellook.com/static/cities/${w}x${h}/${destination_iata}.auto`;
-    // image_url: "https://mphoto.hotellook.com/static/cities/3000x1500/" + destination_iata + ".auto",
-    // image_url: "https://mphoto.hotellook.com/static/cities/480x320/" + destination_iata + ".auto",
 };
 
 var where_am_i = function (lang, settings, callback) {
@@ -96,15 +92,10 @@ var where_am_i = function (lang, settings, callback) {
 
                 if (settings.originCity) {
                     for (let key in settings.originCity) {
-                        // console.log(settings);
                         origin_iata = key;
                         origin_name = ro_city_name(key, lang);
                     }
                     if (settings.hasOwnProperty('lang') && settings.lang !== lang) {
-                        // currency = getOriginCurrency(result.country_name);
-                        // origin_iata = result.iata;
-                        // origin_name = ro_city_name(result.iata, cities_data, lang);
-                        console.log("settings.hasOwnProperty('lang')");
                         let originCity = im_city_name(origin_iata, lang);
                         let origCityObj = new Object(null);
                         origCityObj[origin_iata] = originCity;
@@ -161,19 +152,19 @@ var getDirectionsUrl = function (origin_iata, currency) {
 };
 
 var fetchDirections = function (origin_iata, currency) {
-    return new Promise(resolve => {
-        fetch(getDirectionsUrl(origin_iata, currency)).then(response => response.json()).then(directions => {
-            let result = directions.map(function (dir) {
-                return {
-                    price: dir.value,
-                    return_date: dir.return_date,
-                    origin: dir.origin,
-                    destination: dir.destination,
-                    depart_date: dir.depart_date
-                }
-            });
-            resolve(result);
+    return fetch(getDirectionsUrl(origin_iata, currency)).then(response => response.json()).then(directions => {
+        return directions.map(function (dir) {
+            return {
+                price: dir.value,
+                return_date: dir.return_date,
+                origin: dir.origin,
+                destination: dir.destination,
+                depart_date: dir.depart_date
+            }
         });
+    }).catch(error => {
+        console.log(error);
+        isProcessing = false;
     });
 };
 
@@ -188,18 +179,14 @@ function processDirection(direction, origin_name, origin_iata, lang) {
 
     if (!cities_data[direction.destination] || !iata_codes.includes(direction.destination)) {
         console.log('Направление ' + direction.destination + ' отсутствует в словаре');
-        // cb(null);
-        // return;
         return null;
     }
 
     let image_url = getDestinationPhotosUrl(direction.destination);
-    // var random_photo = photo_urls[Math.floor(Math.random() * photo_urls.length)];
     return {
         image_url: image_url,
         price: direction.price,
-        destination_name: im_city_name(direction.destination, lang) + ', ' +
-            im_country_name(direction.destination, lang),
+        destination_name: im_city_name(direction.destination, lang) + ', ' + im_country_name(direction.destination, lang),
         tags: (booking_reviews[direction.destination] || {}).tags,
         review: (booking_reviews[direction.destination] || {}).review,
         origin_name: origin_name,
@@ -208,37 +195,30 @@ function processDirection(direction, origin_name, origin_iata, lang) {
         depart_date: direction.depart_date,
         return_date: direction.return_date
     };
-
-    // cb(deal);
 }
 
 function processDirections(directions, origin_name, origin_iata, lang) {
     let doneCounter = 0, results = [];
     // let len = 30;
     let len = directions.length;
-    for (let i = 0; i < len; i++) { // arr.forEach(function (item) {
+    for (let i = 0; i < len; i++) {
         let item = directions[i];
         let d = processDirection(item, origin_name, origin_iata, lang);
 
         doneCounter += 1;
-        if (!d && doneCounter !== len) continue; //return;
+        if (!d && doneCounter !== len) continue;
         else if (!d && doneCounter === len) {
-            // console.log(results);
             return results;
         }
         results.push(d);
         if (doneCounter === len) {
-            // console.log(results);
-            // cb(results);
             return results;
         }
     }
 }
 
-
-async function updateAllData(isLoaderActive, lang, replaceData) {
+async function updateAllData(isLoaderActive, lang) {
     isProcessing = true;
-    isUpdating = true;
     let settings = await loadSettingsSynced();
 
     where_am_i(lang || settings.lang, settings, async function (l, origin_iata, origin_name, currency) {
@@ -262,25 +242,16 @@ async function updateAllData(isLoaderActive, lang, replaceData) {
             keys_to_delete.push("deals_" + i.toString());
         }
 
-        if (replaceData) {
-            // callback(dealsObj, keys_to_delete);
-            let p = new Preloader(dealsObj, isLoaderActive);
-            p.replaceData(keys_to_delete);
-        } else {
-            console.log('replaceData else');
-
-            dealsObj.next_deal_index = 0;
-            chrome.storage.local.remove(keys_to_delete, function () {
-                chrome.storage.local.set(dealsObj, function () {
-                    let p = new Preloader(dealsObj, isLoaderActive);
-                    p.preload();
-                });
-            })
-        }
+        dealsObj.next_deal_index = 0;
+        chrome.storage.local.remove(keys_to_delete, () => {
+            chrome.storage.local.set(dealsObj, () => {
+                let p = new Preloader(dealsObj, isLoaderActive);
+                p.preload();
+            });
+        });
     });
 }
 
-// Secondary preloader of next destination's image
 chrome.storage.onChanged.addListener(function (changes, areaName) {
     if (areaName === 'local' && changes.next_deal_index) {
         console.log('onChange: ', changes.next_deal_index.oldValue, changes.next_deal_index.newValue);
@@ -288,51 +259,15 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
             Preloader.preload_next(changes.next_deal_index.newValue);
         }
     }
-    if (areaName === 'sync') {
-        console.log("areaName === 'sync'");
-        if (changes.lang) {
-            chrome.runtime.sendMessage({message: 'processed'})
-        }
-    }
 });
 
-
-// data:
-// {
-//
-//     "deals_0": [{
-//     "image_url": "https://mphoto.hotellook.com/static/cities/1680x1050/SYZ.auto",
-//     "price": 51800,
-//     "destination_name": "Шираз, Иран",
-//     "origin_name": "Киева",
-//     "origin_iata": "IEV",
-//     "destination_iata": "SYZ",
-//     "depart_date": "2019-06-28",
-//     "return_date": "2019-07-28"
-// }, {
-//     "image_url": "https://mphoto.hotellook.com/static/cities/1680x1050/WAS.auto",
-//     "price": 34007,
-//     "destination_name": "Вашингтон, США",
-//     "origin_name": "Киева",
-//     "origin_iata": "IEV",
-//     "destination_iata": "WAS",
-//     "depart_date": "2019-10-07",
-//     "return_date": "2019-10-21"
-// },
-// ],
-//     "last_update": 1561382933364,
-//     "deals_length": 646,
-//     "next_deal_index": 0
-// }
 class Preloader {
     constructor(data, isLoaderActive) {
-        this.isReplaceMode = false;
-        this.keysToDelete = null;
         this.data = data;
         this.deals = [];
         this.deals_length = data.deals_length;
         // var count_limiter = this.deals_length > 100 ? 100 : this.deals_length;
-        this.count_limiter = this.deals_length > 1 ? 1 : this.deals_length;
+        this.count_limiter = 1;
         // this.deals_limit = this.deals.length;
         this.deals_limit = 1;
         this.storage_obj = {};
@@ -358,7 +293,7 @@ class Preloader {
 
     preload_chunk(i) {
         this.counter = 0;
-        this.deals[i].chunk_value.forEach((elem, index) => {
+        this.deals[i].chunk_value.forEach(elem => {
             let img = new Image();
 
             img.onload = () => {
@@ -390,46 +325,16 @@ class Preloader {
         });
     }
 
-    replaceData(keysToDelete) {
-        this.isReplaceMode = true;
-        this.keysToDelete = keysToDelete;
-        this.preload();
-    }
-
-    replace(preloadedDeals) {
-        preloadedDeals['last_update'] = this.data.last_update;
-        preloadedDeals['deals_length'] = this.deals_length;
-        isProcessing = false;
-
-        chrome.runtime.sendMessage({cmd: 'disable_settings_change'}, () => {
-            chrome.storage.local.set(preloadedDeals, () => {
-                chrome.runtime.sendMessage({message: 'processed'});
-                chrome.runtime.sendMessage({cmd: 'enable_settings_change'});
-                isUpdating = false;
-            });
-        });
-    }
-
     onImgLoad() {
-        // Keep 'isAppStarted' = false when 'cold' start is initiated
-        if (!isAppStarted && this.count_success === this.count_limiter) {
-            isAppStarted = true;
+        if (this.count_success === this.count_limiter) {
             chrome.storage.local.set(this.storage_obj, () => {
+                isProcessing = false;
                 chrome.runtime.sendMessage({message: 'processed'}, () => {
-
-                    let lastError = chrome.runtime.lastError;
-                    if (lastError) {
-                        console.log(lastError.message);
-                    }
-
-                    isProcessing = false;
-                    chrome.runtime.sendMessage({cmd: 'disable_main_options'});
-
+                    handleNoTabs();
                     if (this.isLoaderActive) {
-                        chrome.runtime.sendMessage({cmd: 'finish_origin_change'});
+                        chrome.runtime.sendMessage({cmd: 'finish_origin_change'}, () => handleNoTabs());
                     }
                 });
-
                 console.log('start tab!');
             });
         }
@@ -457,68 +362,38 @@ class Preloader {
                 this.preload_chunk(this.i);
             } else {
                 console.log('Preload is finished!');
-                if (this.isReplaceMode) { //callback
-                    this.replace(this.storage_obj);
-                } else {
-                    if (!isAppStarted) {
-                        isAppStarted = true;
-                        chrome.storage.local.set(this.storage_obj, () => {
-                            chrome.runtime.sendMessage({message: 'processed'}, () => {
-                                isProcessing = false;
-                                isUpdating = false;
-                            }, r => {
-                                var lastError = chrome.runtime.lastError;
-                                if (lastError) {
-                                    console.log(lastError.message);
-                                }
-                            });
-                            console.log('start tab!');
-
-                            // load
-                            if (this.isLoaderActive) {
-                                chrome.runtime.sendMessage({cmd: 'finish_origin_change'});
-                            }
-                        });
-                    } else {
-                        this.onImgProcessed();
-                    }
-                }
+                chrome.storage.local.set(this.storage_obj, () => {
+                    isProcessing = false;
+                    chrome.runtime.sendMessage({cmd: 'enable_settings_change'}, () => handleNoTabs());
+                });
             }
         }
     }
+}
 
-    onImgProcessed() {
-        chrome.runtime.sendMessage({cmd: 'disable_settings_change'}, () => {
-            let lastError = chrome.runtime.lastError;
-            if (lastError) {
-                console.log(lastError.message);
-            }
-            chrome.storage.local.set(this.storage_obj, () => {
-                chrome.runtime.sendMessage({cmd: 'enable_settings_change'}, () => {
-                    let lastError = chrome.runtime.lastError;
-                    if (lastError) {
-                        console.log(lastError.message);
-                    }
-                    isUpdating = false;
-                });
-            });
-        });
+function handleNoTabs() {
+    let lastError = chrome.runtime.lastError;
+    if (lastError) {
+        console.log(lastError.message);
     }
 }
 
+function updateDeals() {
+    chrome.runtime.sendMessage({message: 'processed'}, function () {
+        handleNoTabs();
+        chrome.runtime.sendMessage({cmd: 'disable_settings_change'}, function () {
+            handleNoTabs();
+            updateAllData(false);
+        });
+    });
+}
 
 // Update data every 60 minutes
-chrome.alarms.create("updateData", {periodInMinutes: 60});
+chrome.alarms.create("updateData", {periodInMinutes: 60}); // TODO: change to 60
 chrome.alarms.onAlarm.addListener(alarm => {
     if (alarm.name === "updateData") {
         console.log('alarm!!!');
-        // isUpdating = true;
-        // isProcessing = true;
-        // chrome.storage.onChanged.removeListener(storageOnChangeListener);
-        chrome.runtime.sendMessage({cmd: 'disable_main_options'}, function () {
-            // updateDataSoftly(replaceData);
-            updateAllData(false, null, true);
-        });
+        updateDeals();
     }
 });
 
@@ -528,45 +403,21 @@ chrome.runtime.onInstalled.addListener(details => {
         isProcessing = true;
         chrome.storage.local.clear(function () {
             chrome.storage.sync.clear(function () {
-                isProcessing = false;
                 let lang = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
-                updateAllData(false, lang);
+                updateAllData(true, lang);
             });
         });
     }
 });
 
 chrome.runtime.onStartup.addListener(() => {
-    console.log('onStartup');
-    chrome.storage.local.get('last_update', async function (res) {
-        // console.log(Date.now() - res.last_update);
+    chrome.storage.local.get('last_update', res => {
         if (Date.now() - res.last_update >= 3600000) {
+            // if (Date.now() - res.last_update >= 60000) {
             console.log('We need update data!');
-
-            chrome.runtime.sendMessage({message: 'processed'}, function () {
-                isAppStarted = true;
-                let lastError = chrome.runtime.lastError;
-                if (lastError) {
-                    console.log(lastError.message);
-                }
-                chrome.runtime.sendMessage({cmd: 'disable_main_options'}, function () {
-                    let lastError = chrome.runtime.lastError;
-                    if (lastError) {
-                        console.log(lastError.message);
-                    }
-                    // updateDataSoftly(replaceData);
-                    updateAllData(false, null, true);
-                });
-            });
-
+            updateDeals();
         } else {
-            console.log('sendMessage');
-            chrome.runtime.sendMessage({message: 'processed'}, () => {
-                let lastError = chrome.runtime.lastError;
-                if (lastError) {
-                    console.log(lastError.message);
-                }
-            });
+            chrome.runtime.sendMessage({message: 'processed'}, () => handleNoTabs());
         }
     });
 });
