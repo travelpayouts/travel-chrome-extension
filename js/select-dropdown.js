@@ -1,11 +1,11 @@
-import {html, render} from "lit-html";
+import {render} from "lit-html";
+import {currency_label} from './index.template.js';
 
 export default function DropDown(el) {
     this.dd = el;
     this.placeholder = this.dd.children('span');
     this.opts = this.dd.find('ul.dropdown > li');
     this.currentOpt = $(this.opts).filter('.checked');
-    this.val = '';
     this.index = -1;
     this.initEvents();
 }
@@ -24,11 +24,14 @@ DropDown.prototype = {
             opt.addClass('checked');
             obj.currentOpt.removeClass('checked');
             obj.currentOpt = opt;
-            obj.val = opt.html();
             obj.index = opt.index();
-            obj.placeholder.html(obj.val);
-            var currency_symbol = opt.find('.currency-sign').text();
+            let currency_symbol = opt.find('.currency-sign').text();
 
+            if (opt.closest('ul').attr('id') === 'currency_dropdown') {
+                render(currency_label(opt.data('currency')), document.querySelector('#currency_label'));
+            } else {
+                obj.placeholder.html(opt.html());
+            }
 
             chrome.storage.sync.get('settings', function (data) {
                 let settings = data.settings ? data.settings : {};
@@ -47,8 +50,6 @@ DropDown.prototype = {
                     settings.lang = lang;
                     let event2 = new CustomEvent('lang_changed', {'detail': lang});
                     window.dispatchEvent(event2);
-                    // chrome.storage.sync.set({settings});
-                    // console.log(settings);
 
                     chrome.runtime.sendMessage({
                         cmd: 'get_translated_destination',
@@ -69,11 +70,5 @@ DropDown.prototype = {
             // send event to Google Analytics
             // _gaq.push(['_trackEvent', 'settings', 'currency_change', opt.data('currency')]); //dev
         });
-    },
-    getValue: function () {
-        return this.val;
-    },
-    getIndex: function () {
-        return this.index;
     }
-}
+};

@@ -479,7 +479,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var aviasalesUrl = function (origin_iata, destination_iata, depart_date, return_date) {
-        // var base = "https://search.aviasales.ru/",
         let dp = depart_date.split("-"),
             rt = return_date.split("-"),
             passengers_count = 1,
@@ -492,25 +491,18 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             currency + '&' + utm + '&' + utm_medium + '&' + utm_campaign + '&marker=' + config.marker;
     }
 
-    var fill_price_tooltip = function (deal) {
-        var price_tooltip = q('#price_tooltip'),
-            calendar = q('.prices-calendar'),
-            btn_price = document.getElementById('btn_price'),
-            text = '',
-            text_variants = ['ночь', 'ночи', 'ночей'];
+    var fill_price_tooltip_text = function (depart_date, return_date) {
+        let text = '', text_variants = ['ночь', 'ночи', 'ночей'];
+        let d = new Date(depart_date),
+            r = new Date(return_date),
+            depart_date_formatted = d.toLocaleString(settings.lang, {day: 'numeric', month: 'long'}),
+            return_date_formatted = r.toLocaleString(settings.lang, {day: 'numeric', month: 'long'}),
+            nights;
 
-        price_tooltip.classList.remove('price-tooltip--hidden');
-        calendar.classList.add('prices-calendar--off');
-
-        var depart_date = new Date(deal.depart_date),
-            return_date = new Date(deal.return_date),
-            depart_date_formatted = depart_date.toLocaleString(settings.lang, {day: 'numeric', month: 'long'}),
-            return_date_formatted = return_date.toLocaleString(settings.lang, {day: 'numeric', month: 'long'});
-
-        if (depart_date.getFullYear() === return_date.getFullYear()) {
-            var nights = calc_day_of_year(return_date) - calc_day_of_year(depart_date);
+        if (d.getFullYear() === r.getFullYear()) {
+            nights = calc_day_of_year(r) - calc_day_of_year(d);
         } else {
-            var nights = calc_day_of_year(return_date) + (calc_day_of_year(new Date(depart_date.getFullYear(), 11, 31)) - calc_day_of_year(depart_date));
+            nights = calc_day_of_year(r) + (calc_day_of_year(new Date(d.getFullYear(), 11, 31)) - calc_day_of_year(d));
         }
 
         var remainder = nights % 10;
@@ -523,7 +515,19 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             text = get('titles.nights');
         }
 
-        price_tooltip.innerHTML = depart_date_formatted + ' &ndash; ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
+        q('#price_tooltip').innerHTML = depart_date_formatted + ' &ndash; ' + return_date_formatted + ' (' + nights + ' ' + text + ')';
+    };
+
+    var fill_price_tooltip = function (deal) {
+        var price_tooltip = q('#price_tooltip'),
+            calendar = q('.prices-calendar'),
+            btn_price = document.getElementById('btn_price');
+
+
+        price_tooltip.classList.remove('price-tooltip--hidden');
+        calendar.classList.add('prices-calendar--off');
+
+        fill_price_tooltip_text(deal.depart_date, deal.return_date);
 
         btn_price.setAttribute('href', aviasalesUrl(deal.origin_iata, deal.destination_iata, deal.depart_date, deal.return_date));
         btn_price.addEventListener('click', function (e) {
@@ -957,7 +961,12 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     let tn = q('div', m).firstChild;
                     tn.nodeValue = get('titles.from') + ' ';
                 }
+                // var depart_date = month_data.depart_date;
+                // var return_date = month_data.return_date;
+                year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
             }
+            fill_price_tooltip_text(q('#origin').getAttribute('data-depart'), q('#destination').getAttribute('data-return'));
+
         }, false);
 
         return {showComments: showComments, showTags: showTags, create_hidden_city: create_hidden_city};

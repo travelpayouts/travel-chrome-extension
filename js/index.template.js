@@ -1,9 +1,12 @@
 import {html} from 'lit-html';
 import {repeat} from 'lit-html/directives/repeat';
 import {translate} from "@appnest/lit-translate";
-import {signs, countries_currencies} from "./currencies";
+import {signs} from "./currencies";
 
 export const languages = {"en": "English", "ru": "Русский"};
+
+export let currency_label = (c) => html`<span class="currency-sign">${signs[c.toLowerCase()]}</span>
+							${translate('auto_generated.currency.translations.' + c.toLowerCase())}`;
 
 let index_template = (currencies, settings) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
     <img class="logo-aviasales" src="../img/logo.png" alt="">
@@ -57,8 +60,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     <label class="input-label">${translate('titles.currency')}</label>
                     <div class="wrapper-select-dropdown" id="choose_currency">
 						<span class="wrapper-select-dropdown__label" id="currency_label">
-						${html`<span class="currency-sign">${signs[settings.currency[0].toLowerCase()]}</span>
-							${translate('auto_generated.currency.translations.' + settings.currency[0].toLowerCase())}`}
+						${currency_label(settings.currency[0])}
 						</span>
                         <ul class="dropdown" id="currency_dropdown">
                             ${repeat(currencies.order, currency => html`<li data-currency="${currency.toUpperCase()}">
@@ -82,7 +84,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
                     <label class="input-label">${translate('titles.exclude_cities')}</label>
                     <div class="wrapper-input-dropdown">
                         <input type="text" class="input-text" placeholder="${translate('titles.enter_city_name')}"
-                               id="hide_cities" @blur="${e => e.target.value = ''}">
+                               id="hide_cities" @blur=${e => e.target.value = ''}>
                     </div>
                     <div class="hidden-cities" id="exclude_cities"></div>
                 </div>
