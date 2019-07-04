@@ -312,16 +312,34 @@ class Preloader {
     }
 
     static preload_next(deal_index) {
-        storage.get_deal_by_index(deal_index, deal => {
-            if (deal.skip_deal) {
-                chrome.storage.local.get('deals_length', res => {
-                    let next_index = (deal_index + 1) % res.deals_length;
+
+        chrome.storage.local.get('deals_length', res => {
+            let _deal_index = (deal_index + 10) % res.deals_length;
+            storage.get_deal_by_index(_deal_index, deal => {
+                if (deal.skip_deal) {
+                    let next_index = (deal_index + 11) % res.deals_length;
+                    if (next_index === res.deals_length - 1) return;
                     this.preload_next(next_index);
-                });
-            } else {
-                let img = new Image();
-                img.src = deal.image_url;
-            }
+                } else {
+                    let img = new Image();
+                    img.onerror = () => {
+                        this.setImgSkip(deal_index, res)
+                    };
+                    img.src = deal.image_url;
+                }
+            });
+        });
+    }
+
+    static setImgSkip(deal_index, res) {
+        let {chunk_number, index} = storage.get_chunk_info(deal_index);
+        let dealname = 'deals_' + chunk_number;
+        chrome.storage.local.get(dealname, ch => {
+            ch[dealname][index].skip_deal = true;
+            chrome.storage.local.set(ch, () => {
+                let next_index = (deal_index + 11) % res.deals_length;
+                this.preload_next(next_index);
+            });
         });
     }
 
@@ -388,8 +406,7 @@ function updateDeals() {
     });
 }
 
-// Update data every 60 minutes
-chrome.alarms.create("updateData", {periodInMinutes: 60}); // TODO: change to 60
+chrome.alarms.create("updateData", {periodInMinutes: 120});
 chrome.alarms.onAlarm.addListener(alarm => {
     if (alarm.name === "updateData") {
         console.log('alarm!!!');
@@ -412,7 +429,7 @@ chrome.runtime.onInstalled.addListener(details => {
 
 chrome.runtime.onStartup.addListener(() => {
     chrome.storage.local.get('last_update', res => {
-        if (Date.now() - res.last_update >= 3600000) {
+        if (Date.now() - res.last_update >= 7200000) {
             // if (Date.now() - res.last_update >= 60000) {
             console.log('We need update data!');
             updateDeals();

@@ -32,7 +32,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         settings = await chromep.storage.sync.get('settings').then(res => res.settings);
         console.log(settings);
         if (!settings) {
-            let l = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
+            let l = getLocalLang();
             l = languages.hasOwnProperty(l) ? l : 'en';
             await use(l);
             render(index_template({order: ["usd", "eur"]}, {
@@ -71,6 +71,10 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                 console.log('init_tab init');
             }
         });
+    }
+
+    function getLocalLang() {
+        return navigator.language.replace('-', '_').toLowerCase().split('_')[0];
     }
 
     function background_process_listener(request, sender, sendResponse) {
@@ -182,8 +186,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     }
 
     var use_default_deals = function (deals_length) {
-        return false;
-        // return deals_length === 0 || !navigator.onLine;
+        // return false;
+        return deals_length === 0 || !navigator.onLine;
     }
 
     var get_next_deal = function (callback, func) {
@@ -308,7 +312,14 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
 
     var update_destination = function (deal) {
         var destination = qq('.destination')[0];
-        destination.innerText = deal.destination_name;
+
+        if (typeof deal.destination_name == 'object') {
+            let l = settings ? settings.lang : getLocalLang();
+            l = deal.destination_name.hasOwnProperty(l) ? l : 'en';
+            destination.innerText = deal.destination_name[l];
+        } else {
+            destination.innerText = deal.destination_name;
+        }
         destination.setAttribute('data-iata', deal.destination_iata);
         destination.setAttribute('data-return', deal.return_date);
         show(destination);
@@ -722,7 +733,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             settings.showComments = !$toggle_comments[0].checked;
             chrome.storage.sync.set({settings});
             // send event to Google Analytics
-            _gaq.push(['_trackEvent', 'settings', 'comments', get_toggle_state(this)]);
+            // _gaq.push(['_trackEvent', 'settings', 'comments', get_toggle_state(this)]);
         });
 
         function get_toggle_state(checkbox) {
@@ -738,7 +749,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             settings.showTags = !$toggle_tags[0].checked;
             chrome.storage.sync.set({settings});
             // send event to Google Analytics
-            _gaq.push(['_trackEvent', 'settings', 'tags', get_toggle_state(this)]); //dev
+            // _gaq.push(['_trackEvent', 'settings', 'tags', get_toggle_state(this)]); //dev
         });
 
         var input_hide_cities = document.getElementById("hide_cities");
@@ -861,10 +872,12 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         function showComments(state) {
             console.log(settings.lang);
             let c = $('#toggle_comments').closest('div');
-            if (settings.lang === 'ru') {
+            if (settings.lang === 'ru' && !config.hide_comments) {
                 c.show();
                 if (state) {
                     $comments_container.removeClass('review-container--hidden');
+                } else {
+                    $comments_container.addClass('review-container--hidden');
                 }
             } else {
                 c.hide();
@@ -875,10 +888,12 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         function showTags(state) {
             console.log('showTags');
             let c = $('#toggle_tags').closest('div');
-            if (settings.lang === 'ru') {
+            if (settings.lang === 'ru' && !config.hide_tags) {
                 c.show();
                 if (state) {
                     $tags_container.removeClass('tags-container--hidden');
+                } else {
+                    $tags_container.addClass('tags-container--hidden');
                 }
             } else {
                 c.hide();
