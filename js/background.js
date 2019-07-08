@@ -3,6 +3,7 @@ import booking_reviews from './booking_reviews.js';
 import storage from './storage.js';
 import iata_codes from './iata_codes.js';
 import getOriginCurrency from "./currencies.js";
+import config from "./config.js";
 
 var isProcessing = false;
 
@@ -389,6 +390,31 @@ class Preloader {
     }
 }
 
+class RSS {
+    constructor() {
+        this.url = config.hasOwnProperty('rss') ? config.rss : '';
+    }
+
+    async get() {
+        if (!this.url) return;
+
+        let parser = new RSSParser();
+
+        let feed = await parser.parseURL(config.rss);
+
+        let news = [];
+
+        let len = feed.items.length >= 3 ? 3 : feed.items.length;
+
+        for (let i = 0; i < len; i++) {
+            let item = feed.items[i];
+            news.push({title: item.title, link: item.link, pubDate: item.pubDate});
+        }
+
+        chrome.storage.local.set({rss: news});
+    }
+}
+
 function handleNoTabs() {
     let lastError = chrome.runtime.lastError;
     if (lastError) {
@@ -417,6 +443,10 @@ chrome.alarms.onAlarm.addListener(alarm => {
 chrome.runtime.onInstalled.addListener(details => {
     if (details.reason === 'install' || details.reason === 'update') {
         console.log('onInstalled');
+
+        let rss = new RSS();
+        rss.get();
+
         isProcessing = true;
         chrome.storage.local.clear(function () {
             chrome.storage.sync.clear(function () {

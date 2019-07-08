@@ -11,7 +11,7 @@ import DropDown from './select-dropdown.js';
 import SelectionBox from './selectionBox.js';
 import {html, render} from 'lit-html';
 import {registerTranslateConfig, use, get, translateConfig} from '@appnest/lit-translate';
-import index_template, {languages} from './index.template.js';
+import index_template, {languages, rss} from './index.template.js';
 import chromep from 'chromep';
 import config from './config.js';
 
@@ -66,6 +66,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             } else {
                 init_template(apply_settings).then(() => {
                     console.log('init_template then');
+                    showRSS();
                     get_next_deal(update_tab);
                 });
                 console.log('init_tab init');
@@ -82,6 +83,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             console.log('processed');
             chrome.runtime.onMessage.removeListener(background_process_listener);
             init_template(apply_settings).then(() => {
+                showRSS();
                 get_next_deal(update_tab, hideLoading);
             });
         }
@@ -684,6 +686,16 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
         callback();
     };
 
+    async function showRSS() {
+        if (config.hasOwnProperty('rss') && config.rss !== '') {
+            let news = await chromep.storage.local.get('rss').then(res => res.rss);
+            if (news) {
+                render(rss(news, settings.lang), q('#rss'));
+                $('#rss').fadeIn(1500);
+            }
+        }
+    }
+
 //==============================================================================
 // EVENTS LISTENERS
 //==============================================================================
@@ -961,9 +973,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                     let tn = q('div', m).firstChild;
                     tn.nodeValue = get('titles.from') + ' ';
                 }
-                // var depart_date = month_data.depart_date;
-                // var return_date = month_data.return_date;
-                year_obj[i].dates = format_date(depart_date) + ' - ' + format_date(return_date);
             }
             fill_price_tooltip_text(q('#origin').getAttribute('data-depart'), q('#destination').getAttribute('data-return'));
 
@@ -1004,4 +1013,6 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
                 break;
         }
     });
+
+
 })();

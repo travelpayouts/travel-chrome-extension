@@ -686,3 +686,41 @@
   overflow: hidden;
   white-space: nowrap;
 }
+
+#rss {
+  display: none;
+  position: absolute;
+  width: 240px;
+  right: 24px;
+  bottom: 24px;
+}
+
+#rss a {
+  display: block;
+  text-decoration: inherit;
+  font-style: normal;
+}
+
+#rss div {
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 13px;
+  line-height: 18px;
+  color: #ffffff;
+  font-family: 'Open Sans';
+  -webkit-line-clamp: 3;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+#rss span {
+  font-weight: normal;
+  font-size: 11px;
+  line-height: 15px;
+  color: rgba(255, 255, 255, 0.87);
+  text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+}
+
+#rss a:not(:last-child) {
+  margin-bottom: 16px;
+}

@@ -17,7 +17,7 @@ export default {
     output: {
         dir: 'build',
         format: 'es',
-        compact: false,
+        compact: true,
         chunkFileNames: '[name].js'
     },
     plugins: [
@@ -29,7 +29,7 @@ export default {
             include: 'node_modules/**'
         }),
         postcss({
-            minimize: false,
+            minimize: true,
             extract: 'build/style.css'
         }),
         copy({
@@ -43,12 +43,12 @@ export default {
                 'js/booking_reviews.js',
                 'js/storage.js',
                 'node_modules/keen-tracking/dist/keen-tracking.min.js',
+                'node_modules/rss-parser/dist/rss-parser.min.js',
                 'js/initKeen.js',
                 'js/iata_codes.js',
                 'js/background.js',
                 'js/config.js',
                 'js/currencies.js',
-                'scss/fonts',
                 './scss/awesomplete.css'
             ],
             outputFolder: 'build'

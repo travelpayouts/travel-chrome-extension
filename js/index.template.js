@@ -5,7 +5,12 @@ import {signs} from "./currencies";
 
 export const languages = {"en": "English", "ru": "Русский"};
 
-export let currency_label = (c) => html`<span class="currency-sign">${signs[c.toLowerCase()]}</span>
+export const rss = (feed, lang) => html`${repeat(feed, item => html`<a href="${item.link}" target="_blank">
+	<div>${item.title}</div><span>${new Date(item.pubDate).toLocaleString(lang, {
+    day: 'numeric', month: 'long'
+}) + ' ' + new Date(item.pubDate).getFullYear()}</span></a>`)}`;
+
+export let currency_label = c => html`<span class="currency-sign">${signs[c.toLowerCase()]}</span>
 							${translate('auto_generated.currency.translations.' + c.toLowerCase())}`;
 
 let index_template = (currencies, settings) => html`<a id="logo" href="https://www.aviasales.ru/?utm_source=inspiration_tab" target="_blank">
@@ -643,6 +648,9 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
             ${translate('titles.wait_loading')}
         </div>
     </div>
+</div>
+<div id="rss">
+	
 </div>`;
 
 export default index_template;
