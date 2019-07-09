@@ -84,6 +84,8 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             chrome.runtime.onMessage.removeListener(background_process_listener);
             init_template(apply_settings).then(() => {
                 showRSS();
+                console.log('test');
+
                 get_next_deal(update_tab, hideLoading);
             });
         }
@@ -687,7 +689,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
     };
 
     async function showRSS() {
-        if (config.hasOwnProperty('rss') && config.rss !== '') {
+        if (config.hasOwnProperty('rss') && config.rss !== '' && settings && settings.lang) {
             let news = await chromep.storage.local.get('rss').then(res => res.rss);
             if (news) {
                 render(rss(news, settings.lang), q('#rss'));
@@ -960,6 +962,7 @@ const qq = (selector, el = document) => el.querySelectorAll(selector);
             await use(settings.lang);
             showComments(settings.showComments);
             showTags(settings.showTags);
+            showRSS();
 
             let months = qq('.prices-calendar-month_name');
             let mnames = get('dayjs.months').split(',');

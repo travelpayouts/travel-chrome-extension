@@ -687,12 +687,18 @@
   white-space: nowrap;
 }
 
+.block.block--bottom.block--right {
+  width: 450px;
+}
+
+.review-container > .review {
+  margin-top: 24px;
+}
+
 #rss {
   display: none;
-  position: absolute;
   width: 240px;
-  right: 24px;
-  bottom: 24px;
+  margin-left: calc(50% - 24px);
 }
 
 #rss a {

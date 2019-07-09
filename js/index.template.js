@@ -8,7 +8,7 @@ export const languages = {"en": "English", "ru": "Русский"};
 export const rss = (feed, lang) => html`${repeat(feed, item => html`<a href="${item.link}" target="_blank">
 	<div>${item.title}</div><span>${new Date(item.pubDate).toLocaleString(lang, {
     day: 'numeric', month: 'long'
-}) + ' ' + new Date(item.pubDate).getFullYear()}</span></a>`)}`;
+})}</span></a>`)}`;
 
 export let currency_label = c => html`<span class="currency-sign">${signs[c.toLowerCase()]}</span>
 							${translate('auto_generated.currency.translations.' + c.toLowerCase())}`;
@@ -144,6 +144,7 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
     </div>
 
     <div class="block block--bottom block--right">
+    	<div id="rss"></div>
         <div class="review-container" id="comments_container">
             <div class="review hidden show-animate">
                 <img class="quote" src="../img/icon_quote.svg">
@@ -648,9 +649,6 @@ let index_template = (currencies, settings) => html`<a id="logo" href="https://w
             ${translate('titles.wait_loading')}
         </div>
     </div>
-</div>
-<div id="rss">
-	
 </div>`;
 
 export default index_template;

@@ -451,7 +451,7 @@ chrome.runtime.onInstalled.addListener(details => {
         chrome.storage.local.clear(function () {
             chrome.storage.sync.clear(function () {
                 let lang = navigator.language.replace('-', '_').toLowerCase().split('_')[0];
-                updateAllData(true, lang);
+                updateAllData(false, lang);
             });
         });
     }
