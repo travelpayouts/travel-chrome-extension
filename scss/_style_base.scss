@@ -1,0 +1,364 @@
+*,
+*:after,
+*:before {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    z-index: 0;
+    height: 100%;
+}
+
+.logo-aviasales {
+    height: 24px;
+    position: absolute;
+    top: 0;
+    left: 0; 
+    margin: 24px 0 0 24px;
+    z-index: 1;
+}
+
+.blackout {
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.blackout:before {
+    content: "";
+    width: 100%;
+    height: 200px;
+    position: absolute;
+    bottom: 100%;
+    background: -webkit-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+}
+
+.block {
+    z-index: 2;
+    position: absolute;
+    margin: 24px;
+}
+
+.block--top {
+    top: 0;
+}
+
+.block--bottom {
+    bottom: 0;    
+}
+
+.block--left {
+    left: 0;
+}
+
+.block--right {
+    right: 0;
+}
+
+.block--center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.btn-container {
+    height: 70px;
+}
+
+.btn-price {
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+    font-size: 40px;
+    color: white;
+    border: 2px solid;
+    padding: 13px 40px;
+    border-radius: 3px;
+    cursor: pointer;
+    float: left;
+    font-family: $OpenSans;
+
+    &:hover {
+        .price-tooltip {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.3s ease-out; 
+        }
+    }
+
+    &.isLoading {
+        .price-from,
+        .btn-price-value,
+        .currency-symbol,
+        .price-tooltip {
+            visibility: hidden;
+        }
+
+    }
+
+    .preloader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.price-from {
+    font-size: 30px;
+}
+
+.btn-price-value {
+    font-weight: bold;
+}
+
+.currency-symbol {
+    font-family: $Roboto;
+}
+
+.destination {
+    font-size: 28px;
+    line-height: 1em;
+    color: white;
+    margin-top: 13px;
+}
+
+.origin-container {
+    margin-top: 13px;
+}
+
+.origin {
+    font-size: 16px;
+    line-height: 1em;
+    color: white;
+}
+
+.tags-container {
+    margin-top: 16px;
+    &--hidden {
+        display: none;
+    }
+}
+
+.tags {
+    font-size: 0;
+}
+
+.tag {
+    background: rgba(150, 150, 150, 0.8);
+    font-size: 12px;
+    color: black;
+    padding: 5px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.review-container--hidden {
+    display: none;
+}
+
+.review {
+    position: relative;
+    width: 450px;
+    color: white;
+    font-size: 13px;
+    box-sizing: border-box;
+    background: rgba(0,0,0,0.3);
+    padding: 35px 20px 17px 50px;
+}
+
+.quote {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    opacity: .65;
+}
+
+.review-title {
+    font-size: 16px;
+    opacity: 0.85;
+}
+
+.review-text {
+    margin: 10px 30px 0 0;
+    line-height: 18px;
+    opacity: 0.85;
+}
+
+.review-author {
+    text-align: right;
+    margin: 3px 0 0 0;
+}
+
+.review-date {
+    font-size: 11px;
+    text-align: right;
+    margin: 2px 0 0 0;
+    opacity: 0.8;
+}
+
+.hidden {
+    opacity: 0;
+    height: 0;
+    margin: 0 !important;
+    padding: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease-out;
+}
+
+.show-animate {
+    transition: opacity 1s;
+}
+
+.prices-calendar-container {
+    position: absolute;
+    z-index: 0;
+    transform: translate(0%, -100%);
+    padding: 0 0 16px 0;
+    width: 428px;
+    opacity: 1;
+    height: 292px;
+    transition: transform .2s ease , opacity .3s ease, height .0s;
+}
+
+.prices-calendar-container.prices-calendar-container--hidden {
+    transform: translate(0%, -85%);
+    opacity: 0;
+    height: 0px;
+    transition: transform .4s ease, opacity .2s ease, height .0s ease .4s;
+}
+
+.prices-calendar {
+    height: 382px;
+    overflow: hidden;
+    transition: height .0s;
+}
+
+.prices-calendar.prices-calendar--off {
+    display: none;
+}
+
+.prices-calendar-container.prices-calendar-container--hidden .prices-calendar {
+    height: 0;
+    transition: height .0s ease .4s
+}
+
+.prices-calendar-month {
+    text-decoration: none;
+    display: block;
+    height: 66px;
+    width: 140px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, .4);
+    float: left;
+    margin: 0 4px 4px 0;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.prices-calendar-month:nth-child(3n+3) {
+    margin-right: 0;
+}
+
+.prices-calendar-month:nth-child(n + 10):nth-child(-n + 12) {
+    margin-bottom: 0;
+}
+
+.prices-calendar-month .price {
+    font-size: 14px;
+    height: 24px;
+}
+
+.prices-calendar-month .price .price_value,
+.prices-calendar-currency {
+    font-size: 18px;
+}
+
+.prices-calendar-currency {
+    font-family: $Roboto;
+}
+
+.prices-calendar-month:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+.date_container {
+    position: relative;
+    margin-top: 3px;
+    font-size: 14px;
+    width: 200%;
+    left: 0%;
+    transition: left .3s;
+}
+
+.prices-calendar-month.has-price:hover .date_container {
+    left: -100%;
+}
+
+.preloader {
+    display: inline-block;
+    position: relative;
+    -webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    width: 40px;
+    height: 24px;
+}
+
+.item {
+    top: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.6;
+    position: absolute;
+    animation: bounce 1.5s infinite ease-in-out;
+    margin: 7px 0;
+}
+
+.item-1 {
+    left: 0;
+}
+
+.item-2 {
+    //px
+    left: 15px;
+    animation-delay: .2s;
+}
+
+.item-3 {
+    //px
+    left: 30px;
+    animation-delay: .4s;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1);
+    }
+}
+
+.prices-calendar-preloader {
+    margin-top: 8px;
+}
+
+.slider-elem {
+    float: left;
+    width: 50%;
+}

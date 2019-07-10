@@ -1,22 +1,37 @@
 {
-  "name": "inspiration-tab",
-  "version": "1.0.0",
-  "description": "inspiration-tab",
-  "main": "gulpfile.js",
+  "name": "inspiration_tab",
+  "version": "1.0.1",
+  "description": "New tab browser extension.",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup --config"
   },
   "repository": {
     "type": "git",
-    "url": "http://git.nesutulsa.ru/nesutulsa/inspiration-tab"
+    "url": "git+https://github.com/KosyanMedia/inspiration_tab.git"
   },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KosyanMedia/inspiration_tab/issues"
+  },
+  "homepage": "https://github.com/KosyanMedia/inspiration_tab#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.1",
-    "gulp-file-include": "^2.0.1",
-    "gulp-sass": "^4.0.1",
-    "gulp-uglify": "^3.0.0"
+    "node-sass": "^4.12.0",
+    "rollup": "^1.12.0",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-copy": "^2.0.1",
+    "rollup-plugin-node-resolve": "^5.0.0",
+    "rollup-plugin-postcss": "^2.0.3"
+  },
+  "dependencies": {
+    "@appnest/lit-translate": "^1.1.16",
+    "awesomplete": "^1.1.4",
+    "chromep": "^3.3.5",
+    "jquery": "^3.4.1",
+    "keen-tracking": "^4.4.0",
+    "lit-html": "^1.0.0",
+    "rss-parser": "^3.7.2"
   }
 }

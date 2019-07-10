@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="5px" height="16px" viewBox="0 0 5 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 47.1 (45422) - http://www.bohemiancoding.com/sketch -->
+    <title>Rectangle</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="1366x640" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="1366x640-next-dest-&amp;-settings-&amp;-other-cities-hovers" transform="translate(-1305.000000, -28.000000)" fill="#000000">
+            <g id="tooltip" transform="translate(1305.000000, 28.000000)">
+                <path d="M4.99853314,15.0048836 C4.99841778,16.106756 4.56258861,16.2170531 4.02663909,15.2540381 L0.478912876,8.87934466 C0.208633457,8.39369601 0.20483136,7.61327075 0.479097011,7.12063147 L4.0281581,0.745764977 C4.56500691,-0.218529363 5.00011541,-0.107609461 4.99999998,0.994872001 L4.99853314,15.0048836 Z" id="Rectangle" transform="translate(2.637399, 7.999529) scale(-1, 1) translate(-2.637399, -7.999529) "></path>
+            </g>
+        </g>
+    </g>
+</svg>
