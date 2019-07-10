@@ -15,7 +15,7 @@
  
 ## Как работает расширение
 
-Информация о работе приложения находится в файле [документации](https://github.com/travelpayouts/travel-chrome-extension/blob/master/read).
+Информация о работе расширения находится в файле [документации](https://github.com/travelpayouts/travel-chrome-extension/blob/master/read).
 
 Для пользователя работа расширения выглядит так: https://monosnap.com/image/zxnGGk3FD7OMsq4IDbT1TA0aJzpOV6
 
