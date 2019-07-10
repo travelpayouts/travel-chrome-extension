@@ -36,6 +36,7 @@ export default {
             targets: [
                 'manifest.json',
                 'locales',
+                '_locales',
                 'img',
                 'html/bg.html',
                 'html/index.html',

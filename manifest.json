@@ -1,8 +1,9 @@
 {
-  "name": "Inspiration Tab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifest_version": 2,
-  "description": "Beautifull photos + amazing flight tickets prices",
+  "name": "__MSG_appName__",
+	"description": "__MSG_appDesc__",
+	"default_locale": "en",
   "icons": {
     "128": "img/icon128.png"
   },
