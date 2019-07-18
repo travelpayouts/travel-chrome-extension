@@ -35,9 +35,7 @@ function loadSettingsSynced() {
 }
 
 var ro_city_name = function (iata, lang) {
-    console.log(cities_data[iata]);
     var ro_city_names = cities_data[iata].names;
-    console.log(ro_city_names);
     var ro_city_name;
     if (lang === 'ru' && ro_city_names.ru) {
         if (ro_city_names.ru.cases && ro_city_names.ru.cases.ro) {
@@ -179,7 +177,7 @@ var fetchDirections = function (origin_iata, currency) {
 function processDirection(direction, origin_name, origin_iata, lang) {
 
     if (!cities_data[direction.destination] || !iata_codes.includes(direction.destination)) {
-        console.log('Направление ' + direction.destination + ' отсутствует в словаре');
+        // console.log('Направление ' + direction.destination + ' отсутствует в словаре');
         return null;
     }
 
@@ -397,18 +395,20 @@ class RSS {
 
     async get() {
         if (!this.url) return;
-
-        let parser = new RSSParser();
-
-        let feed = await parser.parseURL(config.rss);
-
         let news = [];
+        try {
+            let parser = new RSSParser();
 
-        let len = feed.items.length >= 3 ? 3 : feed.items.length;
+            let feed = await parser.parseURL(config.rss);
 
-        for (let i = 0; i < len; i++) {
-            let item = feed.items[i];
-            news.push({title: item.title, link: item.link, pubDate: item.pubDate});
+            let len = feed.items.length >= 3 ? 3 : feed.items.length;
+
+            for (let i = 0; i < len; i++) {
+                let item = feed.items[i];
+                news.push({title: item.title, link: item.link, pubDate: item.pubDate});
+            }
+        } catch (e) {
+            console.log(e);
         }
 
         chrome.storage.local.set({rss: news});
@@ -425,6 +425,8 @@ function handleNoTabs() {
 function updateDeals() {
     chrome.runtime.sendMessage({message: 'processed'}, function () {
         handleNoTabs();
+        let rss = new RSS();
+        rss.get();
         chrome.runtime.sendMessage({cmd: 'disable_settings_change'}, function () {
             handleNoTabs();
             updateAllData(false);
@@ -460,7 +462,6 @@ chrome.runtime.onInstalled.addListener(details => {
 chrome.runtime.onStartup.addListener(() => {
     chrome.storage.local.get('last_update', res => {
         if (Date.now() - res.last_update >= 7200000) {
-            // if (Date.now() - res.last_update >= 60000) {
             console.log('We need update data!');
             updateDeals();
         } else {
