@@ -1,6 +1,6 @@
 # Travelpayouts Google Chrome Extension
 
-С помощью данного расширения для Chrome, пользователь получает стартовый экран для новых страниц. На экране содержится информация о стоимости перелёта из города пользователя в другой город. При каждом открытии новой вкладки город меняется.
+С помощью данного расширения для Chrome, пользователь получает стартовый экран для новых страниц. На экране содержится информация о стоимости перелёта из города пользователя в другой город. При каждом открытии новой вкладки город меняется. Пример расширения доступен в [магазине приложений](https://chrome.google.com/webstore/detail/inspiration-tab/pakgciiflcoanejilaeokonlgfhboimk?authuser=1).
 
 ![Alt text](https://monosnap.com/image/rJ1RvaXD4Psnj6mzPfMApFCzrDhmPB)
 
@@ -26,3 +26,5 @@
 `npm install`
 
 `npm run build`
+
+В релизах вы всегда можете найти последнюю собранную версию расширения: https://github.com/travelpayouts/travel-chrome-extension/releases
