@@ -397,7 +397,7 @@ class RSS {
         if (!this.url) return;
         let news = [];
         try {
-            let parser = new RSSParser();
+            let parser = new RSSParser({headers: {'Cache-Control': 'no-cache'}});
 
             let feed = await parser.parseURL(config.rss);
 
